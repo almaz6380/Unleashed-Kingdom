@@ -15,6 +15,8 @@ Ein **Kampf- und Aufbauspiel** im Anime-Stil:
 - **Jeder Charakter hat eine Verwandlung als Spezialfähigkeit.**
 - **Hauptfigur: der Junge aus Anigosha**, das **Mädchen aus Anigosha** als zweiter Charakter. Beide gehören dem
   User (Repo `almaz6380/anigosha`, Vorlagen in `figuren/vorlagen/`). Orte im Miniatur-Schaukasten-Look.
+- **Start immer mit dem Jungen**; das Mädchen schließt sich nach einer frühen Mission an (besiegt als Gegnerin),
+  weitere Figuren über die Taverne. Umbau zusammen mit Dorf/Missionen.
 - Reihenfolge: erst Kampf (fertig), dann Dorf, Missionen mit Belohnungen, Online.
 
 Vorgeschichte und verworfene Wege stehen in `UEBERGABE.md`. Figuren-Prompts: `FIGUREN.md`.

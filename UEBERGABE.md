@@ -31,6 +31,11 @@ Ein **Kampf- und Aufbauspiel im Anime-Stil** fürs Handy, als Web-App:
 7. Später gewünscht: Der Junge **wächst in drei Stufen** (Pulli → Abenteurer → Magier), Tagesaufgaben, weitere
    Charaktere (Prompts für 15 Nebenfiguren stehen in `FIGUREN.md`).
 
+8. **Figurenwahl (entschieden 22.11.):** Alle starten **immer mit dem Jungen**. Das **Mädchen** kommt früh dazu:
+   Sie tritt nach den ersten paar Missionen als Gegnerin auf und schließt sich nach dem Sieg an. **Weitere Figuren**
+   (aus `FIGUREN.md`) gibt es später über die **Taverne**. Umbauen erst zusammen mit Dorf und Missionen; bis dahin
+   bleibt die freie Wahl im Menü.
+
 ## 3. Der Weg hierher – bitte nicht erneut vorschlagen
 | Versuch | Ergebnis |
 | --- | --- |
@@ -93,7 +98,7 @@ Lässt sich eine GLB-Datei nicht im Chat schicken, kann er sie über die GitHub-
 
 ## 8. Offene Fragen an den User
 - Wie soll das Spiel heißen? („Arena“ ist nur ein Arbeitsname.)
-- Rolle des Mädchens: nur wählbarer Charakter oder auch Begleiterin im Kampf?
+- Rolle des Mädchens: Freischaltung ist entschieden (siehe 2.8). Offen: auch Begleiterin im Kampf?
 - Sollen die Computer-Stufen sanfter ansteigen? (Für Bots liegen sie sehr weit auseinander.)
 - Tränke: Er wählte „als Spezialfähigkeit je Charakter“. Tränke zum Einsammeln in der Arena sind damit nicht geplant.
 
