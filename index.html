@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1a120c">
+<title>Arena – Kampf</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #120c08; color: #fff;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #rand { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(120% 85% at 50% 50%, rgba(0,0,0,0) 55%, rgba(20,8,0,.5) 100%); }
+  /* Anzeige oben */
+  #anzeige { position: fixed; left: 10px; right: 10px; top: calc(8px + env(safe-area-inset-top)); display: none; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: start; pointer-events: none; }
+  .leiste { height: 16px; border-radius: 8px; background: rgba(20,10,4,.7); box-shadow: inset 0 0 0 1.5px rgba(255,230,190,.5); overflow: hidden; position: relative; }
+  .leiste i { position: absolute; inset: 0; transform-origin: left; background: linear-gradient(#8ff07a, #3fb64a); transition: transform .12s; }
+  .leiste.gegner i { transform-origin: right; background: linear-gradient(#ff9a7a, #e0483a); }
+  .kraft { height: 7px; margin-top: 4px; border-radius: 4px; background: rgba(20,10,4,.7); overflow: hidden; position: relative; width: 78%; }
+  .kraft i { position: absolute; inset: 0; transform-origin: left; background: linear-gradient(90deg, #58c8ff, #b7f2ff); }
+  .kraft.voll i { background: linear-gradient(90deg, #ffd27a, #fff3c4); animation: blink .5s infinite alternate; }
+  @keyframes blink { to { filter: brightness(1.5); } }
+  .name { font-size: 12px; font-weight: 700; margin-bottom: 3px; text-shadow: 0 1px 4px #000; }
+  #rechts .name { text-align: right; } #rechts .kraft { margin-left: auto; }
+  #mitte { text-align: center; min-width: 64px; }
+  #uhr { font-size: 22px; font-weight: 800; text-shadow: 0 2px 6px #000; line-height: 1; }
+  #punkte { font-size: 13px; letter-spacing: 3px; margin-top: 3px; text-shadow: 0 1px 4px #000; }
+  #banner { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font-size: 44px; font-weight: 900; letter-spacing: .02em;
+    text-shadow: 0 4px 18px rgba(0,0,0,.8), 0 0 30px rgba(255,190,90,.6); opacity: 0; transform: scale(.7); transition: opacity .2s, transform .25s; pointer-events: none; }
+  #banner.an { opacity: 1; transform: scale(1); }
+  #banner small { display: block; font-size: 17px; font-weight: 600; margin-top: 4px; }
+  .zahl { position: fixed; left: 0; top: 0; font-size: 22px; font-weight: 900; color: #fff3c4; text-shadow: 0 2px 4px #000, 0 0 8px rgba(255,120,40,.9);
+    pointer-events: none; animation: zahl .7s ease-out forwards; }
+  .zahl.gross { font-size: 32px; color: #ffd27a; } .zahl.ich { color: #ff8a7a; }
+  @keyframes zahl { 0% { opacity: 1; margin-top: 0; } 100% { opacity: 0; margin-top: -46px; } }
+  /* Bedienung */
+  #kreis, #knauf { position: fixed; border-radius: 50%; pointer-events: none; display: none; transform: translate(-50%, -50%); }
+  #kreis { width: 116px; height: 116px; border: 2px solid rgba(255,255,255,.5); background: rgba(255,255,255,.07); }
+  #knauf { width: 50px; height: 50px; background: rgba(255,255,255,.75); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+  #knöpfe { position: fixed; right: calc(14px + env(safe-area-inset-right)); bottom: calc(22px + env(safe-area-inset-bottom)); width: 190px; height: 190px; display: none; }
+  .kn { position: absolute; border: 0; border-radius: 50%; color: #fff; font: inherit; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-direction: column;
+    background: rgba(30,18,8,.62); box-shadow: inset 0 0 0 2.5px rgba(255,230,190,.75), 0 4px 14px rgba(0,0,0,.4); touch-action: none; }
+  .kn small { font-size: 10px; font-weight: 700; opacity: .9; } .kn span { font-size: 30px; line-height: 1; }
+  .kn.gedrückt { transform: scale(.92); background: rgba(255,210,122,.5); }
+  #kAngriff { right: 0; bottom: 0; width: 104px; height: 104px; } #kAngriff span { font-size: 42px; }
+  #kRolle { right: 112px; bottom: 6px; width: 70px; height: 70px; }
+  #kSpezial { right: 14px; bottom: 114px; width: 70px; height: 70px; opacity: .55; }
+  #kSpezial.voll { opacity: 1; background: rgba(255,190,70,.75); box-shadow: inset 0 0 0 3px #fff3c4, 0 0 22px rgba(255,200,90,.95); animation: blink .5s infinite alternate; }
+  #kRolle.pause { opacity: .45; }
+  /* Menü und Ergebnis */
+  .fenster { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(12,6,2,.62); overflow: auto; }
+  .fenster.an { display: flex; }
+  .karte { width: 100%; max-width: 340px; padding: 20px 18px 18px; border-radius: 20px; background: rgba(46,30,18,.94); box-shadow: 0 10px 40px rgba(0,0,0,.55), inset 0 0 0 1.5px rgba(255,210,122,.35); text-align: center; }
+  .karte h1 { margin: 0 0 4px; font-size: 30px; } .karte h2 { margin: 0 0 6px; font-size: 26px; }
+  .karte p { margin: 0 0 12px; font-size: 14px; line-height: 1.45; color: #f0dcc0; }
+  .reihe { display: flex; gap: 8px; justify-content: center; margin: 8px 0 12px; }
+  .wahl { flex: 1; border: 0; border-radius: 14px; padding: 10px 6px; font: inherit; font-size: 15px; font-weight: 700; color: #f3e3cc; background: #47301e; }
+  .wahl small { display: block; font-size: 11px; font-weight: 500; opacity: .85; margin-top: 2px; }
+  .wahl.an { background: #ffd27a; color: #2a1806; }
+  .gross { border: 0; border-radius: 999px; padding: 14px 40px; font: inherit; font-size: 19px; font-weight: 800; background: #ffd27a; color: #2a1806; box-shadow: 0 6px 20px rgba(0,0,0,.4); margin: 4px; }
+  .klein { border: 0; border-radius: 999px; padding: 10px 22px; font: inherit; font-size: 15px; font-weight: 700; background: #47301e; color: #f3e3cc; margin: 4px; }
+  .gross:active, .klein:active, .wahl:active { transform: scale(.97); }
+  #stufeText { font-size: 14px; color: #ffe2a8; margin-bottom: 10px; }
+  #meldung { font-size: 12px; color: #ffcf9a; min-height: 1.2em; margin-top: 8px; }
+  #schalter { margin-top: 6px; } #schalter button { background: none; border: 0; color: #d9c3a0; font: inherit; font-size: 13px; padding: 6px 10px; }
+</style>
+</head>
+<body>
+<canvas id="bild"></canvas>
+<div id="rand"></div>
+<div id="anzeige">
+  <div id="links"><div class="name" id="nameIch"></div><div class="leiste"><i id="lebenIch"></i></div><div class="kraft" id="kraftIch"><i></i></div></div>
+  <div id="mitte"><div id="uhr"></div><div id="punkte"></div></div>
+  <div id="rechts"><div class="name" id="nameGegner"></div><div class="leiste gegner"><i id="lebenGegner"></i></div><div class="kraft" id="kraftGegner"><i></i></div></div>
+</div>
+<div id="banner"></div>
+<div id="kreis"></div><div id="knauf"></div>
+<div id="knöpfe">
+  <button class="kn" id="kSpezial"><span>✨</span><small>Spezial</small></button>
+  <button class="kn" id="kRolle"><span>💨</span><small>Ausweichen</small></button>
+  <button class="kn" id="kAngriff"><span>👊</span><small>Angriff</small></button>
+</div>
+
+<div id="menü" class="fenster an"><div class="karte">
+  <h1>Arena</h1>
+  <p>Wähle deinen Kämpfer und tritt an. Links lenken, rechts angreifen, ausweichen und bei voller Leiste verwandeln.</p>
+  <div class="reihe" id="wahlChar"></div>
+  <div class="reihe" id="wahlModus">
+    <button class="wahl" data-modus="duell">Duell<small>eins gegen eins</small></button>
+    <button class="wahl" data-modus="wellen">Wellen<small>drei Angriffe überstehen</small></button>
+  </div>
+  <div id="stufeText"></div>
+  <button class="gross" id="los" style="display:none">Kämpfen</button>
+  <div id="schalter"><button id="sTon"></button><button id="sVib"></button></div>
+  <div id="meldung">Lädt …</div>
+</div></div>
+<div id="ergebnis" class="fenster"><div class="karte">
+  <h2 id="ergTitel"></h2><p id="ergText"></p>
+  <button class="gross" id="nochmal">Nochmal</button><button class="klein" id="zumMenü">Menü</button>
+</div></div>
+
+<script type="importmap">{ "imports": { "three": "./lib/three.module.min.js", "three/addons/": "./lib/jsm/" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { clone as kloneSkelett } from 'three/addons/utils/SkeletonUtils.js';
+
+/* =====================================================================
+   Arena: Echtzeit-Kampf von schräg oben, gegen den Computer.
+   Zwischen SIM-START und SIM-END steht die reine Spiellogik: fester Zeitschritt, nur Seed-Zufall,
+   kein DOM, kein Date, kein Math.random(). Gleicher Seed ⇒ gleicher Kampf (tests/sim.test.js liest
+   genau diesen Block). Alles danach ist Darstellung und Bedienung. Zugriff für Tests: window.AR
+   ===================================================================== */
+
+/* SIM-START */
+const DT = 1 / 60;
+// Alle Stellschrauben des Kampfes an einer Stelle
+const K = {
+  ARENA_R: 6, KOERPER: 0.42,
+  SCHLAG_ZEIT: [0.34, 0.34, 0.5],   // Dauer der drei Schläge einer Folge
+  TREFFER_BEI: 0.15,                // Sekunden nach Schlagbeginn sitzt der Treffer
+  RUECK: [3, 3, 8.5],               // Rückstoß je Schlag
+  TAUMEL: [0.24, 0.24, 0.42],       // so lange kann der Getroffene nichts tun
+  WINKEL: 0.45,                     // Treffer-Kegel nach vorn (Kosinus des halben Winkels)
+  ROLLE_ZEIT: 0.36, ROLLE_TEMPO: 9.5, ROLLE_PAUSE: 0.85,
+  SPEZIAL_DAUER: 5, E_AUSTEILEN: 12, E_EINSTECKEN: 9,
+  SCHUTZ: 0.55,                     // nach dem dritten Schlag einer Folge ist der Getroffene kurz unverwundbar
+  STEIN: 1.3, STURM: 1.4,           // Schaden-Faktor während der Verwandlung
+  STEIN_TEMPO: 0.8, STURM_TEMPO: 1.4, STURM_SCHLAG: 0.68, // der Steinriese ist langsam, der Sturm schnell
+  RUNDE_ZEIT: 60, WELLE_ZEIT: 120, DREH: 16, ZIELHILFE: 3.2,
+  ZAEHLEN: 2.4, PAUSE: 2.0, SIEGE: 2, HEILUNG: 25,
+};
+// Kämpfer-Werte. flink < 1 = schnellere Schläge. spezial (Verwandlung, in der man nicht taumelt):
+// 'stein' = größer, mehr Reichweite, langsam, kaum wegzustoßen; 'sturm' = schnell, trifft im Halbkreis
+const TYPEN = {
+  junge:    { name: 'Junge',    leben: 100, tempo: 4.5, schaden: [6, 6, 10],   reichweite: 1.5,  spezial: 'stein' },
+  maedchen: { name: 'Mädchen',  leben: 92,  tempo: 5.0, schaden: [6, 6, 9],    reichweite: 1.5,  spezial: 'sturm', flink: 0.85 },
+  ritter:   { name: 'Rabenritter', leben: 100, tempo: 4.3, schaden: [6, 6, 10], reichweite: 1.55, spezial: 'stein' },
+  scherge:  { name: 'Scherge',  leben: 30,  tempo: 3.7, schaden: [4, 4, 6],    reichweite: 1.35, spezial: null },
+  boss:     { name: 'Hauptmann', leben: 140, tempo: 3.9, schaden: [8, 8, 13], reichweite: 1.75, spezial: 'stein' },
+};
+const WELLEN = [['scherge', 'scherge'], ['scherge', 'scherge', 'scherge'], ['boss']];
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// Eine Runde. Eingaben je Kämpfer: mx, mz (Laufrichtung, Länge bis 1) und wunsch.angriff / .rolle / .spezial.
+// Richtung r: Blick zeigt nach (sin r, cos r). Team 0 startet unten (z > 0), Team 1 oben.
+class Kampf {
+  constructor(seed, liste, opt = {}) {
+    this.rnd = mulberry32(seed); this.zeit = 0; this.limit = opt.limit ?? K.RUNDE_ZEIT; this.ereignisse = []; this.fertig = false; this.sieger = -1;
+    const zahl = [0, 0], von = [liste.filter(e => e.team === 0).length, liste.filter(e => e.team === 1).length];
+    this.k = liste.map((e, i) => { const t = TYPEN[e.typ], j = zahl[e.team]++, n = von[e.team];
+      return { i, typ: e.typ, team: e.team, x: (j - (n - 1) / 2) * 2.2, z: e.team === 0 ? 3.2 : -3.2, r: e.team === 0 ? Math.PI : 0, sx: 0, sz: 0,
+        leben: e.leben ?? t.leben, maxLeben: t.leben, energie: e.energie ?? 0, zustand: 'frei', t: 0, kette: 0, traf: false, puffer: false, schlagNr: 0,
+        rollePause: 0, schutz: 0, rx: 0, rz: 0, spezial: 0, mx: 0, mz: 0, wunsch: { angriff: false, rolle: false, spezial: false } }; });
+  }
+  lebend(team) { return this.k.filter(f => f.team === team && f.zustand !== 'tot'); }
+  step() {
+    this.ereignisse.length = 0; if (this.fertig) return; this.zeit += DT;
+    for (const f of this.k) if (f.zustand !== 'tot') this.bewege(f);
+    // Körper schieben sich auseinander (wer rollt, schlüpft durch)
+    for (let a = 0; a < this.k.length; a++) for (let b = a + 1; b < this.k.length; b++) { const p = this.k[a], q = this.k[b];
+      if (p.zustand === 'tot' || q.zustand === 'tot' || p.zustand === 'rolle' || q.zustand === 'rolle') continue;
+      const dx = q.x - p.x, dz = q.z - p.z, d = Math.hypot(dx, dz), m = 2 * K.KOERPER;
+      if (d < m) { const nx = d > 1e-4 ? dx / d : 1, nz = d > 1e-4 ? dz / d : 0, h = (m - d) / 2; p.x -= nx * h; p.z -= nz * h; q.x += nx * h; q.z += nz * h; } }
+    for (const f of this.k) { const d = Math.hypot(f.x, f.z), max = K.ARENA_R - K.KOERPER; if (d > max) { f.x *= max / d; f.z *= max / d; f.sx *= 0.3; f.sz *= 0.3; } }
+    const a = this.lebend(0).length, b = this.lebend(1).length;
+    if (a === 0 || b === 0) { this.fertig = true; this.sieger = a > 0 ? 0 : b > 0 ? 1 : -1; }
+    else if (this.zeit >= this.limit) { this.fertig = true; const teil = t => this.k.filter(f => f.team === t).reduce((s, f) => s + Math.max(0, f.leben) / f.maxLeben, 0) / this.k.filter(f => f.team === t).length;
+      const u = teil(0), v = teil(1); this.sieger = Math.abs(u - v) < 0.01 ? -1 : u > v ? 0 : 1; this.ereignisse.push({ art: 'zeit' }); }
+  }
+  bewege(f) {
+    const t = TYPEN[f.typ], w = f.wunsch;
+    if (f.rollePause > 0) f.rollePause -= DT; if (f.schutz > 0) f.schutz -= DT;
+    if (f.spezial > 0) { f.spezial -= DT; if (f.spezial <= 0) { f.spezial = 0; this.ereignisse.push({ art: 'spezialEnde', von: f.i }); } }
+    const sturm = f.spezial > 0 && t.spezial === 'sturm', stein = f.spezial > 0 && t.spezial === 'stein';
+    f.x += f.sx * DT; f.z += f.sz * DT; const ab = Math.exp(-DT * 9); f.sx *= ab; f.sz *= ab;   // Rückstoß klingt ab
+    const ml = Math.hypot(f.mx, f.mz), ex = ml > 1 ? f.mx / ml : f.mx, ez = ml > 1 ? f.mz / ml : f.mz;
+    if (f.zustand === 'taumel') { w.angriff = w.rolle = false; f.t -= DT; if (f.t <= 0) f.zustand = 'frei'; return; }
+    if (f.zustand === 'rolle') { f.x += f.rx * K.ROLLE_TEMPO * DT; f.z += f.rz * K.ROLLE_TEMPO * DT; f.t -= DT; if (f.t <= 0) { f.zustand = 'frei'; f.rollePause = K.ROLLE_PAUSE; } return; }
+    if (f.zustand === 'schlag') {
+      const tempo = (sturm ? K.STURM_SCHLAG : stein ? 1.12 : 1) * (t.flink ?? 1), dauer = K.SCHLAG_ZEIT[f.kette] * tempo; f.t += DT;
+      if (f.t < 0.12) { f.x += Math.sin(f.r) * 2.2 * DT; f.z += Math.cos(f.r) * 2.2 * DT; }      // kleiner Ausfallschritt
+      if (!f.traf && f.t >= K.TREFFER_BEI * tempo) { f.traf = true; this.schlagTrifft(f); }
+      if (w.angriff && f.t > 0.1) { f.puffer = true; w.angriff = false; }                        // nächsten Schlag vormerken
+      if (w.rolle && f.traf && f.rollePause <= 0) { w.rolle = false; this.starteRolle(f, ex, ez, ml); return; }
+      if (f.t >= dauer) { if (f.puffer && f.kette < 2) this.starteSchlag(f, f.kette + 1, ex, ez, ml); else { f.zustand = 'frei'; f.kette = 0; } }
+      return;
+    }
+    // frei: laufen und Wünsche annehmen
+    const v = t.tempo * (sturm ? K.STURM_TEMPO : stein ? K.STEIN_TEMPO : 1); f.x += ex * v * DT; f.z += ez * v * DT;
+    if (ml > 0.1) { let d = Math.atan2(ex, ez) - f.r; d = Math.atan2(Math.sin(d), Math.cos(d)); f.r += Math.max(-K.DREH * DT, Math.min(K.DREH * DT, d)); }
+    if (w.spezial) { w.spezial = false; if (f.energie >= 100 && t.spezial) { f.energie = 0; f.spezial = K.SPEZIAL_DAUER; this.ereignisse.push({ art: 'spezial', von: f.i, x: f.x, z: f.z, sorte: t.spezial }); } }
+    if (w.rolle) { w.rolle = false; if (f.rollePause <= 0) { this.starteRolle(f, ex, ez, ml); return; } }
+    if (w.angriff) { w.angriff = false; this.starteSchlag(f, 0, ex, ez, ml); }
+  }
+  starteRolle(f, ex, ez, ml) { if (ml > 0.2) { f.rx = ex / ml; f.rz = ez / ml; f.r = Math.atan2(ex, ez); } else { f.rx = Math.sin(f.r); f.rz = Math.cos(f.r); }
+    f.zustand = 'rolle'; f.t = K.ROLLE_ZEIT; f.kette = 0; this.ereignisse.push({ art: 'rolle', von: f.i, x: f.x, z: f.z }); }
+  starteSchlag(f, kette, ex, ez, ml) {
+    let rx = Math.sin(f.r), rz = Math.cos(f.r); if (ml > 0.05) { rx = ex / ml; rz = ez / ml; }
+    // Zielhilfe: Ein Gegner direkt daneben oder ungefähr in Schlagrichtung wird genau anvisiert
+    let best = null, bd = K.ZIELHILFE;
+    for (const g of this.k) { if (g.team === f.team || g.zustand === 'tot') continue; const dx = g.x - f.x, dz = g.z - f.z, d = Math.hypot(dx, dz);
+      if (d < bd && (d < 2 || (dx * rx + dz * rz) / d > 0.25)) { bd = d; best = g; } }
+    if (best) { rx = best.x - f.x; rz = best.z - f.z; }
+    f.r = Math.atan2(rx, rz); f.zustand = 'schlag'; f.t = 0; f.kette = kette; f.traf = false; f.puffer = false; f.schlagNr++;
+    this.ereignisse.push({ art: 'schlag', von: f.i, kette });
+  }
+  schlagTrifft(f) {
+    const t = TYPEN[f.typ], stein = f.spezial > 0 && t.spezial === 'stein', sturm = f.spezial > 0 && t.spezial === 'sturm';
+    const rx = Math.sin(f.r), rz = Math.cos(f.r), weit = t.reichweite * (stein ? 1.25 : 1) + K.KOERPER;
+    for (const g of this.k) { if (g.team === f.team || g.zustand === 'tot' || g.zustand === 'rolle' || g.schutz > 0) continue;
+      const dx = g.x - f.x, dz = g.z - f.z, d = Math.hypot(dx, dz); if (d > weit) continue;
+      if (d > 0.5 && (dx * rx + dz * rz) / d < (sturm ? -0.2 : K.WINKEL)) continue;
+      const schaden = Math.round(t.schaden[f.kette] * (stein ? K.STEIN : sturm ? K.STURM : 1));
+      g.leben -= schaden; if (f.spezial <= 0) f.energie = Math.min(100, f.energie + K.E_AUSTEILEN); if (g.spezial <= 0) g.energie = Math.min(100, g.energie + K.E_EINSTECKEN);
+      // Wer verwandelt ist, taumelt nicht; nur der Steinriese lässt sich auch kaum wegstoßen
+      const fest = g.spezial > 0, schwer = fest && TYPEN[g.typ].spezial === 'stein', nx = d > 1e-4 ? dx / d : rx, nz = d > 1e-4 ? dz / d : rz, stoss = K.RUECK[f.kette] * (stein ? 1.3 : 1) * (schwer ? 0.2 : 1);
+      g.sx = nx * stoss; g.sz = nz * stoss;
+      if (g.leben <= 0) { g.leben = 0; g.zustand = 'tot'; g.sx *= 1.4; g.sz *= 1.4; this.ereignisse.push({ art: 'ko', von: f.i, auf: g.i, x: g.x, z: g.z }); }
+      else if (!fest) { g.zustand = 'taumel'; g.t = K.TAUMEL[f.kette]; g.kette = 0; if (f.kette === 2) g.schutz = K.TAUMEL[2] + K.SCHUTZ; }
+      this.ereignisse.push({ art: 'treffer', von: f.i, auf: g.i, schaden, x: g.x, z: g.z, stark: f.kette === 2 || stein });
+    }
+  }
+}
+
+// Computer-Gegner, Stufe 1 bis 10. Mit k = (Stufe − 1) / 9 steigen Reaktion, Angriffslust, Ausweichen und Folgen.
+class Bot {
+  constructor(stufe, seed) { this.stufe = Math.max(1, Math.min(10, stufe)); this.k = (this.stufe - 1) / 9; this.rnd = mulberry32(seed); this.warte = 0; this.gesehen = {}; this.kette = -1; this.seite = 1; }
+  denke(kampf, i) {
+    const f = kampf.k[i], k = this.k, t = TYPEN[f.typ]; if (f.zustand === 'tot') return;
+    let ziel = null, zd = 1e9; for (const g of kampf.k) { if (g.team === f.team || g.zustand === 'tot') continue; const d = Math.hypot(g.x - f.x, g.z - f.z); if (d < zd) { zd = d; ziel = g; } }
+    if (!ziel) { f.mx = f.mz = 0; return; }
+    const dx = (ziel.x - f.x) / (zd || 1), dz = (ziel.z - f.z) / (zd || 1);
+    // Ausweichen: einmal je gegnerischem Schlag gewürfelt, sobald er in Reichweite ausholt
+    for (const g of kampf.k) { if (g.team === f.team || g.zustand !== 'schlag' || g.traf || this.gesehen[g.i] === g.schlagNr) continue;
+      if (Math.hypot(g.x - f.x, g.z - f.z) < TYPEN[g.typ].reichweite + 1) { this.gesehen[g.i] = g.schlagNr;
+        if (f.rollePause <= 0 && this.rnd() < 0.03 + 0.42 * k) { f.wunsch.rolle = true; f.mx = -dz * this.seite; f.mz = dx * this.seite; this.warte = 8; return; } } }
+    // Schlagfolge fortsetzen: einmal je eigenem Schlag gewürfelt
+    if (f.zustand === 'schlag' && this.kette !== f.schlagNr && f.t > 0.1) { this.kette = f.schlagNr; if (f.kette < 2 && this.rnd() < 0.35 + 0.5 * k) f.wunsch.angriff = true; }
+    if (--this.warte > 0) return;
+    this.warte = Math.round(20 - 11 * k + this.rnd() * 4);
+    if (this.rnd() < 0.3) this.seite = -this.seite;
+    if (this.rnd() < 0.2 * (1 - k)) { f.mx = f.mz = 0; return; }                               // zögern
+    if (f.energie >= 100 && t.spezial && zd < 4 && this.rnd() < 0.25 + 0.75 * k) f.wunsch.spezial = true;
+    const nah = t.reichweite * 0.9;
+    if (zd > nah) { const s = (this.rnd() - 0.5) * 0.7; f.mx = dx - dz * s; f.mz = dz + dx * s; }
+    else if (f.zustand === 'frei' && this.rnd() < 0.36 + 0.4 * k) { f.mx = dx * 0.15; f.mz = dz * 0.15; f.wunsch.angriff = true; }
+    else { f.mx = -dz * this.seite * 0.35; f.mz = dx * this.seite * 0.35; }
+  }
+}
+
+// Ein ganzes Duell oder ein Wellen-Lauf. Phasen: count → play → end → (count …) → over.
+// opt: { modus: 'duell' | 'wellen', spieler, gegner, stufe, seed, mensch (false = auch der Spieler ist ein Bot), spielerStufe }
+class Match {
+  constructor(opt) {
+    this.opt = { modus: 'duell', spieler: 'junge', gegner: 'ritter', stufe: 1, seed: 1, mensch: true, spielerStufe: 5, ...opt };
+    this.rnd = mulberry32(this.opt.seed); this.punkte = [0, 0]; this.runde = 0; this.welle = 0; this.gewonnen = null; this.ereignisse = [];
+    this.tragen = null; this.neueRunde();
+  }
+  neueRunde() {
+    const o = this.opt, seed = Math.floor(this.rnd() * 2 ** 31); let liste, limit = K.RUNDE_ZEIT;
+    if (o.modus === 'wellen') { liste = [{ typ: o.spieler, team: 0, ...(this.tragen ?? {}) }, ...WELLEN[this.welle].map(typ => ({ typ, team: 1 }))]; limit = K.WELLE_ZEIT; }
+    else liste = [{ typ: o.spieler, team: 0 }, { typ: o.gegner, team: 1 }];
+    this.kampf = new Kampf(seed, liste, { limit }); this.phase = 'count'; this.t = this.runde === 0 && this.welle === 0 ? K.ZAEHLEN : K.ZAEHLEN * 0.7;
+    this.bots = this.kampf.k.map((f, i) => i === 0 ? (o.mensch ? null : new Bot(o.spielerStufe, seed + 7)) : new Bot(f.typ === 'scherge' ? Math.max(1, o.stufe - 2) : o.stufe, seed + 13 * (i + 1)));
+  }
+  tick() {
+    this.ereignisse.length = 0;
+    if (this.phase === 'count') { this.t -= DT; if (this.t <= 0) { this.phase = 'play'; this.ereignisse.push({ art: 'los' }); } return; }
+    if (this.phase === 'play') {
+      this.bots.forEach((b, i) => b && b.denke(this.kampf, i)); this.kampf.step(); for (const e of this.kampf.ereignisse) this.ereignisse.push(e);
+      if (this.kampf.fertig) { const s = this.kampf.sieger, o = this.opt; this.phase = 'end'; this.t = K.PAUSE;
+        if (o.modus === 'wellen') { if (s === 0) { this.welle++; const ich = this.kampf.k[0]; this.tragen = { leben: Math.min(ich.maxLeben, ich.leben + K.HEILUNG), energie: ich.energie }; } else this.gewonnen = false;
+          if (this.welle >= WELLEN.length) this.gewonnen = true; }
+        else { this.runde++; if (s >= 0) this.punkte[s]++; if (this.punkte[0] >= K.SIEGE) this.gewonnen = true; else if (this.punkte[1] >= K.SIEGE) this.gewonnen = false;
+          else if (this.runde >= 5) this.gewonnen = this.punkte[0] > this.punkte[1]; }
+        this.ereignisse.push({ art: 'rundeEnde', sieger: s }); }
+      return;
+    }
+    if (this.phase === 'end') { this.t -= DT; if (this.t <= 0) { if (this.gewonnen !== null) { this.phase = 'over'; this.ereignisse.push({ art: 'ende', gewonnen: this.gewonnen }); } else this.neueRunde(); } }
+  }
+}
+/* SIM-END */
+
+// =====================================================================
+// Darstellung
+// =====================================================================
+const Q = new URLSearchParams(location.search), $ = id => document.getElementById(id);
+const lerp = (a, b, t) => a + (b - a) * t, klemme = (v, a, b) => Math.min(b, Math.max(a, v));
+const canvas = $('bild');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2a1c12); scene.fog = new THREE.Fog(0x3a2616, 22, 46);
+const camera = new THREE.PerspectiveCamera(46, 1, 0.5, 120);
+const loader = new GLTFLoader(), fehlend = [];
+
+// Speicher (Präfix ar_), läuft auch ohne
+const speicher = { lies: (k, d) => { try { const v = localStorage.getItem('ar_' + k); return v === null ? d : v; } catch (e) { return d; } }, schreib: (k, v) => { try { localStorage.setItem('ar_' + k, v); } catch (e) {} } };
+const stand = { stufe: klemme(+speicher.lies('stufe', 1) || 1, 1, 10), char: speicher.lies('char', 'junge'), modus: speicher.lies('modus', 'duell'), ton: speicher.lies('ton', '1') === '1', vib: speicher.lies('vib', '1') === '1' };
+if (Q.has('neu')) { stand.stufe = 1; }
+
+// ---------- Licht und Arena ----------
+scene.add(new THREE.HemisphereLight(0xffe2bb, 0x4a3324, 1.15));
+const sonne = new THREE.DirectionalLight(0xffc88a, 2.6); sonne.position.set(7, 12, 5); sonne.castShadow = true; sonne.shadow.mapSize.set(2048, 2048);
+Object.assign(sonne.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 40 }); sonne.shadow.bias = -0.0006; sonne.shadow.normalBias = 0.04; scene.add(sonne);
+const gegenlicht = new THREE.DirectionalLight(0x9db8ff, 0.55); gegenlicht.position.set(-6, 5, -7); scene.add(gegenlicht);
+
+function bodenBild() { // Steinplatten in Ringen, im Code gemalt (wird später durch ein Bild des Users ersetzt)
+  const n = 1024, c = document.createElement('canvas'); c.width = c.height = n; const g = c.getContext('2d'), r = mulberry32(11), m = n / 2;
+  g.fillStyle = '#6d5a48'; g.fillRect(0, 0, n, n);
+  const ringe = [0, 0.16, 0.33, 0.5, 0.67, 0.84, 1.0];
+  for (let i = 0; i < ringe.length - 1; i++) { const a = ringe[i] * m, b = ringe[i + 1] * m, teile = i === 0 ? 1 : 6 + i * 5, versatz = r() * 6.28;
+    for (let j = 0; j < teile; j++) { const w0 = versatz + j / teile * 6.283, w1 = versatz + (j + 1) / teile * 6.283, hell = 96 + r() * 46, ton = r();
+      g.beginPath(); g.arc(m, m, b - 2, w0 + 0.012, w1 - 0.012); g.arc(m, m, a + 2, w1 - 0.012, w0 + 0.012, true); g.closePath();
+      g.fillStyle = `rgb(${hell + 30 * ton | 0},${hell + 8 | 0},${hell - 22 | 0})`; g.fill(); } }
+  for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(${r() < 0.5 ? '0,0,0' : '255,235,200'},${r() * 0.07})`; g.fillRect(r() * n, r() * n, 2 + r() * 5, 2 + r() * 5); }
+  g.strokeStyle = 'rgba(255,205,120,.5)'; g.lineWidth = 7; g.beginPath(); g.arc(m, m, m * 0.33, 0, 6.283); g.stroke();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+}
+function rasenBild() { const n = 256, c = document.createElement('canvas'); c.width = c.height = n; const g = c.getContext('2d'), r = mulberry32(5);
+  g.fillStyle = '#5a6b35'; g.fillRect(0, 0, n, n); for (let i = 0; i < 3000; i++) { g.fillStyle = `rgba(${r() < 0.5 ? '30,45,15' : '150,165,80'},${r() * 0.25})`; g.fillRect(r() * n, r() * n, 2 + r() * 3, 2 + r() * 3); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(14, 14); return t; }
+function weicherFleck(farbe = '255,255,255') { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, `rgba(${farbe},1)`); gr.addColorStop(0.45, `rgba(${farbe},.45)`); gr.addColorStop(1, `rgba(${farbe},0)`); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; }
+const fleck = weicherFleck();
+function baueArena() {
+  const R = K.ARENA_R + 0.35;
+  const boden = new THREE.Mesh(new THREE.CircleGeometry(R, 72).rotateX(-Math.PI / 2), new THREE.MeshLambertMaterial({ map: bodenBild() })); boden.receiveShadow = true; scene.add(boden);
+  const rasen = new THREE.Mesh(new THREE.CircleGeometry(60, 48).rotateX(-Math.PI / 2), new THREE.MeshLambertMaterial({ map: rasenBild(), color: 0xd8c8a8 })); rasen.position.y = -0.04; rasen.receiveShadow = true; scene.add(rasen);
+  const rand = new THREE.Mesh(new THREE.TorusGeometry(R + 0.12, 0.2, 8, 72).rotateX(Math.PI / 2), new THREE.MeshLambertMaterial({ color: 0x7c6a58 })); rand.position.y = 0.06; rand.castShadow = rand.receiveShadow = true; scene.add(rand);
+  // Stehende Steine mit Feuerschalen rund um den Ring
+  const stein = new THREE.MeshLambertMaterial({ color: 0x8a7a68 }), r = mulberry32(3);
+  for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283 + 0.31, x = Math.sin(a) * (R + 1.5), z = Math.cos(a) * (R + 1.5), h = 1.5 + r() * 1.1;
+    const s = new THREE.Mesh(new THREE.BoxGeometry(0.7 + r() * 0.3, h, 0.55 + r() * 0.25), stein); s.position.set(x, h / 2 - 0.05, z); s.rotation.set((r() - 0.5) * 0.14, a + (r() - 0.5) * 0.5, (r() - 0.5) * 0.14); s.castShadow = s.receiveShadow = true; scene.add(s);
+    if (i % 2 === 0) { const f = new THREE.Sprite(new THREE.SpriteMaterial({ map: fleck, color: 0xffa040, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); f.position.set(x, h + 0.35, z); f.scale.setScalar(1.6); f.userData.ph = r() * 9; scene.add(f); feuer.push(f); } }
+}
+const feuer = [];
+
+// ---------- Figuren ----------
+// Zuordnung Kämpfer-Typ → Modell. Die Figuren des Users werden hier eingetragen (datei, höhe, ton).
+// Erwartete Animationsnamen im Modell: steh, lauf, schlag1, schlag2, treffer, tod, rolle
+// (auch englische Namen werden erkannt: idle, run, attack/punch, hit, death, roll).
+const AUSSEHEN = {
+  junge:    { datei: 'modelle/moench.glb',   höhe: 1.75, ton: 0xffffff },
+  maedchen: { datei: 'modelle/schurkin.glb', höhe: 1.68, ton: 0xffffff },
+  ritter:   { datei: 'modelle/krieger.glb',  höhe: 1.85, ton: 0xffffff },
+  scherge:  { datei: 'modelle/schurkin.glb', höhe: 1.5,  ton: 0x8a6aa8 },
+  boss:     { datei: 'modelle/krieger.glb',  höhe: 2.3,  ton: 0xc07070 },
+};
+const NAMEN = { steh: /^steh$|idle/i, lauf: /^lauf$|run/i, schlag1: /^schlag1$|attack(?!2)|punch|slash/i, schlag2: /^schlag2$|attack2|kick/i, treffer: /^treffer$|hit/i, tod: /^tod$|death|die|knock/i, rolle: /^rolle$|roll|dodge/i };
+const vorlagen = {};
+async function ladeVorlagen() {
+  const dateien = [...new Set(Object.values(AUSSEHEN).map(a => a.datei))];
+  await Promise.all(dateien.map(async d => { if (Q.get('ohne') === 'modelle') { fehlend.push(d); return; }
+    try { const g = await loader.loadAsync(d), box = new THREE.Box3().setFromObject(g.scene); vorlagen[d] = { szene: g.scene, clips: g.animations, h: box.max.y - box.min.y, y0: box.min.y }; } catch (e) { fehlend.push(d); } }));
+}
+function baueFigur(f) {
+  const a = AUSSEHEN[f.typ], v = vorlagen[a.datei], grp = new THREE.Group(), fig = { grp, mixer: null, akt: {}, jetzt: null, mats: [], gross: 1, schlagNr: -1, zustand: '', a, blitz: 0 };
+  if (v) { const m = kloneSkelett(v.szene); m.position.y = -v.y0; m.scale.setScalar(1); const halter = new THREE.Group(); halter.add(m); halter.scale.setScalar(a.höhe / v.h); grp.add(halter);
+    m.traverse(o => { if (!o.isMesh) return; o.castShadow = true; o.frustumCulled = false; const alt = o.material, neu = new THREE.MeshLambertMaterial({ map: alt.map, color: a.ton });
+      neu.color.multiplyScalar(1.45); neu.emissive = new THREE.Color(0xffffff); neu.emissiveMap = alt.map; neu.emissiveIntensity = 0.12; neu.userData.grund = neu.color.clone(); o.material = neu; fig.mats.push(neu); });
+    fig.mixer = new THREE.AnimationMixer(m);
+    for (const clip of v.clips) for (const [name, re] of Object.entries(NAMEN)) if (re.test(clip.name) && !fig.akt[name]) fig.akt[name] = fig.mixer.clipAction(clip);
+  } else { // Ersatzfigur, falls das Modell fehlt
+    const mat = new THREE.MeshLambertMaterial({ color: f.team === 0 ? 0xe2a048 : 0xa05868 }); mat.userData.grund = mat.color.clone(); fig.mats.push(mat);
+    const k = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, a.höhe - 1.0, 6, 12), mat); k.position.y = a.höhe / 2 - 0.1; k.castShadow = true;
+    const kopf = new THREE.Mesh(new THREE.SphereGeometry(0.26, 14, 10), mat); kopf.position.y = a.höhe - 0.22; kopf.castShadow = true;
+    const nase = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.3), mat); nase.position.set(0, a.höhe - 0.25, 0.26); grp.add(k, kopf, nase); }
+  // Ring am Boden: gold = du, rot = Gegner
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.62, 28).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: f.team === 0 ? 0xffd27a : 0xff5a4a, transparent: true, opacity: 0.85, depthWrite: false }));
+  ring.position.y = 0.03; grp.add(ring); fig.ring = ring; scene.add(grp); return fig;
+}
+function spiele(fig, name, einmal, dauer) { // Animation wechseln; dauer = so lange soll sie insgesamt laufen
+  const a = fig.akt[name] ?? (name === 'schlag2' ? fig.akt.schlag1 : null) ?? (name === 'rolle' ? fig.akt.lauf : null); if (!a) return;
+  if (fig.jetzt === a && !einmal) return;
+  a.reset(); a.setLoop(einmal ? THREE.LoopOnce : THREE.LoopRepeat, Infinity); a.clampWhenFinished = true; a.timeScale = dauer ? a.getClip().duration / dauer : 1;
+  a.fadeIn(0.07).play(); if (fig.jetzt && fig.jetzt !== a) fig.jetzt.fadeOut(0.07); fig.jetzt = a;
+}
+function zeigeFigur(fig, f, dt) {
+  const t = TYPEN[f.typ], stein = f.spezial > 0 && t.spezial === 'stein', sturm = f.spezial > 0 && t.spezial === 'sturm';
+  fig.grp.position.set(f.x, 0, f.z); fig.grp.rotation.y = f.r;
+  fig.gross = lerp(fig.gross, stein ? 1.32 : 1, 1 - Math.exp(-dt * 9)); fig.grp.scale.setScalar(fig.gross);
+  // Farbe: Treffer-Blitz, Steinriese grau, Sturm bläulich
+  fig.blitz = Math.max(0, fig.blitz - dt * 6);
+  for (const m of fig.mats) { m.color.copy(m.userData.grund); if (stein) m.color.lerp(_grau, 0.6).multiplyScalar(1.15); if (sturm) m.color.lerp(_blau, 0.45);
+    if (fig.blitz > 0) m.color.lerp(_weiss, fig.blitz * 0.8).multiplyScalar(1 + fig.blitz * 2); if (m.emissive) m.emissiveIntensity = sturm ? 0.5 : 0.12; }
+  fig.ring.visible = f.zustand !== 'tot'; fig.ring.material.opacity = f.energie >= 100 ? 0.6 + 0.4 * Math.sin(zeit * 12) : 0.8;
+  const lauf = Math.hypot(f.mx, f.mz) > 0.1;
+  if (f.zustand === 'schlag') { if (fig.schlagNr !== f.schlagNr) { fig.schlagNr = f.schlagNr; spiele(fig, f.kette === 1 ? 'schlag2' : 'schlag1', true, K.SCHLAG_ZEIT[f.kette] * 1.5); } }
+  else if (f.zustand !== fig.zustand || f.zustand === 'frei') {
+    if (f.zustand === 'taumel') spiele(fig, 'treffer', true, 0.5); else if (f.zustand === 'rolle') spiele(fig, 'rolle', true, K.ROLLE_ZEIT * 1.15);
+    else if (f.zustand === 'tot') spiele(fig, 'tod', true, 0.9); else spiele(fig, lauf ? 'lauf' : 'steh', false); }
+  if (f.zustand === 'frei' && fig.jetzt === fig.akt.lauf) fig.jetzt.timeScale = t.tempo / 4.2 * (sturm ? 1.35 : 1);
+  fig.zustand = f.zustand; fig.mixer?.update(dt);
+  if (!fig.mixer) { fig.grp.rotation.x = f.zustand === 'tot' ? -1.5 : f.zustand === 'schlag' ? 0.25 : f.zustand === 'taumel' ? -0.3 : 0; fig.grp.position.y = f.zustand === 'tot' ? 0.3 : 0; }
+}
+const _grau = new THREE.Color(0x9a9a92), _blau = new THREE.Color(0x7fd8ff), _weiss = new THREE.Color(0xffffff);
+
+// ---------- Effekte: Funken, Schlagbogen, Zahlen, Töne ----------
+const teile = [];
+function funken(x, y, z, farbe, n, wucht) { for (let i = 0; i < n; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: fleck, color: farbe, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+    const a = Math.random() * 6.283, v = (0.5 + Math.random()) * wucht; s.position.set(x, y, z); s.userData = { vx: Math.cos(a) * v, vy: 1 + Math.random() * wucht, vz: Math.sin(a) * v, t: 0, d: 0.35 + Math.random() * 0.25, g: 0.18 + Math.random() * 0.22 }; scene.add(s); teile.push(s); } }
+function bogen(f, kette) { const t = TYPEN[f.typ], sturm = f.spezial > 0 && t.spezial === 'sturm', stein = f.spezial > 0 && t.spezial === 'stein', halb = sturm ? 1.75 : 1.1, weit = t.reichweite * (stein ? 1.25 : 1) + 0.3;
+  const m = new THREE.Mesh(new THREE.RingGeometry(0.55, weit, 20, 1, Math.PI / 2 - halb, halb * 2).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: f.team === 0 ? 0xfff0c0 : 0xffb0a0, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  m.position.set(f.x, 0.9, f.z); m.rotation.y = f.r + Math.PI; /* Bogen wird nach −z gebaut, Blick zeigt nach (sin r, cos r) */ m.userData = { t: 0, d: kette === 2 ? 0.26 : 0.18, bogen: true }; scene.add(m); teile.push(m); }
+function bewegeTeile(dt) { for (let i = teile.length - 1; i >= 0; i--) { const s = teile[i], u = s.userData; u.t += dt; const k = u.t / u.d;
+    if (k >= 1) { scene.remove(s); s.material.dispose(); if (u.bogen) s.geometry.dispose(); teile.splice(i, 1); continue; }
+    if (u.bogen) { s.material.opacity = 0.55 * (1 - k); s.scale.setScalar(0.85 + k * 0.25); continue; }
+    u.vy -= 9 * dt; s.position.x += u.vx * dt; s.position.y = Math.max(0.05, s.position.y + u.vy * dt); s.position.z += u.vz * dt; s.scale.setScalar(u.g * (1 - k * 0.6)); s.material.opacity = 1 - k; } }
+const _p = new THREE.Vector3();
+function zahl(x, z, text, klasse) { _p.set(x, 1.9, z).project(camera); const el = document.createElement('div'); el.className = 'zahl ' + klasse; el.textContent = text;
+  el.style.transform = `translate(${(_p.x * 0.5 + 0.5) * innerWidth - 12 + (Math.random() - 0.5) * 24}px, ${(-_p.y * 0.5 + 0.5) * innerHeight - 10}px)`; document.body.appendChild(el); setTimeout(() => el.remove(), 720); }
+let ac = null;
+function ton(freq, dauer, art = 'square', laut = 0.08, ziel = freq) { if (!stand.ton || !app.läuft) return; try { ac ??= new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+    o.type = art; o.frequency.setValueAtTime(freq, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, ziel), t + dauer); g.gain.setValueAtTime(laut, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dauer); o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dauer); } catch (e) {} }
+const vib = m => { if (stand.vib && navigator.vibrate) try { navigator.vibrate(m); } catch (e) {} };
+let wackel = 0, stopp = 0, zeitlupe = 0, bannerUhr = 0;
+function banner(text, klein = '', ms = 1300) { const el = $('banner'); el.innerHTML = text + (klein ? `<small>${klein}</small>` : ''); el.classList.add('an'); clearTimeout(bannerUhr); bannerUhr = setTimeout(() => el.classList.remove('an'), ms); }
+function fx(e) { // Ereignisse aus der Simulation ⇒ Bild, Ton, Vibration
+  const k = app.match.kampf;
+  if (e.art === 'schlag') { bogen(k.k[e.von], e.kette); ton(e.kette === 2 ? 190 : 260, 0.09, 'triangle', 0.05, 90); }
+  else if (e.art === 'treffer') { const ich = e.auf === 0; funken(e.x, 1.1, e.z, e.stark ? 0xffd27a : 0xffe8c0, e.stark ? 14 : 8, e.stark ? 4.5 : 3); app.figuren[e.auf].blitz = 1;
+    zahl(e.x, e.z, e.schaden, (e.stark ? 'gross ' : '') + (ich ? 'ich' : '')); wackel = Math.max(wackel, e.stark ? 0.32 : 0.14); stopp = Math.max(stopp, e.stark ? 0.09 : 0.045);
+    ton(e.stark ? 110 : 150, e.stark ? 0.2 : 0.12, 'sawtooth', e.stark ? 0.13 : 0.09, 40); if (ich) vib(e.stark ? 60 : 25); }
+  else if (e.art === 'ko') { zeitlupe = 0.9; wackel = 0.45; funken(e.x, 1, e.z, 0xff9050, 22, 6); ton(90, 0.5, 'sawtooth', 0.14, 30); vib(e.auf === 0 ? [80, 40, 120] : 50); }
+  else if (e.art === 'rolle') { funken(e.x, 0.2, e.z, 0xd8c8a8, 5, 1.5); ton(420, 0.1, 'sine', 0.04, 200); }
+  else if (e.art === 'spezial') { funken(e.x, 1, e.z, e.sorte === 'stein' ? 0xffc070 : 0x9fe8ff, 30, 6); wackel = 0.35; stopp = 0.12; ton(220, 0.5, 'square', 0.1, 880); if (e.von === 0) { vib([40, 30, 80]); banner(e.sorte === 'stein' ? 'Steinriese!' : 'Sturm!', '', 800); } }
+  else if (e.art === 'los') { banner('Los!', '', 600); ton(660, 0.25, 'square', 0.08, 990); }
+  else if (e.art === 'zeit') banner('Zeit um!', '', 1000);
+  else if (e.art === 'rundeEnde') { const m = app.match; if (m.gewonnen === null) banner(m.opt.modus === 'wellen' ? `Welle ${m.welle} geschafft!` : e.sieger === 0 ? 'Runde gewonnen!' : e.sieger === 1 ? 'Runde verloren' : 'Unentschieden', '', 1500); }
+  else if (e.art === 'ende') zeigeErgebnis(e.gewonnen);
+}
+
+// ---------- Kamera: behält dich und den nächsten Gegner im Bild ----------
+const kam = { x: 0, z: 1, d: 16 };
+function bewegeKamera(dt, hart) {
+  let zx = 0, zz = 0, weite = 9;
+  const k = app.match?.kampf; if (k) { const ich = k.k[0]; let nah = null, nd = 1e9; for (const g of k.k) if (g.team === 1 && g.zustand !== 'tot') { const d = Math.hypot(g.x - ich.x, g.z - ich.z); if (d < nd) { nd = d; nah = g; } }
+    if (nah) { zx = lerp(ich.x, nah.x, 0.4); zz = lerp(ich.z, nah.z, 0.4); weite = klemme(nd * 1.2 + 4.2, 6, 12); } else { zx = ich.x * 0.7; zz = ich.z * 0.7; } }
+  const hoch = innerHeight > innerWidth, ziel = weite * (hoch ? 1.5 : 1.0), a = hart ? 1 : 1 - Math.exp(-dt * 4);
+  kam.x = lerp(kam.x, zx, a); kam.z = lerp(kam.z, zz, a); kam.d = lerp(kam.d, ziel, hart ? 1 : 1 - Math.exp(-dt * 2.5));
+  const wx = wackel > 0 ? (Math.random() - 0.5) * wackel : 0, wz = wackel > 0 ? (Math.random() - 0.5) * wackel : 0; wackel = Math.max(0, wackel - dt * 1.6);
+  camera.position.set(kam.x + wx, kam.d * 0.74, kam.z + kam.d * 0.68 + wz); camera.lookAt(kam.x + wx, 0.7, kam.z + wz - 0.2);
+  sonne.target.position.set(kam.x, 0, kam.z); sonne.position.set(kam.x + 7, 12, kam.z + 5); sonne.target.updateMatrixWorld();
+}
+
+// ---------- Bedienung ----------
+// Links: schwebender Steuerkreis auf dem Spielfeld, der zuletzt aufgesetzte Finger lenkt. Rechts: drei Knöpfe.
+// Loslassen wird an Canvas und Fenster abgefangen (dazu blur und visibilitychange), damit nichts hängen bleibt.
+const JOY_R = 58, JOY_TOT = 8;
+const eingabe = { joy: null, tasten: new Set(), halten: false };
+const kreisEl = $('kreis'), knaufEl = $('knauf');
+function zeigeKreis() { const j = eingabe.joy; kreisEl.style.display = knaufEl.style.display = j ? 'block' : 'none'; if (!j) return;
+  kreisEl.style.left = j.x0 + 'px'; kreisEl.style.top = j.y0 + 'px'; knaufEl.style.left = j.x + 'px'; knaufEl.style.top = j.y + 'px'; }
+canvas.addEventListener('pointerdown', e => { if (!app.läuft) return; try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+  eingabe.joy = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; zeigeKreis(); });
+canvas.addEventListener('pointermove', e => { const j = eingabe.joy; if (!j || e.pointerId !== j.id) return; j.x = e.clientX; j.y = e.clientY;
+  const dx = j.x - j.x0, dy = j.y - j.y0, d = Math.hypot(dx, dy); if (d > JOY_R) { j.x0 += dx * (1 - JOY_R / d); j.y0 += dy * (1 - JOY_R / d); } zeigeKreis(); });
+function los(e) { const j = eingabe.joy; if (!j || (e && e.pointerId !== j.id)) return; eingabe.joy = null; zeigeKreis(); }
+for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) { canvas.addEventListener(t, los); window.addEventListener(t, los); }
+function allesLos() { los(); eingabe.tasten.clear(); eingabe.halten = false; document.querySelectorAll('.kn').forEach(k => k.classList.remove('gedrückt')); }
+window.addEventListener('blur', allesLos); document.addEventListener('visibilitychange', allesLos);
+const wunsch = was => { const f = app.match?.kampf.k[0]; if (f && app.läuft && app.match.opt.mensch) f.wunsch[was] = true; };
+for (const [id, was] of [['kAngriff', 'angriff'], ['kRolle', 'rolle'], ['kSpezial', 'spezial']]) { const el = $(id);
+  el.addEventListener('pointerdown', e => { e.preventDefault(); el.classList.add('gedrückt'); wunsch(was); if (was === 'angriff') eingabe.halten = true; });
+  for (const t of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(t, () => { el.classList.remove('gedrückt'); if (was === 'angriff') eingabe.halten = false; }); }
+window.addEventListener('keydown', e => { if (e.repeat) return; eingabe.tasten.add(e.code);
+  if (e.code === 'KeyJ' || e.code === 'Space') wunsch('angriff'); if (e.code === 'KeyK' || e.code === 'ShiftLeft') wunsch('rolle'); if (e.code === 'KeyL' || e.code === 'KeyE') wunsch('spezial'); });
+window.addEventListener('keyup', e => eingabe.tasten.delete(e.code));
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+function leseEingabe() { // Steuerkreis und Tasten → Laufrichtung des Spielers (oben im Bild = von der Kamera weg = −z)
+  const f = app.match.kampf.k[0]; if (!app.match.opt.mensch) return; let x = 0, z = 0; const t = eingabe.tasten, j = eingabe.joy;
+  if (j) { const dx = j.x - j.x0, dy = j.y - j.y0, d = Math.hypot(dx, dy); if (d > JOY_TOT) { const s = Math.min(1, (d - JOY_TOT) / (JOY_R - JOY_TOT)); x = dx / d * s; z = dy / d * s; } }
+  if (t.has('KeyW') || t.has('ArrowUp')) z -= 1; if (t.has('KeyS') || t.has('ArrowDown')) z += 1; if (t.has('KeyA') || t.has('ArrowLeft')) x -= 1; if (t.has('KeyD') || t.has('ArrowRight')) x += 1;
+  const l = Math.hypot(x, z); if (l > 1) { x /= l; z /= l; } f.mx = x; f.mz = z;
+  if (eingabe.halten && f.zustand === 'schlag' && f.t > 0.12) f.wunsch.angriff = true;      // Knopf halten = Schlagfolge
+}
+
+// ---------- Anzeige ----------
+function zeigeAnzeige() {
+  const m = app.match, k = m.kampf, ich = k.k[0], gegner = k.k.filter(f => f.team === 1), o = m.opt;
+  $('lebenIch').style.transform = `scaleX(${Math.max(0, ich.leben) / ich.maxLeben})`;
+  const le = gegner.reduce((s, f) => s + Math.max(0, f.leben), 0), lm = gegner.reduce((s, f) => s + f.maxLeben, 0); $('lebenGegner').style.transform = `scaleX(${le / lm})`;
+  const kI = $('kraftIch'), kG = $('kraftGegner'); kI.firstChild.style.transform = `scaleX(${ich.spezial > 0 ? ich.spezial / K.SPEZIAL_DAUER : ich.energie / 100})`; kI.classList.toggle('voll', ich.energie >= 100 || ich.spezial > 0);
+  const g0 = gegner[0]; kG.style.visibility = TYPEN[g0.typ].spezial ? 'visible' : 'hidden'; kG.firstChild.style.transform = `scaleX(${g0.spezial > 0 ? g0.spezial / K.SPEZIAL_DAUER : g0.energie / 100})`; kG.classList.toggle('voll', g0.energie >= 100 || g0.spezial > 0);
+  $('uhr').textContent = m.phase === 'count' ? Math.ceil(m.t / (K.ZAEHLEN / 3)) : Math.max(0, Math.ceil(k.limit - k.zeit));
+  $('punkte').textContent = o.modus === 'wellen' ? `Welle ${Math.min(m.welle + 1, WELLEN.length)}/${WELLEN.length}` : '●'.repeat(m.punkte[0]) + '○'.repeat(K.SIEGE - m.punkte[0]) + ' ' + '○'.repeat(K.SIEGE - m.punkte[1]) + '●'.repeat(m.punkte[1]);
+  $('nameGegner').textContent = o.modus === 'wellen' ? (gegner.length > 1 ? `${gegner.filter(f => f.zustand !== 'tot').length} Schergen` : TYPEN[g0.typ].name) : `${TYPEN[g0.typ].name} · Stufe ${o.stufe}`;
+  $('kSpezial').classList.toggle('voll', ich.energie >= 100); $('kRolle').classList.toggle('pause', ich.rollePause > 0);
+}
+
+// ---------- Spielablauf ----------
+const app = { läuft: false, match: null, figuren: [], kampfAlt: null, tempo: +(Q.get('tempo') || 1), rest: 0 };
+let zeit = 0;
+function starte(opt = {}) {
+  for (const f of app.figuren) scene.remove(f.grp); app.figuren = []; app.kampfAlt = null;
+  app.match = new Match({ modus: stand.modus, spieler: stand.char, gegner: stand.char === 'junge' ? 'ritter' : 'ritter', stufe: stand.stufe, seed: (Date.now() & 0x7fffffff) || 1, mensch: !Q.has('auto'), ...opt });
+  app.läuft = true; app.rest = 0; zeitlupe = 0; stopp = 0;
+  $('menü').classList.remove('an'); $('ergebnis').classList.remove('an'); $('anzeige').style.display = 'grid'; $('knöpfe').style.display = 'block';
+  $('nameIch').textContent = TYPEN[app.match.opt.spieler].name; bewegeKamera(0, true);
+}
+function zeigeErgebnis(gewonnen) {
+  const o = app.match.opt; app.läuft = false; allesLos(); $('knöpfe').style.display = 'none';
+  let text = ''; if (o.modus === 'duell') { if (gewonnen && stand.stufe < 10 && o.stufe === stand.stufe) { stand.stufe++; speicher.schreib('stufe', stand.stufe); text = `Der nächste Gegner kämpft auf Stufe ${stand.stufe}.`; }
+      else text = gewonnen ? 'Stärker wird der Computer nicht mehr.' : 'Tipp: Weiche aus, wenn der Gegner ausholt, und schlage direkt danach zu.'; }
+  else text = gewonnen ? 'Alle drei Wellen überstanden.' : `Du bist in Welle ${app.match.welle + 1} gescheitert.`;
+  $('ergTitel').textContent = gewonnen ? 'Sieg!' : 'Niederlage'; $('ergText').textContent = text; if (gewonnen) { ton(523, 0.15); setTimeout(() => ton(784, 0.3), 150); vib([60, 40, 60, 40, 140]); }
+  setTimeout(() => $('ergebnis').classList.add('an'), 500);
+}
+function zumMenü() { app.läuft = false; $('ergebnis').classList.remove('an'); $('anzeige').style.display = 'none'; $('knöpfe').style.display = 'none'; zeichneMenü(); $('menü').classList.add('an'); }
+function zeichneMenü() {
+  const c = $('wahlChar'); c.innerHTML = ''; for (const typ of ['junge', 'maedchen']) { const b = document.createElement('button'); b.className = 'wahl' + (stand.char === typ ? ' an' : ''); b.dataset.char = typ;
+    b.innerHTML = `${TYPEN[typ].name}<small>${TYPEN[typ].spezial === 'stein' ? 'wird zum Steinriesen' : 'entfesselt den Sturm'}</small>`; b.addEventListener('click', () => { stand.char = typ; speicher.schreib('char', typ); zeichneMenü(); }); c.appendChild(b); }
+  document.querySelectorAll('#wahlModus .wahl').forEach(b => b.classList.toggle('an', b.dataset.modus === stand.modus));
+  $('stufeText').textContent = `Computer-Gegner: Stufe ${stand.stufe} von 10`; $('sTon').textContent = 'Ton: ' + (stand.ton ? 'an' : 'aus'); $('sVib').textContent = 'Vibration: ' + (stand.vib ? 'an' : 'aus');
+}
+document.querySelectorAll('#wahlModus .wahl').forEach(b => b.addEventListener('click', () => { stand.modus = b.dataset.modus; speicher.schreib('modus', stand.modus); zeichneMenü(); }));
+$('sTon').addEventListener('click', () => { stand.ton = !stand.ton; speicher.schreib('ton', stand.ton ? '1' : '0'); zeichneMenü(); });
+$('sVib').addEventListener('click', () => { stand.vib = !stand.vib; speicher.schreib('vib', stand.vib ? '1' : '0'); zeichneMenü(); });
+$('los').addEventListener('click', () => starte()); $('nochmal').addEventListener('click', () => starte()); $('zumMenü').addEventListener('click', zumMenü);
+
+// ---------- Hauptschleife ----------
+const uhr = new THREE.Clock();
+function passeAn() { renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.fov = innerHeight > innerWidth ? 40 : 46; camera.updateProjectionMatrix(); }
+window.addEventListener('resize', passeAn);
+function bild() {
+  requestAnimationFrame(bild); const echt = Math.min(0.05, uhr.getDelta()); zeit += echt;
+  let dt = echt; if (zeitlupe > 0) { zeitlupe -= echt; dt *= 0.3; } if (stopp > 0) { stopp -= echt; dt = 0; }      // Treffer-Stopp und Zeitlupe sind nur Darstellung
+  const m = app.match;
+  if (m && m.phase !== 'over') { app.rest += dt * app.tempo; let n = 0;
+    while (app.rest >= DT && n++ < 40) { app.rest -= DT; if (m.phase === 'play') leseEingabe(); m.tick(); for (const e of m.ereignisse) fx(e); if (stopp > 0 || m.phase === 'over') break; } }
+  if (m) { const k = m.kampf; if (k !== app.kampfAlt) { for (const f of app.figuren) scene.remove(f.grp); app.figuren = k.k.map(baueFigur); app.kampfAlt = k; }
+    k.k.forEach((f, i) => zeigeFigur(app.figuren[i], f, dt)); zeigeAnzeige(); }
+  bewegeTeile(dt); for (const f of feuer) { f.scale.setScalar(1.5 + 0.25 * Math.sin(zeit * 9 + f.userData.ph) + 0.15 * Math.sin(zeit * 23 + f.userData.ph)); }
+  bewegeKamera(echt, false); renderer.render(scene, camera);
+}
+
+async function init() {
+  passeAn(); baueArena(); zeichneMenü(); await ladeVorlagen();
+  // Im Menü läuft im Hintergrund ein Schaukampf Computer gegen Computer
+  app.match = new Match({ modus: 'duell', spieler: 'junge', gegner: 'ritter', stufe: 4, spielerStufe: 4, mensch: false, seed: 77 }); bewegeKamera(0, true);
+  renderer.compile(scene, camera); requestAnimationFrame(bild);
+  $('meldung').textContent = fehlend.length ? 'Figuren nicht geladen, es geht mit Ersatzfiguren weiter.' : 'Die Figuren sind Platzhalter, bis deine eigenen da sind.'; $('los').style.display = 'inline-block';
+  AR.bereit = true; if (Q.has('start')) starte({ ...(Q.get('modus') ? { modus: Q.get('modus') } : {}), ...(Q.get('stufe') ? { stufe: +Q.get('stufe') } : {}), ...(Q.get('seed') ? { seed: +Q.get('seed') } : {}), ...(Q.get('spielerStufe') ? { spielerStufe: +Q.get('spielerStufe') } : {}) });
+}
+const AR = window.AR = { bereit: false, K, TYPEN, WELLEN, Kampf, Bot, Match, app, stand, eingabe, fehlend, starte, zumMenü,
+  info: () => { const m = app.match, k = m.kampf, ich = k.k[0], g = k.k.filter(f => f.team === 1);
+    return { läuft: app.läuft, phase: m.phase, modus: m.opt.modus, punkte: [...m.punkte], welle: m.welle, gewonnen: m.gewonnen, zeit: k.zeit,
+      ich: { x: ich.x, z: ich.z, leben: ich.leben, energie: ich.energie, zustand: ich.zustand, spezial: ich.spezial, kette: ich.kette }, gegner: g.map(f => ({ x: f.x, z: f.z, leben: f.leben, zustand: f.zustand })) }; } };
+init().catch(e => { console.error(e); $('meldung').textContent = 'Fehler beim Start: ' + e.message; });
+</script>
+</body>
+</html>
