@@ -62,7 +62,8 @@ Vorgeschichte und verworfene Wege stehen in `UEBERGABE.md`. Figuren-Prompts: `FI
 | Scherge | 30 | 3,7 | 4/4/6 | 1,35 | – |
 | Hauptmann | 140 | 3,9 | 8/8/13 | 1,75 | Stein |
 
-## Computer-Gegner `Bot(stufe, seed)`, mit k = (Stufe − 1) / 9
+## Computer-Gegner `Bot(stufe, seed)`, mit k = (2 + (Stufe − 1) · 7/9) / 9
+(Seit 22.11. ist Stufe 1 so stark wie die frühere Stufe 3, Wunsch des Users: „Stufe 1 zu leicht“. Stufe 10 unverändert.)
 | Eigenschaft | Wert |
 | --- | --- |
 | neue Entscheidung | alle `round(20 − 11·k)` Ticks (plus bis zu 4 zufällige) |
@@ -74,9 +75,9 @@ Vorgeschichte und verworfene Wege stehen in `UEBERGABE.md`. Figuren-Prompts: `FI
 Schergen kämpfen zwei Stufen schwächer als eingestellt.
 
 **Gemessen** (`sim.test.js`, Bot gegen Bot, je 200 Runden): Stufe 10 schlägt Stufe 1 in 100 %, Stufe 5 schlägt
-Stufe 1 in 99 %, Stufe 10 schlägt Stufe 5 in 99 %; gleiche Stufe 51 %, Rundendauer etwa 16 s. Figuren auf Stufe 5:
-Junge gegen Rabenritter 42 %, Mädchen gegen Rabenritter 43 %, Junge gegen Mädchen 52 %. Wellen gegen Stufe 3: ein
-Bot der Stufe 7 schafft 57 %, einer der Stufe 2 fast nie. **Die Stufen liegen für Bots sehr weit auseinander; ob das
+Stufe 1 in 98 %, Stufe 10 schlägt Stufe 5 in 98 %; gleiche Stufe 56 %, Rundendauer etwa 16 s. Figuren auf Stufe 5:
+Junge gegen Rabenritter 45 %, Mädchen gegen Rabenritter 45 %, Junge gegen Mädchen 42 %. Wellen gegen Stufe 3: ein
+Bot der Stufe 7 schafft 48 %, einer der Stufe 2 fast nie. **Die Stufen liegen für Bots sehr weit auseinander; ob das
 für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zahlen vorher und nachher vergleichen.
 
 ## Aufbau von `index.html`
@@ -85,7 +86,7 @@ für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zah
 | `Kampf` | Eine Runde: `step()`, Eingaben über `k[i].mx/.mz` und `k[i].wunsch`, Ereignisse in `ereignisse` |
 | `Bot` | `denke(kampf, i)` setzt Laufrichtung und Wünsche |
 | `Match` | Runden bzw. Wellen, Phasen `count → play → end → over`, `tick()` |
-| `AUSSEHEN`, `NAMEN`, `ladeVorlagen`, `baueFigur`, `zeigeFigur` | Modell je Typ, Animationen am Namen erkennen, Zustand → Animation |
+| `AUSSEHEN`, `NAMEN`, `ladeVorlagen`, `baueFigur`, `zeigeFigur` | Modell je Typ, Animationen am Namen erkennen, Zustand → Animation. Flüssig: Position zwischen zwei Rechenschritten eingeblendet (`vx0/vz0`), Drehung folgt weich, Überblenden 0,06 s (Schläge) bis 0,18 s (Stehen/Laufen), Schlag 3 als eigene Kopie |
 | `fx(e)` | Ereignisse ⇒ Funken, Schlagbogen, Schadenszahlen, Wackeln, Treffer-Stopp, Zeitlupe, Töne, Vibration |
 | `bewegeKamera` | hält Spieler und nächsten Gegner im Bild |
 | Bedienung | Steuerkreis links (zuletzt aufgesetzter Finger, Loslassen überall abgefangen), drei Knöpfe rechts |

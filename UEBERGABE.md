@@ -57,6 +57,13 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
 - **Gemessen**, Bot gegen Bot, je 200 Runden: Stufe 10 schlägt Stufe 1 in 100 %, Stufe 5 schlägt Stufe 1 in 99 %,
   gleiche Stufe 51 % bei etwa 16 s je Runde, Junge gegen Mädchen 52 %.
 
+### Erste Rückmeldung vom echten Handy (22.11.2026)
+- „Kampf fühlt sich gut an.“ „Stufe 1 zu leicht“ → Stufe 1 ist jetzt so stark wie die frühere Stufe 3 (er wählte
+  „deutlich schwerer“). Stufe 10 blieb gleich.
+- „Könnte flüssiger sein“, gemeint: **Figuren wirken steif**. Geändert: weiche Drehung, längeres Überblenden
+  zwischen Stehen und Laufen, kein Rücksprung beim dritten Schlag, Bewegung zwischen den Rechenschritten
+  eingeblendet. Noch nicht auf dem echten Handy bestätigt; nachfragen.
+
 ## 5. Was noch Platzhalter ist
 - **Figuren:** einfache freie Figuren (Quaternius, gemeinfrei) statt Junge und Mädchen.
 - **Arena:** Boden, Steine und Feuerschein sind im Code gemalt, kein Schaukasten-Bild.

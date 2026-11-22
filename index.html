@@ -230,7 +230,7 @@ class Kampf {
 
 // Computer-Gegner, Stufe 1 bis 10. Mit k = (Stufe − 1) / 9 steigen Reaktion, Angriffslust, Ausweichen und Folgen.
 class Bot {
-  constructor(stufe, seed) { this.stufe = Math.max(1, Math.min(10, stufe)); this.k = (this.stufe - 1) / 9; this.rnd = mulberry32(seed); this.warte = 0; this.gesehen = {}; this.kette = -1; this.seite = 1; }
+  constructor(stufe, seed) { this.stufe = Math.max(1, Math.min(10, stufe)); this.k = (2 + (this.stufe - 1) * 7 / 9) / 9; /* Stufe 1 entspricht der früheren Stufe 3 */ this.rnd = mulberry32(seed); this.warte = 0; this.gesehen = {}; this.kette = -1; this.seite = 1; }
   denke(kampf, i) {
     const f = kampf.k[i], k = this.k, t = TYPEN[f.typ]; if (f.zustand === 'tot') return;
     let ziel = null, zd = 1e9; for (const g of kampf.k) { if (g.team === f.team || g.zustand === 'tot') continue; const d = Math.hypot(g.x - f.x, g.z - f.z); if (d < zd) { zd = d; ziel = g; } }
@@ -366,6 +366,7 @@ function baueFigur(f) {
       neu.color.multiplyScalar(1.45); neu.emissive = new THREE.Color(0xffffff); neu.emissiveMap = alt.map; neu.emissiveIntensity = 0.12; neu.userData.grund = neu.color.clone(); o.material = neu; fig.mats.push(neu); });
     fig.mixer = new THREE.AnimationMixer(m);
     for (const clip of v.clips) for (const [name, re] of Object.entries(NAMEN)) if (re.test(clip.name) && !fig.akt[name]) fig.akt[name] = fig.mixer.clipAction(clip);
+    if (fig.akt.schlag1) fig.akt.schlag3 = fig.mixer.clipAction(fig.akt.schlag1.getClip().clone()); // eigene Kopie: Schlag 3 blendet weich aus Schlag 1/2 über
   } else { // Ersatzfigur, falls das Modell fehlt
     const mat = new THREE.MeshLambertMaterial({ color: f.team === 0 ? 0xe2a048 : 0xa05868 }); mat.userData.grund = mat.color.clone(); fig.mats.push(mat);
     const k = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, a.höhe - 1.0, 6, 12), mat); k.position.y = a.höhe / 2 - 0.1; k.castShadow = true;
@@ -376,26 +377,33 @@ function baueFigur(f) {
   ring.position.y = 0.03; grp.add(ring); fig.ring = ring; scene.add(grp); return fig;
 }
 function spiele(fig, name, einmal, dauer) { // Animation wechseln; dauer = so lange soll sie insgesamt laufen
-  const a = fig.akt[name] ?? (name === 'schlag2' ? fig.akt.schlag1 : null) ?? (name === 'rolle' ? fig.akt.lauf : null); if (!a) return;
+  const a = fig.akt[name] ?? (name === 'schlag2' || name === 'schlag3' ? fig.akt.schlag1 : null) ?? (name === 'rolle' ? fig.akt.lauf : null); if (!a) return;
   if (fig.jetzt === a && !einmal) return;
+  // Überblenden: Schläge und Treffer schnell, Stehen und Laufen weich
+  const blende = name.startsWith('schlag') ? 0.06 : name === 'treffer' || name === 'rolle' ? 0.08 : name === 'tod' ? 0.12 : 0.18;
   a.reset(); a.setLoop(einmal ? THREE.LoopOnce : THREE.LoopRepeat, Infinity); a.clampWhenFinished = true; a.timeScale = dauer ? a.getClip().duration / dauer : 1;
-  a.fadeIn(0.07).play(); if (fig.jetzt && fig.jetzt !== a) fig.jetzt.fadeOut(0.07); fig.jetzt = a;
+  if (fig.jetzt && fig.jetzt !== a) { a.crossFadeFrom(fig.jetzt, blende, false); a.play(); } else a.fadeIn(blende).play(); fig.jetzt = a;
 }
-function zeigeFigur(fig, f, dt) {
+function zeigeFigur(fig, f, dt, anteil) {
   const t = TYPEN[f.typ], stein = f.spezial > 0 && t.spezial === 'stein', sturm = f.spezial > 0 && t.spezial === 'sturm';
-  fig.grp.position.set(f.x, 0, f.z); fig.grp.rotation.y = f.r;
+  // Zwischen letztem und jetzigem Rechenschritt einblenden, damit nichts hakt (Bildrate ≠ 60/s)
+  const x = f.vx0 === undefined ? f.x : lerp(f.vx0, f.x, anteil), z = f.vz0 === undefined ? f.z : lerp(f.vz0, f.z, anteil);
+  fig.grp.position.set(x, 0, z);
+  // Drehung folgt weich, auch wenn die Regeln sie springen lassen (Zielhilfe, Rolle)
+  if (fig.r === undefined) fig.r = f.r; let dr = f.r - fig.r; dr = Math.atan2(Math.sin(dr), Math.cos(dr));
+  fig.r += dr * (1 - Math.exp(-dt * 28)); fig.grp.rotation.y = fig.r;
   fig.gross = lerp(fig.gross, stein ? 1.32 : 1, 1 - Math.exp(-dt * 9)); fig.grp.scale.setScalar(fig.gross);
   // Farbe: Treffer-Blitz, Steinriese grau, Sturm bläulich
   fig.blitz = Math.max(0, fig.blitz - dt * 6);
   for (const m of fig.mats) { m.color.copy(m.userData.grund); if (stein) m.color.lerp(_grau, 0.6).multiplyScalar(1.15); if (sturm) m.color.lerp(_blau, 0.45);
     if (fig.blitz > 0) m.color.lerp(_weiss, fig.blitz * 0.8).multiplyScalar(1 + fig.blitz * 2); if (m.emissive) m.emissiveIntensity = sturm ? 0.5 : 0.12; }
   fig.ring.visible = f.zustand !== 'tot'; fig.ring.material.opacity = f.energie >= 100 ? 0.6 + 0.4 * Math.sin(zeit * 12) : 0.8;
-  const lauf = Math.hypot(f.mx, f.mz) > 0.1;
-  if (f.zustand === 'schlag') { if (fig.schlagNr !== f.schlagNr) { fig.schlagNr = f.schlagNr; spiele(fig, f.kette === 1 ? 'schlag2' : 'schlag1', true, K.SCHLAG_ZEIT[f.kette] * 1.5); } }
+  const stark = Math.hypot(f.mx, f.mz), lauf = fig.jetzt === fig.akt.lauf ? stark > 0.06 : stark > 0.15;   // kein Flackern zwischen Stehen und Laufen
+  if (f.zustand === 'schlag') { if (fig.schlagNr !== f.schlagNr) { fig.schlagNr = f.schlagNr; spiele(fig, ['schlag1', 'schlag2', 'schlag3'][f.kette], true, K.SCHLAG_ZEIT[f.kette] * 1.5); } }
   else if (f.zustand !== fig.zustand || f.zustand === 'frei') {
     if (f.zustand === 'taumel') spiele(fig, 'treffer', true, 0.5); else if (f.zustand === 'rolle') spiele(fig, 'rolle', true, K.ROLLE_ZEIT * 1.15);
     else if (f.zustand === 'tot') spiele(fig, 'tod', true, 0.9); else spiele(fig, lauf ? 'lauf' : 'steh', false); }
-  if (f.zustand === 'frei' && fig.jetzt === fig.akt.lauf) fig.jetzt.timeScale = t.tempo / 4.2 * (sturm ? 1.35 : 1);
+  if (f.zustand === 'frei' && fig.jetzt === fig.akt.lauf) fig.jetzt.timeScale = t.tempo / 4.2 * (sturm ? 1.35 : 1) * klemme(stark, 0.55, 1);
   fig.zustand = f.zustand; fig.mixer?.update(dt);
   if (!fig.mixer) { fig.grp.rotation.x = f.zustand === 'tot' ? -1.5 : f.zustand === 'schlag' ? 0.25 : f.zustand === 'taumel' ? -0.3 : 0; fig.grp.position.y = f.zustand === 'tot' ? 0.3 : 0; }
 }
@@ -533,9 +541,9 @@ function bild() {
   let dt = echt; if (zeitlupe > 0) { zeitlupe -= echt; dt *= 0.3; } if (stopp > 0) { stopp -= echt; dt = 0; }      // Treffer-Stopp und Zeitlupe sind nur Darstellung
   const m = app.match;
   if (m && m.phase !== 'over') { app.rest += dt * app.tempo; let n = 0;
-    while (app.rest >= DT && n++ < 40) { app.rest -= DT; if (m.phase === 'play') leseEingabe(); m.tick(); for (const e of m.ereignisse) fx(e); if (stopp > 0 || m.phase === 'over') break; } }
+    while (app.rest >= DT && n++ < 40) { app.rest -= DT; if (m.phase === 'play') leseEingabe(); for (const f of m.kampf.k) { f.vx0 = f.x; f.vz0 = f.z; } m.tick(); for (const e of m.ereignisse) fx(e); if (stopp > 0 || m.phase === 'over') break; } }
   if (m) { const k = m.kampf; if (k !== app.kampfAlt) { for (const f of app.figuren) scene.remove(f.grp); app.figuren = k.k.map(baueFigur); app.kampfAlt = k; }
-    k.k.forEach((f, i) => zeigeFigur(app.figuren[i], f, dt)); zeigeAnzeige(); }
+    const anteil = klemme(app.rest / DT, 0, 1); k.k.forEach((f, i) => zeigeFigur(app.figuren[i], f, dt, anteil)); zeigeAnzeige(); }
   bewegeTeile(dt); for (const f of feuer) { f.scale.setScalar(1.5 + 0.25 * Math.sin(zeit * 9 + f.userData.ph) + 0.15 * Math.sin(zeit * 23 + f.userData.ph)); }
   bewegeKamera(echt, false); renderer.render(scene, camera);
 }
