@@ -23,11 +23,12 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   let page = await neu('neu');
   ok(page.fehler.length === 0, 'keine Fehler beim Laden' + (page.fehler.length ? ': ' + page.fehler[0] : ''));
   ok((await page.evaluate(() => AR.fehlend.length)) === 0, 'alle Figuren geladen');
-  ok(await page.isVisible('#los'), 'Menü mit Start-Knopf erscheint');
-  await page.click('[data-char=maedchen]'); await page.click('[data-modus=wellen]');
-  ok(await page.evaluate(() => AR.stand.char === 'maedchen' && AR.stand.modus === 'wellen'), 'Kämpfer und Modus lassen sich wählen');
-  await page.click('[data-char=junge]'); await page.click('[data-modus=duell]'); await page.click('#los');
-  ok((await info(page)).läuft && (await info(page)).modus === 'duell', 'Kampf startet');
+  ok(await page.isVisible('#dorf') && (await page.$$('.platz')).length === 5 && await page.isEnabled('#zuMissionen'), 'Dorf mit fünf Bauplätzen und Missionen-Knopf erscheint');
+  await page.click('#zuMissionen');
+  ok(await page.isVisible('#missionen') && await page.isEnabled('[data-mission="0"]') && !(await page.isEnabled('[data-mission="1"]')), 'Missionsliste: nur die erste ist offen');
+  ok(!(await page.isEnabled('[data-char=maedchen]')), 'am Anfang gibt es nur den Jungen');
+  await page.click('[data-mission="0"]');
+  ok((await info(page)).läuft && (await info(page)).modus === 'duell' && await page.evaluate(() => AR.app.mission === 0), 'Mission 1 startet als Duell');
   ok(await warte(page, () => AR.info().phase === 'play'), 'nach dem Herunterzählen geht es los');
 
   console.log('Bedienung');
@@ -60,12 +61,34 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   ok(page.fehler.length === 0, 'keine Fehler während des Kampfes' + (page.fehler.length ? ': ' + page.fehler[0] : ''));
   await page.context().close();
 
-  console.log('Ganzes Duell und Wellen (Computer spielt, beschleunigt)');
-  page = await neu('neu&start&auto&tempo=6&modus=duell&stufe=1&spielerStufe=9&seed=11');
-  ok(await warte(page, () => AR.info().phase === 'over', null, 240000), 'Duell läuft bis zum Ende');
-  ok((await info(page)).gewonnen === true && await warte(page, () => document.getElementById('ergebnis').classList.contains('an'), null, 10000), 'starker Spieler gewinnt gegen Stufe 1, Ergebnis erscheint');
-  ok(await page.evaluate(() => AR.stand.stufe === 2), 'nach dem Sieg steigt die Stufe des Computers');
-  await page.click('#zumMenü'); ok(await page.isVisible('#los'), 'zurück ins Menü');
+  console.log('Dorf: bauen');
+  page = await neu('neu');
+  await page.evaluate(() => { Object.assign(AR.dorf.roh, { holz: 45, stein: 15, gold: 0, zutaten: 0 }); AR.zeigeDorf(); });
+  ok(await page.evaluate(() => document.querySelector('[data-bau=training]').classList.contains('kann')), 'Bauplatz leuchtet, wenn genug Rohstoffe da sind');
+  await page.click('[data-bau=training]'); ok(await page.isVisible('#bau') && await page.isEnabled('#bauLos'), 'Bau-Fenster zeigt Kosten und Bauen-Knopf');
+  await page.click('#bauLos');
+  ok(await page.evaluate(() => AR.dorf.bau.training === 1 && AR.dorf.roh.holz === 15 && AR.dorf.roh.stein === 5), 'Trainingsplatz gebaut, Rohstoffe abgezogen');
+  ok(!(await page.isEnabled('#bauLos')), 'Ausbau gesperrt, solange Rohstoffe fehlen');
+  await page.click('#bauZu'); await page.click('[data-bau=taverne]');
+  ok(await page.isHidden('#bauLos'), 'Taverne ist als „kommt später“ markiert');
+  await page.click('#bauZu');
+  await page.evaluate(() => AR.starte({ modus: 'duell', spieler: 'junge', bonus: { leben: 8, schaden: 1, energie: 1 } }));
+  ok((await info(page)).ich.leben === 108, 'Trainingsplatz gibt im Kampf mehr Leben');
+  await page.context().close();
+
+  console.log('Missionen durchspielen (Computer spielt, beschleunigt)');
+  page = await neu('neu&auto&tempo=6');
+  await page.evaluate(() => AR.starte({ modus: 'duell', gegner: 'ritter', stufe: 1, spielerStufe: 9, seed: 11 }, 0));
+  ok(await warte(page, () => AR.info().phase === 'over', null, 240000), 'Mission 1 läuft bis zum Ende');
+  ok((await info(page)).gewonnen === true && await warte(page, () => document.getElementById('ergebnis').classList.contains('an'), null, 10000), 'Sieg, Ergebnis erscheint');
+  ok(await page.evaluate(() => AR.dorf.geschafft.includes(0) && AR.dorf.roh.holz === 40 && AR.dorf.roh.stein === 20), 'Belohnung kommt im Dorf an');
+  await page.evaluate(() => AR.starte({ modus: 'duell', gegner: 'maedchen', stufe: 2, spielerStufe: 9, seed: 12 }, 1));
+  await warte(page, () => AR.info().phase === 'over', null, 240000); await warte(page, () => document.getElementById('ergebnis').classList.contains('an'), null, 10000);
+  ok(await page.evaluate(() => AR.dorf.figuren.includes('maedchen')) && (await page.textContent('#ergNeu')).includes('schließt sich dir an'), 'nach Mission 2 schließt sich das Mädchen an');
+  await page.click('#zumMenü'); ok(await page.isVisible('#dorf'), 'zurück ins Dorf');
+  await page.goto(URL); await page.waitForFunction('window.AR && AR.bereit', null, { timeout: 90000 });
+  ok(await page.evaluate(() => AR.dorf.geschafft.length === 2 && AR.dorf.roh.holz === 40 && AR.dorf.figuren.includes('maedchen')), 'Fortschritt bleibt nach dem Neuladen erhalten');
+  await page.click('#zuMissionen'); ok(await page.isEnabled('[data-char=maedchen]') && await page.isEnabled('[data-mission="2"]'), 'Mädchen wählbar, Mission 3 offen');
   await page.context().close();
   page = await neu('neu&start&auto&tempo=6&modus=wellen&stufe=3&spielerStufe=9&seed=104');
   ok(await warte(page, () => AR.info().phase === 'over', null, 300000), 'Wellen-Lauf läuft bis zum Ende');
@@ -78,8 +101,12 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   await page.context().close();
 
   console.log('Bilder in doppelter Auflösung (bitte ansehen: tests/screenshots/)');
-  page = await neu('neu', 2); await page.waitForTimeout(1500); await bild(page, '1-menue');
-  await page.click('#los'); await warte(page, () => AR.info().phase === 'play'); await page.waitForTimeout(700); await bild(page, '2-kampf');
+  page = await neu('neu', 2);
+  await page.evaluate(() => { Object.assign(AR.dorf.roh, { holz: 120, stein: 85, gold: 30, zutaten: 25 }); AR.dorf.bau.training = 1; AR.dorf.bau.schmiede = 2; AR.dorf.geschafft.push(0, 1, 2); AR.dorf.figuren.push('maedchen'); AR.zeigeDorf(); });
+  await page.waitForTimeout(300); await bild(page, '1-dorf');
+  await page.click('[data-bau=kueche]'); await page.waitForTimeout(200); await bild(page, '1b-bauen'); await page.click('#bauZu');
+  await page.click('#zuMissionen'); await page.waitForTimeout(200); await bild(page, '1c-missionen');
+  await page.click('[data-mission="0"]'); await warte(page, () => AR.info().phase === 'play'); await page.waitForTimeout(700); await bild(page, '2-kampf');
   await page.context().close();
   page = await neu('neu&start&auto&modus=duell&stufe=5&spielerStufe=6&seed=3', 2);
   await warte(page, () => AR.info().gegner[0].zustand === 'taumel', null, 90000); await bild(page, '3-treffer');
@@ -88,7 +115,7 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   page = await neu('neu&start&auto&modus=wellen&stufe=3&spielerStufe=8&seed=104', 2);
   await warte(page, () => AR.info().phase === 'play' && AR.info().zeit > 1.2, null, 90000); await bild(page, '5-wellen');
   await page.context().close();
-  page = await neu('neu&start&auto&tempo=6&modus=duell&stufe=1&spielerStufe=9&seed=11', 2);
+  page = await neu('neu&auto&tempo=6', 2); await page.evaluate(() => AR.starte({ modus: 'duell', gegner: 'ritter', stufe: 1, spielerStufe: 9, seed: 11 }, 0));
   await warte(page, () => document.getElementById('ergebnis').classList.contains('an'), null, 240000); await page.waitForTimeout(400); await bild(page, '6-ergebnis');
   await browser.close();
   console.log(fehler ? `\n${fehler} Prüfung(en) fehlgeschlagen` : '\nAlles grün');

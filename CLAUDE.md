@@ -10,7 +10,7 @@ ohne Fachbegriffe. Immer ehrlich sagen, was nur simuliert geprüft ist.
 Ein **Kampf- und Aufbauspiel** im Anime-Stil:
 - **Kämpfe in Echtzeit** in einer Arena, als Missionen (Duell oder Wellen). ← gebaut
 - **Eigenes Dorf mit festen Bauplätzen** als Zuhause; Missionen bringen Rohstoffe, Gebäude machen stärker
-  (Trainingsplatz, Schmiede, Zauberküche, Taverne, Arena). Noch nicht gebaut.
+  (Trainingsplatz, Schmiede, Zauberküche, Taverne, Arena). ← erste Fassung gebaut, mit Platzhalter-Bild
 - Gegner: Computer und **online gegen Freunde** (wie Worm Attack, Gastgeber rechnet). Noch nicht gebaut.
 - **Jeder Charakter hat eine Verwandlung als Spezialfähigkeit.**
 - **Hauptfigur: der Junge aus Anigosha**, das **Mädchen aus Anigosha** als zweiter Charakter. Beide gehören dem
@@ -41,8 +41,8 @@ Vorgeschichte und verworfene Wege stehen in `UEBERGABE.md`. Figuren-Prompts: `FI
 | `UEBERGABE.md` | Stand, Entscheidungen, nächste Schritte |
 | `modelle/` | Platzhalter-Kämpfer (Quaternius, CC0) mit Animationen steh, lauf, schlag1, schlag2, treffer, tod, rolle |
 | `werkzeug/baue-figuren.mjs` | Macht aus den FBX-Vorlagen die GLB-Dateien (vorher `fbx2gltf`) |
-| `tests/sim.test.js` | Kampfregeln ohne Browser: Wiederholbarkeit, Bot-Stufen, Figuren-Balance, Duell, Wellen |
-| `tests/arena.test.js` | Simuliertes Handy: Menü, Bedienung, Treffer, Ausweichen, Spezial, ganze Kämpfe, Bilder |
+| `tests/sim.test.js` | Kampfregeln ohne Browser: Wiederholbarkeit, Bot-Stufen, Figuren-Balance, Duell, Wellen, Dorf-Wirtschaft, Missions-Schwierigkeit |
+| `tests/arena.test.js` | Simuliertes Handy: Dorf, Bauen, Missionen mit Belohnung und Freischalten, Bedienung, ganze Kämpfe, Bilder |
 
 ## Kampfregeln (Konstanten `K` und `TYPEN` am Anfang des SIM-Blocks)
 - Arena-Radius 6 m. Fester Zeitschritt 1/60 s.
@@ -82,6 +82,14 @@ Junge gegen Rabenritter 45 %, Mädchen gegen Rabenritter 45 %, Junge gegen Mädc
 Bot der Stufe 7 schafft 48 %, einer der Stufe 2 fast nie. **Die Stufen liegen für Bots sehr weit auseinander; ob das
 für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zahlen vorher und nachher vergleichen.
 
+## Dorf und Missionen (im SIM-Block: `ROHSTOFFE`, `GEBAEUDE`, `MISSIONEN`, `bonusAus`, `lohnFür`)
+- Spielstand in `localStorage` `ar_dorf` (JSON: `roh`, `bau`, `geschafft`, `figuren`, `char`). `?neu` beginnt leer.
+- Gebäude je 3 Stufen: Trainingsplatz +8 Leben, Schmiede +6 % Schaden, Zauberküche +12 % Energie je Stufe.
+  Taverne und Arena haben `bald` (noch ohne Wirkung). Die Boni gehen als `bonus` über `Match` an den Spieler.
+- 10 Missionen der Reihe nach, Wiederholen = halbe Belohnung. Mission 2 (`figur: 'maedchen'`) schaltet das Mädchen frei.
+- Gemessen (`sim.test.js`): voller Ausbau macht aus 44 % Siegchance 94 % bei gleicher Stufe. Alle Missionen
+  einmal = 65 % der Baukosten. Sieg-Anteil eines Bots der Stufe 4 je Mission steht in der Test-Ausgabe.
+
 ## Aufbau von `index.html`
 | Baustein | Aufgabe |
 | --- | --- |
@@ -92,11 +100,12 @@ für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zah
 | `fx(e)` | Ereignisse ⇒ Funken, Schlagbogen, Schadenszahlen, Wackeln, Treffer-Stopp, Zeitlupe, Töne, Vibration |
 | `bewegeKamera` | hält Spieler und nächsten Gegner im Bild |
 | Bedienung | Steuerkreis links (zuletzt aufgesetzter Finger, Loslassen überall abgefangen), drei Knöpfe rechts |
-| `starte`, `zeigeErgebnis`, `zumMenü`, `zeichneMenü` | Ablauf; im Menü läuft ein Schaukampf |
-| `window.AR` | Für Tests: `info()`, `app`, `stand`, `starte()`, `Kampf`, `Bot`, `Match`, `K`, `TYPEN` |
+| `starte(opt, mission)`, `starteMission`, `zeigeErgebnis` | Kampf starten, Belohnung verbuchen |
+| `ladeDorf`, `zeichneDorf`, `zeigeBau`, `baue`, `zeigeMissionen`, `zeigeDorf`, `PLÄTZE`, `DEKO` | Dorf-Bild mit Bauplätzen (Lage in Prozent), Bau-Fenster, Missionsliste. Im Dorf ruht die 3D-Szene |
+| `window.AR` | Für Tests: `info()`, `app`, `stand`, `dorf`, `starte()`, `starteMission()`, `baue()`, `zeigeDorf()`, `Kampf`, `Bot`, `Match`, `K`, `TYPEN` |
 
 Schalter: `?start`, `?auto` (Computer spielt den Spieler), `?tempo=6`, `?modus=duell|wellen`, `?stufe=`,
-`?spielerStufe=`, `?seed=`, `?neu` (Stufe 1), `?ohne=modelle`.
+`?spielerStufe=`, `?seed=`, `?neu` (leeres Dorf), `?ohne=modelle`.
 
 ## Eigene Figuren einsetzen
 In `AUSSEHEN` Datei, Höhe und Farbton eintragen. Das Modell braucht die Animationen **Idle, Run, Schlag, Getroffen,

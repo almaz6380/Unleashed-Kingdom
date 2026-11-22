@@ -56,7 +56,13 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   (Verwandlung für 5 s bei voller Leiste), Zielhilfe, Schonfrist nach einer Schlagfolge.
 - **Charaktere:** Junge (Steinriese) und Mädchen (Sturm). Gegner: Rabenritter, Schergen, Hauptmann.
 - **Modi:** Duell (2 Siege) und Wellen (3 Angriffe mit einem Leben).
-- **Computer-Gegner** in zehn Stufen; nach jedem Duell-Sieg eine Stufe stärker (gespeichert).
+- **Computer-Gegner** in zehn Stufen (Stufe kommt jetzt aus der Mission).
+- **Dorf, erste Fassung (22.11.):** Startbild ist das Dorf mit fünf festen Bauplätzen und Rohstoff-Leiste
+  (Holz, Stein, Gold, Zutaten). Trainingsplatz (+8 Leben je Stufe), Schmiede (+6 % Schaden), Zauberküche
+  (Spezial-Leiste +12 % schneller), je drei Stufen. Taverne und Arena stehen da, sind als „bald“ markiert.
+- **Zehn Missionen** nacheinander (Duelle und Wellen, Stufe 1 bis 7), jede öffnet die nächste; Wiederholen gibt
+  die halbe Belohnung. Mission 2 ist das Duell gegen das Mädchen, danach ist sie wählbar. Stand wird gespeichert.
+  Alle Missionen einmal geschafft reichen für etwa 65 % des vollen Ausbaus.
 - **Wucht:** Funken, Schlagbogen, Schadenszahlen, Treffer-Stopp, Zeitlupe beim K. o., Töne, Vibration.
 - **Tests:** `tests/sim.test.js` (Regeln, Balance) und `tests/arena.test.js` (simuliertes Handy), beide grün.
 - **Gemessen**, Bot gegen Bot, je 200 Runden: Stufe 10 schlägt Stufe 1 in 100 %, Stufe 5 schlägt Stufe 1 in 99 %,
@@ -70,6 +76,7 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   eingeblendet. Noch nicht auf dem echten Handy bestätigt; nachfragen.
 
 ## 5. Was noch Platzhalter ist
+- **Dorf:** Wiese aus Farbverläufen, Gebäude als Emoji. Wird durch das gemalte Dorf-Bild ersetzt.
 - **Figuren:** einfache freie Figuren (Quaternius, gemeinfrei) statt Junge und Mädchen.
 - **Arena:** Boden, Steine und Feuerschein sind im Code gemalt, kein Schaukasten-Bild.
 - **Töne:** einfache Pieptöne aus dem Code.
@@ -90,8 +97,10 @@ Lässt sich eine GLB-Datei nicht im Chat schicken, kann er sie über die GitHub-
    leicht oder zu schwer? Ruckelt es? Danach an `K`, `TYPEN` und `Bot` nachstellen (Zahlen vorher und nachher
    vergleichen).
 2. **Eigene Figuren einsetzen**, sobald die GLB-Dateien da sind.
-3. **Dorf mit festen Bauplätzen**, Rohstoffe, zwei bis drei Gebäude.
-4. **Missionen mit Belohnungen** (Liste von Kämpfen mit Ziel und Lohn), Aufleveln.
+3. ~~Dorf mit festen Bauplätzen~~ und ~~Missionen mit Belohnungen~~: erste Fassung steht. Rückmeldung holen:
+   Machen Bauen und Missionen Spaß? Sind die Missionen zu schwer (Wellen sind für mittlere Bots hart, siehe
+   `sim.test.js`)? Danach Dorf-Bild einsetzen (Lage der Plätze in `PLÄTZE`), Taverne mit weiteren Figuren.
+4. **Aufleveln der Figur** (Erfahrung aus Missionen), eventuell Tagesaufgaben.
 5. **Wachstumsstufen** des Jungen, weitere Charaktere.
 6. **Online-Duell gegen Freunde.** Vorlage ist das fertige Spiel des Users `almaz6380/Worm-Attack` (PeerJS,
    Gastgeber rechnet, Gast bekommt Spielstände). Die Simulation hier ist dafür schon wiederholbar gebaut.

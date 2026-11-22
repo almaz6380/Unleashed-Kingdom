@@ -6,7 +6,7 @@ const a = html.indexOf('/* SIM-START */'), b = html.indexOf('/* SIM-END */');
 if (a < 0 || b < 0) { console.error('SIM-Marker fehlen'); process.exit(1); }
 const code = html.slice(a, b);
 for (const verboten of ['Math.random', 'Date', 'document', 'window']) if (new RegExp('\\b' + verboten.replace('.', '\\.') + '\\b').test(code)) { console.error('Im SIM-Block verboten: ' + verboten); process.exit(1); }
-const { K, TYPEN, WELLEN, Kampf, Bot, Match } = new Function(code + '; return { K, TYPEN, WELLEN, Kampf, Bot, Match };')();
+const { K, TYPEN, WELLEN, Kampf, Bot, Match, ROHSTOFFE, GEBAEUDE, MISSIONEN, bonusAus, lohnFür } = new Function(code + '; return { K, TYPEN, WELLEN, Kampf, Bot, Match, ROHSTOFFE, GEBAEUDE, MISSIONEN, bonusAus, lohnFür };')();
 let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗ ') + text); if (!bed) fehler++; };
 
 function duell(stufeA, stufeB, seed, typA = 'junge', typB = 'ritter') { // eine Runde Bot gegen Bot
@@ -49,6 +49,33 @@ let gewS = 0; for (let i = 0; i < M; i++) if (lauf({ modus: 'wellen', stufe: 3, 
 console.log(`  Wellen gegen Stufe 3: ein guter Spieler (Bot Stufe 7) schafft ${pz(gew / M)}, ein schwacher (Bot Stufe 2) ${pz(gewS / M)}`);
 ok(ende === M, 'jeder Wellen-Lauf endet');
 ok(gew / M > 0.4 && gewS < gew, 'Wellen sind für gute Spieler schaffbar und für schwache schwerer');
+
+console.log('Dorf und Missionen');
+const summe = liste => { const z = Object.fromEntries(ROHSTOFFE.map(r => [r, 0])); for (const l of liste) for (const r of ROHSTOFFE) z[r] += l[r] ?? 0; return z; };
+const zeig = z => ROHSTOFFE.map(r => `${r} ${z[r]}`).join(', ');
+const lohnAlle = summe(MISSIONEN.map((m, i) => lohnFür(i, false))), kostenAlle = summe(GEBAEUDE.flatMap(g => g.kosten));
+console.log(`  Belohnung aller Missionen beim ersten Mal: ${zeig(lohnAlle)}`);
+console.log(`  Alle Gebäude voll ausbauen kostet:         ${zeig(kostenAlle)}`);
+const anteil = Math.min(...ROHSTOFFE.filter(r => kostenAlle[r]).map(r => lohnAlle[r] / kostenAlle[r]));
+ok(anteil > 0.5 && anteil < 1, `erste Runde durch alle Missionen reicht für gut die Hälfte des Ausbaus (knappster Rohstoff ${pz(anteil)}), Rest durch Wiederholen`);
+const nachVier = summe(MISSIONEN.slice(0, 4).map((m, i) => lohnFür(i, false))), stufe1 = summe(GEBAEUDE.filter(g => g.kosten.length).map(g => g.kosten[0]));
+ok(ROHSTOFFE.every(r => nachVier[r] >= stufe1[r]), 'nach vier Missionen lassen sich alle drei Gebäude auf Stufe 1 bauen');
+ok(lohnFür(0, true).holz === Math.round(MISSIONEN[0].lohn.holz / 2), 'Wiederholen bringt die halbe Belohnung');
+ok(MISSIONEN.some(m => m.figur === 'maedchen') && MISSIONEN.findIndex(m => m.figur === 'maedchen') < 4, 'das Mädchen schließt sich in einer frühen Mission an');
+// Wirkung der Gebäude: gleich starke Bots, einer mit voll ausgebautem Dorf
+const voll = bonusAus({ training: 3, schmiede: 3, kueche: 3 }), keine = bonusAus({});
+function quote(opt, n) { let g = 0; for (let i = 0; i < n; i++) if (lauf({ ...opt, seed: 500 + i * 31 }).gewonnen) g++; return g / n; }
+const ohneB = quote({ modus: 'duell', gegner: 'ritter', stufe: 5, spielerStufe: 5, bonus: keine }, 80), mitB = quote({ modus: 'duell', gegner: 'ritter', stufe: 5, spielerStufe: 5, bonus: voll }, 80);
+console.log(`  Duell Stufe 5 gegen Stufe 5: ohne Gebäude ${pz(ohneB)}, mit voll ausgebautem Dorf ${pz(mitB)}`);
+ok(mitB > ohneB + 0.15, 'Gebäude machen spürbar stärker');
+// Schwierigkeit jeder Mission für einen mittleren Spieler (Bot Stufe 4), ohne und mit halb ausgebautem Dorf
+const halb = bonusAus({ training: 2, schmiede: 2, kueche: 1 }), MQ = 30, zeile = [];
+for (const [i, m] of MISSIONEN.entries()) { const o = { modus: m.modus, gegner: m.gegner ?? 'ritter', stufe: m.stufe, spielerStufe: 4 };
+  zeile.push({ i, ohne: quote({ ...o, bonus: keine }, MQ), mit: quote({ ...o, bonus: halb }, MQ) }); }
+console.log('  Mission: Sieg-Anteil Bot Stufe 4 ohne / mit halb ausgebautem Dorf');
+for (const z of zeile) console.log(`    ${String(z.i + 1).padStart(2)} ${MISSIONEN[z.i].name.padEnd(26)} ${pz(z.ohne).padStart(5)} / ${pz(z.mit).padStart(5)}`);
+ok(zeile[0].ohne > 0.6, 'die erste Mission ist ohne Gebäude gut schaffbar');
+ok(zeile[9].ohne < zeile[0].ohne && zeile[9].mit > zeile[9].ohne, 'die letzte Mission ist schwerer, Gebäude helfen dort');
 
 console.log(fehler ? `\n${fehler} Prüfung(en) fehlgeschlagen` : '\nAlles grün');
 process.exit(fehler ? 1 : 0);
