@@ -14,3 +14,4 @@ Namen (klein, mit Bindestrich):
 
 Schon da:
 - `knappe-niedlich-mit-umhang.webp`: erstes Knappen-Bild (23.11.), Stil-Vorlage für alle weiteren Figuren
+- `knappe-niedlich.webp`: Fassung A ohne Umhang (23.11.), für Tripo freigegeben
