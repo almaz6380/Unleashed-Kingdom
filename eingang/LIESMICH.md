@@ -17,3 +17,5 @@ Schon da:
 - `knappe-niedlich.webp`: Fassung A ohne Umhang (23.11.), für Tripo freigegeben
 - `knappe-niedlich.fbx`: Fassung A aus Tripo nach Retopo (Quad, 10.000), etwa 18.600 Dreiecke, **noch ohne Skelett**.
   Kam per Google-Drive-Link (der Chat nimmt keine 3D-Dateien, GitHub-Upload nur bis 25 MB).
+- `knappe-gross.glb`: Tripo-Export ohne Retopo (23.11.), 16 MB, 1,88 Mio. Dreiecke, Meshopt-gepackt, ohne Skelett.
+  Wirkt schlanker als `knappe-niedlich` (vielleicht Fassung B, beim User nachfragen). Unverändert auch in `modelle/`.

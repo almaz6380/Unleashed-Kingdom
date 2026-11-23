@@ -29,6 +29,7 @@
   #mitte { text-align: center; min-width: 64px; }
   #uhr { font-size: 22px; font-weight: 800; text-shadow: 0 2px 6px #000; line-height: 1; }
   #punkte { font-size: 13px; letter-spacing: 3px; margin-top: 3px; text-shadow: 0 1px 4px #000; }
+  #messung { font-size: 11px; font-weight: 700; margin-top: 4px; color: #b8f0a0; text-shadow: 0 1px 3px #000; white-space: nowrap; }
   #banner { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font-size: 44px; font-weight: 900; letter-spacing: .02em;
     text-shadow: 0 4px 18px rgba(0,0,0,.8), 0 0 30px rgba(255,190,90,.6); opacity: 0; transform: scale(.7); transition: opacity .2s, transform .25s; pointer-events: none; }
   #banner.an { opacity: 1; transform: scale(1); }
@@ -110,7 +111,7 @@
 <div id="rand"></div>
 <div id="anzeige">
   <div id="links"><div class="name" id="nameIch"></div><div class="leiste"><i id="lebenIch"></i></div><div class="kraft" id="kraftIch"><i></i></div></div>
-  <div id="mitte"><div id="uhr"></div><div id="punkte"></div></div>
+  <div id="mitte"><div id="uhr"></div><div id="punkte"></div><div id="messung"></div></div>
   <div id="rechts"><div class="name" id="nameGegner"></div><div class="leiste gegner"><i id="lebenGegner"></i></div><div class="kraft" id="kraftGegner"><i></i></div></div>
 </div>
 <div id="banner"></div>
@@ -152,6 +153,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as kloneSkelett } from 'three/addons/utils/SkeletonUtils.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 /* =====================================================================
    Arena: Echtzeit-Kampf von schräg oben, gegen den Computer.
@@ -371,7 +373,7 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2a1c12); scene.fog = new THREE.Fog(0x3a2616, 22, 46);
 const camera = new THREE.PerspectiveCamera(46, 1, 0.5, 120);
-const loader = new GLTFLoader(), fehlend = [];
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder), fehlend = [];   // Tripo packt große Modelle mit Meshopt
 
 // Speicher (Präfix ar_), läuft auch ohne
 const speicher = { lies: (k, d) => { try { const v = localStorage.getItem('ar_' + k); return v === null ? d : v; } catch (e) { return d; } }, schreib: (k, v) => { try { localStorage.setItem('ar_' + k, v); } catch (e) {} } };
@@ -427,7 +429,9 @@ const AUSSEHEN = {
 };
 // Eigene Figuren des Users (Tripo). dreh = Drehung um die Hochachse, damit die Figur nach vorn (+z) schaut;
 // hell = Helligkeit der Farbe (Platzhalter brauchen 1,45). Noch ohne Skelett, deshalb nur über ?figur=knappe.
-const EIGENE = { knappe: { datei: 'modelle/knappe.glb', höhe: 1.6, ton: 0xffffff, dreh: -Math.PI / 2, hell: 1.15 } };
+// knappe-gross: unverkleinerter Tripo-Export (16 MB, 1,9 Mio. Dreiecke), nur zum Vergleich auf dem Handy
+const EIGENE = { knappe: { datei: 'modelle/knappe.glb', höhe: 1.6, ton: 0xffffff, dreh: -Math.PI / 2, hell: 1.15 },
+  'knappe-gross': { datei: 'modelle/knappe-gross.glb', höhe: 1.6, ton: 0xffffff, dreh: -Math.PI / 2, hell: 1.15 } };
 if (EIGENE[Q.get('figur')]) AUSSEHEN.junge = EIGENE[Q.get('figur')];
 const NAMEN = { steh: /^steh$|idle/i, lauf: /^lauf$|run/i, schlag1: /^schlag1$|attack(?!2)|punch|slash/i, schlag2: /^schlag2$|attack2|kick/i, treffer: /^treffer$|hit/i, tod: /^tod$|death|die|knock/i, rolle: /^rolle$|roll|dodge/i };
 const vorlagen = {};
@@ -694,8 +698,13 @@ $('nochmal').addEventListener('click', () => starte(app.letzte.opt, app.letzte.m
 const uhr = new THREE.Clock();
 function passeAn() { renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.fov = innerHeight > innerWidth ? 40 : 46; camera.updateProjectionMatrix(); }
 window.addEventListener('resize', passeAn);
+// Mess-Anzeige für Figuren-Tests (?figur=): Ladezeit und Bilder pro Sekunde
+const messung = { an: Q.has('figur'), laden: 0, bilder: 0, seit: performance.now(), bps: 0 };
+function messe() { if (!messung.an) return; messung.bilder++; const jetzt = performance.now();
+  if (jetzt - messung.seit >= 1000) { messung.bps = Math.round(messung.bilder * 1000 / (jetzt - messung.seit)); messung.bilder = 0; messung.seit = jetzt;
+    $('messung').textContent = `Laden ${(messung.laden / 1000).toFixed(1)} s · ${messung.bps} Bilder/s`; } }
 function bild() {
-  requestAnimationFrame(bild); const echt = Math.min(0.05, uhr.getDelta()); zeit += echt; if (app.imDorf) return;   // Dorf ist reines Bild, Kampfszene ruht
+  requestAnimationFrame(bild); messe(); const echt = Math.min(0.05, uhr.getDelta()); zeit += echt; if (app.imDorf) return;   // Dorf ist reines Bild, Kampfszene ruht
   let dt = echt; if (zeitlupe > 0) { zeitlupe -= echt; dt *= 0.3; } if (stopp > 0) { stopp -= echt; dt = 0; }      // Treffer-Stopp und Zeitlupe sind nur Darstellung
   const m = app.match;
   if (m && m.phase !== 'over') { app.rest += dt * app.tempo; let n = 0;
@@ -710,9 +719,9 @@ async function init() {
   passeAn(); baueArena(); zeichneDorf(); await ladeVorlagen();
   bewegeKamera(0, true); renderer.compile(scene, camera); requestAnimationFrame(bild);
   $('meldung').textContent = fehlend.length ? 'Figuren nicht geladen, es geht mit Ersatzfiguren weiter.' : 'Die Figuren sind Platzhalter, bis deine eigenen da sind.'; $('zuMissionen').disabled = false;
-  AR.bereit = true; if (Q.has('start')) starte({ ...(Q.get('modus') ? { modus: Q.get('modus') } : {}), ...(Q.get('stufe') ? { stufe: +Q.get('stufe') } : {}), ...(Q.get('seed') ? { seed: +Q.get('seed') } : {}), ...(Q.get('spielerStufe') ? { spielerStufe: +Q.get('spielerStufe') } : {}) });
+  messung.laden = performance.now(); AR.bereit = true; if (Q.has('start')) starte({ ...(Q.get('modus') ? { modus: Q.get('modus') } : {}), ...(Q.get('stufe') ? { stufe: +Q.get('stufe') } : {}), ...(Q.get('seed') ? { seed: +Q.get('seed') } : {}), ...(Q.get('spielerStufe') ? { spielerStufe: +Q.get('spielerStufe') } : {}) });
 }
-const AR = window.AR = { bereit: false, K, TYPEN, WELLEN, Kampf, Bot, Match, app, stand, eingabe, fehlend, starte, zeigeDorf, dorf, GEBAEUDE, MISSIONEN, baue, starteMission, zeigeMissionen,
+const AR = window.AR = { bereit: false, messung, K, TYPEN, WELLEN, Kampf, Bot, Match, app, stand, eingabe, fehlend, starte, zeigeDorf, dorf, GEBAEUDE, MISSIONEN, baue, starteMission, zeigeMissionen,
   info: () => { const m = app.match, k = m.kampf, ich = k.k[0], g = k.k.filter(f => f.team === 1);
     return { läuft: app.läuft, phase: m.phase, modus: m.opt.modus, punkte: [...m.punkte], welle: m.welle, gewonnen: m.gewonnen, zeit: k.zeit,
       ich: { x: ich.x, z: ich.z, leben: ich.leben, energie: ich.energie, zustand: ich.zustand, spezial: ich.spezial, kette: ich.kette }, gegner: g.map(f => ({ x: f.x, z: f.z, leben: f.leben, zustand: f.zustand })) }; } };

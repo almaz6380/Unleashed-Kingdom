@@ -107,7 +107,9 @@ für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zah
 | `window.AR` | Für Tests: `info()`, `app`, `stand`, `dorf`, `starte()`, `starteMission()`, `baue()`, `zeigeDorf()`, `Kampf`, `Bot`, `Match`, `K`, `TYPEN` |
 
 Schalter: `?start`, `?auto` (Computer spielt den Spieler), `?tempo=6`, `?modus=duell|wellen`, `?stufe=`,
-`?spielerStufe=`, `?seed=`, `?neu` (leeres Dorf), `?ohne=modelle`, `?figur=knappe` (Junge als Tripo-Knappe, Test).
+`?spielerStufe=`, `?seed=`, `?neu` (leeres Dorf), `?ohne=modelle`, `?figur=knappe` (Junge als Tripo-Knappe, Test), `?figur=knappe-gross` (unverkleinerter Export, 16 MB). Mit `?figur=`
+zeigt das Spiel unter der Uhr Ladezeit und Bilder pro Sekunde (`messung`). `GLTFLoader` hat `MeshoptDecoder`
+(`lib/jsm/libs/`), weil Tripo große Modelle damit packt.
 
 ## Eigene Figuren einsetzen
 **Weg vom Tripo-Export ins Spiel** (Knappe, 23.11.): Der User schickt einen Google-Drive-Link (Download über

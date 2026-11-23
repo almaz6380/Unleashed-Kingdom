@@ -96,6 +96,10 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
 - Der User wollte die große Fassung (1,9 Mio. Flächen) auch testen; sie war zu groß für Chat und GitHub-Upload.
   **Er entscheidet selbst**, nicht für ihn mitentscheiden (er hat sich darüber geärgert). Große Dateien: Link über
   Google Drive, Dropbox oder WeTransfer, alle drei sind von hier erreichbar.
+- Danach schickte er die große Fassung doch per Drive-Link: GLB, 16 MB (Tripo packt mit Meshopt), 1,88 Mio.
+  Dreiecke, ohne Skelett. Unverändert eingebaut als `?figur=knappe-gross`, damit er auf dem Handy vergleicht
+  (Anzeige: Ladezeit und Bilder/s). Im simulierten Browser ohne Grafikkarte: klein 5 Bilder/s, groß 1 Bild/s,
+  also etwa fünfmal langsamer; echte Handy-Werte fehlen noch. Sie wirkt schlanker, eventuell Fassung B: nachfragen.
 - Nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist
