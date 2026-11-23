@@ -100,6 +100,9 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   Dreiecke, ohne Skelett. Unverändert eingebaut als `?figur=knappe-gross`, damit er auf dem Handy vergleicht
   (Anzeige: Ladezeit und Bilder/s). Im simulierten Browser ohne Grafikkarte: klein 5 Bilder/s, groß 1 Bild/s,
   also etwa fünfmal langsamer; echte Handy-Werte fehlen noch. Sie wirkt schlanker, eventuell Fassung B: nachfragen.
+- **Ergebnis vom echten Handy (23.11.):** beide Fassungen gleich flüssig. Er nimmt auf Empfehlung die **kleine**
+  (kürzere Ladezeit übers Handynetz, mehrere Figuren gleichzeitig, Rig in Tripo zuverlässiger). Seine Kritik: Die
+  Figur „schwebt“ und ist starr, weil das Skelett fehlt. Ersatz-Bewegungen können keine Beine bewegen.
 - Nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist
