@@ -19,3 +19,6 @@ Schon da:
   Kam per Google-Drive-Link (der Chat nimmt keine 3D-Dateien, GitHub-Upload nur bis 25 MB).
 - `knappe-gross.glb`: Tripo-Export ohne Retopo (23.11.), 16 MB, 1,88 Mio. Dreiecke, Meshopt-gepackt, ohne Skelett.
   Wirkt schlanker als `knappe-niedlich` (vielleicht Fassung B, beim User nachfragen). Unverändert auch in `modelle/`.
+- `knappe-rig.fbx`: schlanke Fassung nach Retopo (9.500 Punkte) mit **Skelett** (Tripo-Rig, Humanoid, Mixamo-Knochen,
+  65 Knochen), ohne Bewegungen. **Die Farb-Textur fehlt in der FBX** (Tripo bettet sie nicht ein); sie wurde aus
+  dem Retopo-Export ohne Skelett übernommen (gleiche Figur, gleiche UV). Daraus entsteht `modelle/knappe.glb`.

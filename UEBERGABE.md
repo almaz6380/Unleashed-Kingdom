@@ -103,7 +103,11 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
 - **Ergebnis vom echten Handy (23.11.):** beide Fassungen gleich flüssig. Er nimmt auf Empfehlung die **kleine**
   (kürzere Ladezeit übers Handynetz, mehrere Figuren gleichzeitig, Rig in Tripo zuverlässiger). Seine Kritik: Die
   Figur „schwebt“ und ist starr, weil das Skelett fehlt. Ersatz-Bewegungen können keine Beine bewegen.
-- Nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
+- **Rig geschafft (23.11.):** schlanke Fassung, Retopo (Quad 10.000, 40 Credits) + Rig Humanoid/Mixamo (20 Credits).
+  Tripo bot ihm keine Bewegungen an. FBX hatte Skelett, aber keine Farb-Textur (aus dem Retopo-GLB übernommen).
+  Bewegungen jetzt selbst im Code (`knochenBewegung`). Test-Link `?figur=knappe`. Wenn er zufrieden ist: zum
+  normalen Jungen machen (`AUSSEHEN.junge`). Für schönere Bewegungen später mixamo.com (kostenloses Adobe-Konto).
+- Alter nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist
 - **Dorf:** Das gemalte Dorf-Bild des Users ist drin (`bilder/dorf.webp`, 23.11.). Die Gebäude sind noch Emoji auf

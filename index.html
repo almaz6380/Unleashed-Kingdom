@@ -430,7 +430,7 @@ const AUSSEHEN = {
 // Eigene Figuren des Users (Tripo). dreh = Drehung um die Hochachse, damit die Figur nach vorn (+z) schaut;
 // hell = Helligkeit der Farbe (Platzhalter brauchen 1,45). Noch ohne Skelett, deshalb nur über ?figur=knappe.
 // knappe-gross: unverkleinerter Tripo-Export (16 MB, 1,9 Mio. Dreiecke), nur zum Vergleich auf dem Handy
-const EIGENE = { knappe: { datei: 'modelle/knappe.glb', höhe: 1.6, ton: 0xffffff, dreh: -Math.PI / 2, hell: 1.15 },
+const EIGENE = { knappe: { datei: 'modelle/knappe.glb', höhe: 1.6, ton: 0xffffff, dreh: 0, hell: 1.15 },
   'knappe-gross': { datei: 'modelle/knappe-gross.glb', höhe: 1.6, ton: 0xffffff, dreh: -Math.PI / 2, hell: 1.15 } };
 if (EIGENE[Q.get('figur')]) AUSSEHEN.junge = EIGENE[Q.get('figur')];
 const NAMEN = { steh: /^steh$|idle/i, lauf: /^lauf$|run/i, schlag1: /^schlag1$|attack(?!2)|punch|slash/i, schlag2: /^schlag2$|attack2|kick/i, treffer: /^treffer$|hit/i, tod: /^tod$|death|die|knock/i, rolle: /^rolle$|roll|dodge/i };
@@ -444,12 +444,13 @@ function baueFigur(f) {
   const a = AUSSEHEN[f.typ], v = vorlagen[a.datei], grp = new THREE.Group(), fig = { grp, mixer: null, akt: {}, jetzt: null, mats: [], gross: 1, schlagNr: -1, zustand: '', a, blitz: 0 };
   // körper: Drehpunkt in Körpermitte, für Ersatz-Bewegungen bei Figuren ohne Skelett; grp dreht nur um die Hochachse
   const körper = new THREE.Group(), mitte = a.höhe * 0.5, innen = new THREE.Group(); körper.position.y = mitte; innen.position.y = -mitte; körper.add(innen); grp.add(körper);
-  fig.körper = körper; fig.mitte = mitte; fig.ohneAnim = !v || !v.clips.length; fig.phase = 0;
+  fig.körper = körper; fig.mitte = mitte; fig.ohneAnim = !v || !v.clips.length; fig.phase = 0; fig.knochen = null;
   if (v) { const m = kloneSkelett(v.szene); m.position.y = -v.y0; m.scale.setScalar(1); const halter = new THREE.Group(); halter.add(m); halter.scale.setScalar(a.höhe / v.h); halter.rotation.y = a.dreh ?? 0; innen.add(halter);
     m.traverse(o => { if (!o.isMesh) return; o.castShadow = true; o.frustumCulled = false; const alt = o.material, neu = new THREE.MeshLambertMaterial({ map: alt.map, color: a.ton });
       neu.color.multiplyScalar(a.hell ?? 1.45); neu.emissive = new THREE.Color(0xffffff); neu.emissiveMap = alt.map; neu.emissiveIntensity = 0.12; neu.userData.grund = neu.color.clone(); o.material = neu; fig.mats.push(neu); });
     fig.mixer = new THREE.AnimationMixer(m);
     for (const clip of v.clips) for (const [name, re] of Object.entries(NAMEN)) if (re.test(clip.name) && !fig.akt[name]) fig.akt[name] = fig.mixer.clipAction(clip);
+    if (!v.clips.length) fig.knochen = findeKnochen(m);
     if (fig.akt.schlag1) fig.akt.schlag3 = fig.mixer.clipAction(fig.akt.schlag1.getClip().clone()); // eigene Kopie: Schlag 3 blendet weich aus Schlag 1/2 über
   } else { // Ersatzfigur, falls das Modell fehlt
     const mat = new THREE.MeshLambertMaterial({ color: f.team === 0 ? 0xe2a048 : 0xa05868 }); mat.userData.grund = mat.color.clone(); fig.mats.push(mat);
@@ -489,21 +490,60 @@ function zeigeFigur(fig, f, dt, anteil) {
     else if (f.zustand === 'tot') spiele(fig, 'tod', true, 0.9); else spiele(fig, lauf ? 'lauf' : 'steh', false); }
   if (f.zustand === 'frei' && fig.jetzt === fig.akt.lauf) fig.jetzt.timeScale = t.tempo / 4.2 * (sturm ? 1.35 : 1) * klemme(stark, 0.55, 1);
   fig.zustand = f.zustand; fig.mixer?.update(dt);
-  if (fig.ohneAnim) ersatzBewegung(fig, f, dt, lauf ? klemme(stark, 0.4, 1) * t.tempo / 4.5 : 0);
+  if (fig.ohneAnim) { const l = lauf ? klemme(stark, 0.4, 1) * t.tempo / 4.5 : 0; ersatzBewegung(fig, f, dt, l); if (fig.knochen) knochenBewegung(fig, f, dt, l); }
 }
 // Einfache Bewegungen für Figuren ohne Skelett: wippen beim Laufen, neigen beim Schlag, Überschlag bei der Rolle,
 // zur Seite umfallen beim K. o. Positive Drehung um x neigt nach vorn (Figur schaut nach +z).
 function ersatzBewegung(fig, f, dt, lauf) {
   const k = fig.körper, glatt = 1 - Math.exp(-dt * 14); let rx = 0, rz = 0, y = fig.mitte, sy = 1;
   if (f.zustand === 'frei') { fig.phase += dt * (lauf ? 9 * (0.6 + 0.4 * lauf) : 2.2);
-    if (lauf) { rx = 0.14 * lauf; rz = Math.sin(fig.phase) * 0.07; y += Math.abs(Math.sin(fig.phase)) * 0.07; } else sy = 1 + Math.sin(fig.phase) * 0.012; }
-  else if (f.zustand === 'schlag') { const d = K.SCHLAG_ZEIT[f.kette]; rx = 0.42 * Math.sin(Math.PI * klemme(f.t / d, 0, 1)) * (f.kette === 2 ? 1.4 : 1); rz = (f.kette === 1 ? -1 : 1) * 0.12 * Math.sin(Math.PI * klemme(f.t / d, 0, 1)); }
-  else if (f.zustand === 'taumel') { rx = -0.38; }
+    const w = fig.knochen ? 0.4 : 1;                                         // mit Skelett bewegen sich Beine, der Körper wippt weniger
+    if (lauf) { rx = 0.14 * lauf * w; rz = Math.sin(fig.phase) * 0.07 * w; y += Math.abs(Math.sin(fig.phase)) * 0.07 * w; } else sy = 1 + Math.sin(fig.phase) * 0.012 * w; }
+  else if (f.zustand === 'schlag') { const d = K.SCHLAG_ZEIT[f.kette]; rx = (fig.knochen ? 0.12 : 0.42) * Math.sin(Math.PI * klemme(f.t / d, 0, 1)) * (f.kette === 2 ? 1.4 : 1); rz = (f.kette === 1 ? -1 : 1) * 0.12 * Math.sin(Math.PI * klemme(f.t / d, 0, 1)); }
+  else if (f.zustand === 'taumel') { rx = fig.knochen ? -0.12 : -0.38; }
   else if (f.zustand === 'rolle') { const p = 1 - klemme(f.t / K.ROLLE_ZEIT, 0, 1); k.rotation.x = p * Math.PI * 2; k.rotation.z = 0; k.position.y = fig.mitte * (1 - 0.35 * Math.sin(Math.PI * p)); k.scale.y = 1; return; }
   else if (f.zustand === 'tot') { rz = 1.5; y = 0.28; }
   if (k.rotation.x > Math.PI) k.rotation.x -= Math.PI * 2;                  // nach der Rolle nicht zurückdrehen
   k.rotation.x = lerp(k.rotation.x, rx, glatt); k.rotation.z = lerp(k.rotation.z, rz, f.zustand === 'tot' ? 1 - Math.exp(-dt * 6) : glatt);
   k.position.y = lerp(k.position.y, y, f.zustand === 'tot' ? 1 - Math.exp(-dt * 6) : glatt); k.scale.y = sy;
+}
+// ---------- Bewegungen über das Skelett (Mixamo-Knochen), für eigene Figuren ohne mitgelieferte Animationen ----------
+// Alle Drehungen sind im Raum der Figur gedacht: +z vorn, +y oben, +x links. Vor jedem Bild geht jeder Knochen in seine
+// Ruhelage zurück, dann wird gedreht (Eltern vor Kindern). Positiver Winkel um x schwingt ein hängendes Bein nach hinten.
+const KNOCHEN = ['Hips', 'Spine', 'Spine2', 'Neck', 'Head', 'LeftArm', 'LeftForeArm', 'RightArm', 'RightForeArm', 'LeftUpLeg', 'LeftLeg', 'RightUpLeg', 'RightLeg'];
+function findeKnochen(m) {
+  const k = {}; m.traverse(o => { if (!o.isBone) return; const n = o.name.replace(/^mixamorig:?/i, ''); if (KNOCHEN.includes(n)) k[n] = o; });
+  if (!k.LeftUpLeg || !k.RightUpLeg || !k.LeftArm || !k.RightArm) return null;
+  for (const b of Object.values(k)) b.userData.ruhe = b.quaternion.clone();
+  return { b: k, wurzel: m, pose: {} };
+}
+const _qa = new THREE.Quaternion(), _qb = new THREE.Quaternion(), _va = new THREE.Vector3(), X = new THREE.Vector3(1, 0, 0), Y = new THREE.Vector3(0, 1, 0), Z = new THREE.Vector3(0, 0, 1);
+function drehe(kn, name, achse, winkel) { const b = kn.b[name]; if (!b || !winkel) return;
+  b.parent.updateWorldMatrix(true, false); kn.wurzel.getWorldQuaternion(_qa).invert(); b.parent.getWorldQuaternion(_qb); _qa.multiply(_qb);   // Eltern im Raum der Figur
+  _va.copy(achse).applyQuaternion(_qa.invert()); b.quaternion.premultiply(_qb.setFromAxisAngle(_va, winkel)); b.updateWorldMatrix(false, false); }
+// Haltung als Zahlen; jede Bewegung setzt Ziele, die Haltung folgt weich
+function knochenBewegung(fig, f, dt, lauf) {
+  const kn = fig.knochen, z = { bl: 0, br: 0, kl: 0.06, kr: 0.06, al: 0, ar: 0, hl: 0.55, hr: 0.55, ul: 0.25, ur: 0.25, rx: 0, ry: 0, kx: 0 }, p = fig.phase;
+  if (f.zustand === 'frei' && lauf) { const a = 0.55 * lauf; z.bl = -a * Math.sin(p); z.br = a * Math.sin(p);
+    z.kl = 0.1 + 0.75 * lauf * Math.max(0, Math.sin(p + 1.3)); z.kr = 0.1 + 0.75 * lauf * Math.max(0, Math.sin(p + 1.3 + Math.PI));
+    z.al = 0.45 * lauf * Math.sin(p); z.ar = -0.45 * lauf * Math.sin(p); z.ul = z.ur = 0.5; z.hl = z.hr = 0.6; z.rx = 0.12 * lauf; z.ry = 0.12 * Math.sin(p) * lauf; }
+  else if (f.zustand === 'frei') { z.rx = 0.02 * Math.sin(p); z.hl = z.hr = 0.6 + 0.03 * Math.sin(p); }
+  else if (f.zustand === 'schlag') { const s = klemme(f.t / K.SCHLAG_ZEIT[f.kette], 0, 1);
+    const aus = s < 0.3 ? -0.35 * s / 0.3 : s < 0.5 ? lerp(-0.35, 1, (s - 0.3) / 0.2) : lerp(1, 0, (s - 0.5) / 0.5);   // ausholen, zustoßen, zurück
+    z.bl = -0.35; z.kl = 0.3; z.br = 0.25; z.kr = 0.2; z.rx = 0.15;
+    if (f.kette === 2) { const auf = s < 0.4 ? s / 0.4 : 1 - (s - 0.4) / 0.6; z.al = z.ar = -2.6 * auf - 0.9 * Math.max(0, aus); z.ul = z.ur = 0.2; z.rx = 0.35 * aus - 0.15 * auf; }
+    else if (f.kette === 0) { z.ar = -1.55 * Math.max(0, aus) + 0.4 * Math.min(0, aus); z.ur = 1.3 * (1 - Math.max(0, aus)); z.ry = 0.45 * aus; z.al = 0.2; z.ul = 1.2; }
+    else { z.al = -1.55 * Math.max(0, aus) + 0.4 * Math.min(0, aus); z.ul = 1.3 * (1 - Math.max(0, aus)); z.ry = -0.45 * aus; z.ar = 0.2; z.ur = 1.2; } }
+  else if (f.zustand === 'taumel') { z.rx = -0.45; z.kx = -0.4; z.al = z.ar = -0.6; z.hl = z.hr = 0.4; z.bl = 0.2; z.kl = 0.3; }
+  else if (f.zustand === 'rolle') { z.bl = z.br = -1.5; z.kl = z.kr = 2.0; z.rx = 0.7; z.kx = 0.4; z.al = z.ar = -0.9; z.ul = z.ur = 1.4; }
+  else if (f.zustand === 'tot') { z.al = -0.3; z.ar = 0.5; z.hl = z.hr = 0.3; z.kl = 0.5; z.bl = -0.3; z.kx = 0.5; }
+  const g = 1 - Math.exp(-dt * (f.zustand === 'schlag' ? 30 : 16)), h = kn.pose;
+  for (const key in z) h[key] = h[key] === undefined ? z[key] : lerp(h[key], z[key], g);
+  for (const b of Object.values(kn.b)) b.quaternion.copy(b.userData.ruhe);
+  drehe(kn, 'Spine', X, h.rx * 0.5); drehe(kn, 'Spine', Y, h.ry * 0.5); drehe(kn, 'Spine2', X, h.rx * 0.5); drehe(kn, 'Spine2', Y, h.ry * 0.5); drehe(kn, 'Head', X, h.kx);
+  drehe(kn, 'LeftArm', Z, -h.hl); drehe(kn, 'LeftArm', X, h.al); drehe(kn, 'LeftForeArm', X, -h.ul);       // linker Arm liegt bei +x: senken = −z
+  drehe(kn, 'RightArm', Z, h.hr); drehe(kn, 'RightArm', X, h.ar); drehe(kn, 'RightForeArm', X, -h.ur);
+  drehe(kn, 'LeftUpLeg', X, h.bl); drehe(kn, 'LeftLeg', X, h.kl); drehe(kn, 'RightUpLeg', X, h.br); drehe(kn, 'RightLeg', X, h.kr);
 }
 const _grau = new THREE.Color(0x9a9a92), _blau = new THREE.Color(0x7fd8ff), _weiss = new THREE.Color(0xffffff);
 

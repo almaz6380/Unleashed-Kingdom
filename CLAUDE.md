@@ -121,7 +121,12 @@ Ergebnis in `modelle/`. Der Knappe hat so 18.600 Dreiecke und 0,9 MB.
 Tripo-Modelle schauen nach +x: in `EIGENE` mit `dreh: -Math.PI / 2` nach vorn drehen. `hell` regelt die
 Helligkeit (Tripo-Texturen sind heller als die Platzhalter, 1,15 statt 1,45).
 Figuren **ohne Skelett** bekommen Ersatz-Bewegungen im Code (`ersatzBewegung`: wippen, neigen, Überschlag,
-umfallen). Eingebaut nur per Schalter `?figur=knappe`, bis die Fassung mit Skelett da ist.
+umfallen). Figuren **mit Mixamo-Skelett, aber ohne Animationen** (Tripo-Rig) bekommen zusätzlich `knochenBewegung`:
+Knochen werden über ihre Namen gefunden (`findeKnochen`, `KNOCHEN`), jedes Bild aus der Ruhelage im Raum der Figur
+gedreht (`drehe`: +z vorn, +y oben, +x links; positiver Winkel um x schwingt ein hängendes Bein nach hinten).
+Haltungen: Stehen, Laufen (Beine und Arme gegengleich), Schlag 1 rechts / 2 links / 3 über Kopf, Treffer, Rolle,
+K. o. Der Knappe mit Skelett (`modelle/knappe.glb`, 1,4 MB, schaut schon nach +z, `dreh: 0`) läuft so über
+`?figur=knappe`. Tripo-FBX mit Skelett enthält **keine Farb-Textur**: aus dem Retopo-Export derselben Figur nehmen.
 
 
 In `AUSSEHEN` Datei, Höhe und Farbton eintragen. Das Modell braucht die Animationen **Idle, Run, Schlag, Getroffen,
