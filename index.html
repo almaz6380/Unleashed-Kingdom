@@ -68,24 +68,25 @@
   #meldung { font-size: 12px; color: #ffcf9a; min-height: 1.2em; margin-top: 2px; text-shadow: 0 1px 3px #000; }
   #schalter button { background: none; border: 0; color: #f0dcc0; font: inherit; font-size: 13px; padding: 4px 10px; text-shadow: 0 1px 3px #000; }
   /* Dorf (Platzhalter-Bild aus Farbverläufen, später ein gemaltes Bild mit festen Bauplätzen) */
-  #dorf { position: fixed; inset: 0; display: none; overflow: hidden;
-    background: radial-gradient(ellipse 70% 55% at 50% 52%, #8fbb5a 0%, #6c9840 45%, #4a6e2c 75%, #2e4419 100%); }
+  /* Dorf: gemaltes Bild (bilder/dorf.webp, 687×1024) mit festen Bauplätzen; Lage der Plätze in PLÄTZE (Prozent des Bildes) */
+  #dorf { position: fixed; inset: 0; display: none; overflow: hidden; background: #3a2a1c; }
   #dorf.an { display: block; }
-  #dorf::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(160deg, rgba(255,190,110,.28), rgba(255,140,60,0) 45%, rgba(40,10,0,.35)); }
-  #land { position: absolute; left: 0; right: 0; top: calc(56px + env(safe-area-inset-top)); bottom: calc(118px + env(safe-area-inset-bottom)); }
-  #land svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .deko { position: absolute; transform: translate(-50%, -50%); font-size: 30px; pointer-events: none; filter: drop-shadow(0 4px 3px rgba(0,0,0,.35)); }
+  #dorf::before { content: ''; position: absolute; inset: -30px; background: url(bilder/dorf.webp) center / cover; filter: blur(16px) brightness(.5); }
+  #land { position: absolute; left: 0; right: 0; top: calc(54px + env(safe-area-inset-top)); bottom: calc(116px + env(safe-area-inset-bottom)); container-type: size; }
+  #dorfKarte { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(100cqw, 100cqh * 687 / 1024); aspect-ratio: 687 / 1024; container-type: inline-size; }
+  #dorfBild { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
   #roh { position: absolute; left: 8px; right: 8px; top: calc(10px + env(safe-area-inset-top)); display: flex; gap: 6px; justify-content: center; z-index: 2; }
   .rs { background: rgba(30,18,8,.78); border-radius: 999px; padding: 6px 10px; font-weight: 800; font-size: 14px; white-space: nowrap; box-shadow: inset 0 0 0 1.5px rgba(255,210,122,.3); }
-  .platz { position: absolute; transform: translate(-50%, -50%); width: 104px; border: 0; background: none; color: #fff; font: inherit; padding: 0; text-align: center; z-index: 1; }
-  .platz .sockel { width: 78px; height: 78px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 42px;
-    background: radial-gradient(circle at 50% 40%, #b48a5a, #7a5530); box-shadow: 0 6px 10px rgba(0,0,0,.35), inset 0 0 0 3px rgba(255,226,170,.85); }
-  .platz.leer .sockel { background: rgba(90,62,30,.35); box-shadow: none; border: 3px dashed rgba(255,236,200,.8); width: 72px; height: 72px; }
-  .platz.leer .sockel span, .platz.bald .sockel span { opacity: .5; filter: grayscale(.8); }
+  /* Platz-Mitte = Mitte des Sockels: Knopf beginnt am Punkt und wird um den halben Sockel nach oben geschoben */
+  .platz { position: absolute; transform: translate(-50%, -9cqw); width: 32cqw; border: 0; background: none; color: #fff; font: inherit; padding: 0; text-align: center; z-index: 1; }
+  .platz .sockel { width: 18cqw; height: 18cqw; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10cqw;
+    background: radial-gradient(circle at 50% 40%, #b48a5a, #7a5530); box-shadow: 0 6px 10px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,226,170,.85); }
+  .platz.leer .sockel { background: rgba(255,240,210,.12); box-shadow: inset 0 0 0 2px rgba(255,240,210,.55); }
+  .platz.leer .sockel span, .platz.bald .sockel span { opacity: .55; filter: grayscale(.7); }
   .platz.bald { opacity: .75; }
   .platz.kann .sockel { animation: winke 0.9s infinite alternate; }
   @keyframes winke { to { box-shadow: 0 0 18px 4px rgba(255,214,120,.95), inset 0 0 0 3px #fff3c4; } }
-  .platz .schild { display: inline-block; margin-top: 5px; padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 800; background: rgba(30,18,8,.82); }
+  .platz .schild { display: inline-block; margin-top: 2px; padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 800; background: rgba(30,18,8,.82); }
   .platz .sterne { display: block; font-size: 12px; color: #ffd27a; letter-spacing: 2px; text-shadow: 0 1px 3px #000; height: 15px; }
   #dorfUnten { position: absolute; left: 0; right: 0; bottom: calc(10px + env(safe-area-inset-bottom)); text-align: center; z-index: 2; }
   #dorfUnten .gross { padding: 15px 46px; font-size: 20px; }
@@ -123,12 +124,7 @@
 <div id="dorf" class="an">
   <div id="roh"></div>
   <div id="land">
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M50 104 C 46 86, 58 78, 50 64 S 34 46, 50 40 S 66 22, 50 -4" fill="none" stroke="#d8b77c" stroke-width="7" stroke-linecap="round" opacity=".85"/>
-      <path d="M50 52 C 38 50, 30 44, 22 34 M50 52 C 62 50, 70 42, 76 32 M50 66 C 40 66, 32 66, 24 68 M50 66 C 60 66, 68 66, 76 68" fill="none" stroke="#cfae74" stroke-width="3.2" stroke-linecap="round" opacity=".75"/>
-      <ellipse cx="50" cy="52" rx="9" ry="6" fill="#d8b77c" opacity=".9"/>
-    </svg>
-    <div id="plätze"></div>
+    <div id="dorfKarte"><img id="dorfBild" src="bilder/dorf.webp" alt="" draggable="false" onerror="this.style.display='none'"><div id="plätze"></div></div>
   </div>
   <div id="dorfUnten">
     <button class="gross" id="zuMissionen" disabled>⚔️ Missionen</button>
@@ -616,9 +612,9 @@ function zeigeErgebnis(gewonnen) {
 // ---------- Dorf ----------
 const ROH_BILD = { holz: '🪵', stein: '🪨', gold: '🪙', zutaten: '🌿' };
 // Feste Bauplätze: Lage in Prozent des Dorf-Bildes und Platzhalter-Bild. Später durch gemalte Bilder je Stufe ersetzen.
-const PLÄTZE = { training: { x: 24, y: 24, bild: '🎯' }, schmiede: { x: 76, y: 22, bild: '⚒️' }, kueche: { x: 20, y: 66, bild: '🧪' },
-  taverne: { x: 80, y: 66, bild: '🍲' }, arena: { x: 50, y: 88, bild: '🏟️' } };
-const DEKO = [['🌲', 6, 8], ['🌲', 92, 44], ['🌳', 8, 44], ['🌲', 38, 6], ['🌳', 62, 4], ['🔥', 50, 52], ['🌲', 94, 88], ['🌳', 6, 90], ['🪨', 34, 40], ['🌼', 64, 78], ['🌼', 36, 80]];
+// Gemessen an bilder/dorf.webp: Mitte der Steinkreise. Die Arena hat im Bild keinen Platz und steht unten auf dem Weg.
+const PLÄTZE = { training: { x: 30.3, y: 32.5, bild: '🎯' }, schmiede: { x: 68.1, y: 32.5, bild: '⚒️' }, kueche: { x: 26.6, y: 55, bild: '🧪' },
+  taverne: { x: 73.5, y: 55.5, bild: '🍲' }, arena: { x: 52, y: 82, bild: '🏟️' } };
 function ladeDorf() {
   const leer = () => ({ roh: { holz: 0, stein: 0, gold: 0, zutaten: 0 }, bau: {}, geschafft: [], figuren: ['junge'], char: 'junge' });
   let d = leer(); if (!Q.has('neu')) try { const g = JSON.parse(speicher.lies('dorf', 'null')); if (g) d = { ...d, ...g, roh: { ...d.roh, ...g.roh }, bau: { ...g.bau } }; } catch (e) {}
@@ -632,7 +628,7 @@ function baue(id) { const g = GEBAEUDE.find(x => x.id === id), s = dorf.bau[id],
   for (const r of ROHSTOFFE) dorf.roh[r] -= preis[r] ?? 0; dorf.bau[id]++; speichereDorf(); ton(392, 0.12, 'triangle', 0.08); setTimeout(() => ton(587, 0.25, 'triangle', 0.08), 120); vib(40); return true; }
 function zeichneDorf() {
   $('roh').innerHTML = ROHSTOFFE.map(r => `<div class="rs">${ROH_BILD[r]} ${dorf.roh[r]}</div>`).join('');
-  const p = $('plätze'); p.innerHTML = DEKO.map(([b, x, y]) => `<div class="deko" style="left:${x}%;top:${y}%">${b}</div>`).join('');
+  const p = $('plätze'); p.innerHTML = '';
   for (const g of GEBAEUDE) { const pl = PLÄTZE[g.id], s = dorf.bau[g.id], max = g.kosten.length, el = document.createElement('button');
     el.className = 'platz' + (g.bald ? ' bald' : s === 0 ? ' leer' : '') + (!g.bald && s < max && genug(g.kosten[s]) ? ' kann' : ''); el.dataset.bau = g.id;
     el.style.left = pl.x + '%'; el.style.top = pl.y + '%';
@@ -692,7 +688,7 @@ function bild() {
 async function init() {
   passeAn(); baueArena(); zeichneDorf(); await ladeVorlagen();
   bewegeKamera(0, true); renderer.compile(scene, camera); requestAnimationFrame(bild);
-  $('meldung').textContent = fehlend.length ? 'Figuren nicht geladen, es geht mit Ersatzfiguren weiter.' : 'Dorf und Figuren sind Platzhalter, bis deine Bilder da sind.'; $('zuMissionen').disabled = false;
+  $('meldung').textContent = fehlend.length ? 'Figuren nicht geladen, es geht mit Ersatzfiguren weiter.' : 'Die Figuren sind Platzhalter, bis deine eigenen da sind.'; $('zuMissionen').disabled = false;
   AR.bereit = true; if (Q.has('start')) starte({ ...(Q.get('modus') ? { modus: Q.get('modus') } : {}), ...(Q.get('stufe') ? { stufe: +Q.get('stufe') } : {}), ...(Q.get('seed') ? { seed: +Q.get('seed') } : {}), ...(Q.get('spielerStufe') ? { spielerStufe: +Q.get('spielerStufe') } : {}) });
 }
 const AR = window.AR = { bereit: false, K, TYPEN, WELLEN, Kampf, Bot, Match, app, stand, eingabe, fehlend, starte, zeigeDorf, dorf, GEBAEUDE, MISSIONEN, baue, starteMission, zeigeMissionen,

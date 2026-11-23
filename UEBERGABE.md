@@ -84,7 +84,9 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   eingeblendet. Noch nicht auf dem echten Handy bestätigt; nachfragen.
 
 ## 5. Was noch Platzhalter ist
-- **Dorf:** Wiese aus Farbverläufen, Gebäude als Emoji. Wird durch das gemalte Dorf-Bild ersetzt.
+- **Dorf:** Das gemalte Dorf-Bild des Users ist drin (`bilder/dorf.webp`, 23.11.). Die Gebäude sind noch Emoji auf
+  Holzschildern. Das Bild hat nur vier Bauplätze, die Arena steht deshalb unten auf dem Weg. Es ist nur 687 px breit
+  und auf scharfen Handy-Bildschirmen leicht weich: falls es eine größere Fassung gibt, gleich ersetzen.
 - **Figuren:** einfache freie Figuren (Quaternius, gemeinfrei) statt Junge und Mädchen.
 - **Arena:** Boden, Steine und Feuerschein sind im Code gemalt, kein Schaukasten-Bild.
 - **Töne:** einfache Pieptöne aus dem Code.

@@ -9,3 +9,6 @@
 
 Die Platzhalter werden durch die eigenen Figuren des Users ersetzt (Junge und Mädchen aus seiner App Anigosha).
 Arena-Boden, Steine, Feuerschein, Effekte und Töne entstehen im Code.
+
+## Bilder
+- `bilder/dorf.webp`: Dorf-Bild, vom User selbst mit einem Bild-Werkzeug erzeugt (23.11.2026). Gehört dem User.

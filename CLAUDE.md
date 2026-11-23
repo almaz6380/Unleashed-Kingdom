@@ -10,7 +10,7 @@ ohne Fachbegriffe. Immer ehrlich sagen, was nur simuliert geprüft ist.
 Ein **Kampf- und Aufbauspiel** in einem **Königreich mit Rittern und Drachen**, **Märchen-Stil** (seit 23.11.):
 - **Kämpfe in Echtzeit** in einer Arena, als Missionen (Duell oder Wellen). ← gebaut
 - **Eigenes Dorf mit festen Bauplätzen** als Zuhause; Missionen bringen Rohstoffe, Gebäude machen stärker
-  (Trainingsplatz, Schmiede, Zauberküche, Taverne, Arena). ← erste Fassung gebaut, mit Platzhalter-Bild
+  (Trainingsplatz, Schmiede, Zauberküche, Taverne, Arena). ← erste Fassung gebaut, mit gemaltem Dorf-Bild
 - Gegner: Computer und **online gegen Freunde** (wie Worm Attack, Gastgeber rechnet). Noch nicht gebaut.
 - **Jeder Charakter hat eine Verwandlung als Spezialfähigkeit.**
 - **Hauptfigur: der Junge aus Anigosha**, das **Mädchen aus Anigosha** als zweiter Charakter. Beide gehören dem
@@ -37,6 +37,7 @@ Vorgeschichte und verworfene Wege stehen in `UEBERGABE.md`. Figuren-Prompts: `FI
 | --- | --- |
 | `index.html` | Das ganze Spiel |
 | `lib/` | three.js r170 mit GLTFLoader und SkeletonUtils |
+| `bilder/dorf.webp` | Dorf-Bild des Users (687×1024). Lage der Bauplätze in `PLÄTZE` (Prozent des Bildes) |
 | `figuren/vorlagen/`, `FIGUREN.md` | Charakterblatt und Bilder der eigenen Figuren; Prompts (Märchen-Stil) für Helden, Gegner, Drache, Dorf- und Arena-Bild |
 | `manifest.webmanifest`, `icons/` | Web-App zum Ablegen auf dem Startbildschirm (noch ohne Offline-Betrieb) |
 | `UEBERGABE.md` | Stand, Entscheidungen, nächste Schritte |
@@ -102,7 +103,7 @@ für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zah
 | `bewegeKamera` | hält Spieler und nächsten Gegner im Bild |
 | Bedienung | Steuerkreis links (zuletzt aufgesetzter Finger, Loslassen überall abgefangen), drei Knöpfe rechts |
 | `starte(opt, mission)`, `starteMission`, `zeigeErgebnis` | Kampf starten, Belohnung verbuchen |
-| `ladeDorf`, `zeichneDorf`, `zeigeBau`, `baue`, `zeigeMissionen`, `zeigeDorf`, `PLÄTZE`, `DEKO` | Dorf-Bild mit Bauplätzen (Lage in Prozent), Bau-Fenster, Missionsliste. Im Dorf ruht die 3D-Szene |
+| `ladeDorf`, `zeichneDorf`, `zeigeBau`, `baue`, `zeigeMissionen`, `zeigeDorf`, `PLÄTZE` | Dorf-Bild mit Bauplätzen (Lage in Prozent des Bildes; `#dorfKarte` hält das Seitenverhältnis, Größen in `cqw`), Bau-Fenster, Missionsliste. Im Dorf ruht die 3D-Szene |
 | `window.AR` | Für Tests: `info()`, `app`, `stand`, `dorf`, `starte()`, `starteMission()`, `baue()`, `zeigeDorf()`, `Kampf`, `Bot`, `Match`, `K`, `TYPEN` |
 
 Schalter: `?start`, `?auto` (Computer spielt den Spieler), `?tempo=6`, `?modus=duell|wellen`, `?stufe=`,

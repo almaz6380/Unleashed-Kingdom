@@ -24,6 +24,7 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   ok(page.fehler.length === 0, 'keine Fehler beim Laden' + (page.fehler.length ? ': ' + page.fehler[0] : ''));
   ok((await page.evaluate(() => AR.fehlend.length)) === 0, 'alle Figuren geladen');
   ok(await page.isVisible('#dorf') && (await page.$$('.platz')).length === 5 && await page.isEnabled('#zuMissionen'), 'Dorf mit fünf Bauplätzen und Missionen-Knopf erscheint');
+  ok(await page.evaluate(() => { const b = document.getElementById('dorfBild'); return b.complete && b.naturalWidth > 0; }), 'Dorf-Bild geladen');
   await page.click('#zuMissionen');
   ok(await page.isVisible('#missionen') && await page.isEnabled('[data-mission="0"]') && !(await page.isEnabled('[data-mission="1"]')), 'Missionsliste: nur die erste ist offen');
   ok(!(await page.isEnabled('[data-char=maedchen]')), 'am Anfang gibt es nur den Jungen');
