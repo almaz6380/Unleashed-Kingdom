@@ -14,27 +14,34 @@ Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst
 - Kein Geld ausgeben, keine Schlüssel, nichts aus bestehenden Spielen, Filmen oder Serien kopieren.
 
 ## 2. Was das Spiel werden soll (vom User festgelegt)
-Ein **Kampf- und Aufbauspiel im Anime-Stil** fürs Handy, als Web-App:
+Ein **Kampf- und Aufbauspiel** fürs Handy, als Web-App, in einem **Königreich mit Rittern und Drachen** im
+**Märchen-Stil** (seit 23.11., siehe Punkt 9):
 1. **Kämpfe in Echtzeit** in einer Arena von schräg oben. Sie sind die Missionen: mal Duell eins gegen eins, mal
    Wellen von Gegnern. ← **gebaut**
 2. **Eigenes Dorf mit festen Bauplätzen** als Zuhause. Missionen bringen Rohstoffe (Holz, Stein, Gold, Zutaten).
    Gebäude wachsen in drei Stufen und machen stärker: Trainingsplatz (Aufleveln), Schmiede (Schaden), Zauberküche
-   (Spezial), Taverne (neue Charaktere), Arena (Online-Duelle). ← offen
+   (Spezial), Taverne (neue Charaktere), Arena (Online-Duelle). ← erste Fassung gebaut
 3. **Gegner:** Computer in zehn Stufen ← gebaut; **online gegen Freunde** ← offen.
 4. **Jeder Charakter hat eine Verwandlung als Spezialfähigkeit.** ← für zwei Charaktere gebaut
 5. **Hauptfigur: der Junge aus Anigosha**, das **Mädchen aus Anigosha** ist der zweite Charakter. Anigosha ist die
    eigene Anime-Quiz-App des Users (Repo `almaz6380/anigosha`), die Figuren gehören ihm. Vorlagen:
-   `figuren/vorlagen/`. Junge: dunkelgrüne Stachelfrisur, oranger Kapuzenpulli, schwarze Shorts. Mädchen: lila
-   Pferdeschwanz, olivgrüne Jacke.
+   `figuren/vorlagen/`. Junge: dunkelgrüne Stachelfrisur, Orange als Hauptfarbe. Mädchen: lila Pferdeschwanz,
+   Olivgrün. Seit 23.11. tragen beide Fantasy-Kleidung (Punkt 9).
 6. **Look:** Orte als Miniatur-Schaukasten (wie handgebaute Modell-Landschaften im Abendlicht), Figuren im
-   gezeichneten Anime-Stil.
-7. Später gewünscht: Der Junge **wächst in drei Stufen** (Pulli → Abenteurer → Magier), Tagesaufgaben, weitere
-   Charaktere (Prompts für 15 Nebenfiguren stehen in `FIGUREN.md`).
+   gezeichneten Märchen-Stil (weich, verspielt, wie ein Bilderbuch).
+7. Später gewünscht: Der Junge **wächst in drei Stufen** (**Knappe → Ritter → Drachenritter**), Tagesaufgaben,
+   weitere Charaktere über die Taverne.
 
 8. **Figurenwahl (entschieden 22.11.):** Alle starten **immer mit dem Jungen**. Das **Mädchen** kommt früh dazu:
    Sie tritt nach den ersten paar Missionen als Gegnerin auf und schließt sich nach dem Sieg an. **Weitere Figuren**
-   (aus `FIGUREN.md`) gibt es später über die **Taverne**. Umbauen erst zusammen mit Dorf und Missionen; bis dahin
-   bleibt die freie Wahl im Menü.
+   gibt es später über die **Taverne**. Umbauen erst zusammen mit Dorf und Missionen; bis dahin
+   bleibt die freie Wahl im Menü. ← mit dem Dorf umgesetzt (Mission 2)
+9. **Richtung (entschieden 23.11.):** Auf seine Frage „passen Anime-Figuren, oder eher Ritter und Drachen?“
+   wählte er die **Mischung**: Junge und Mädchen aus Anigosha bleiben die Helden, aber der Junge als
+   Knappe/Ritter, das Mädchen als **junge Sturm-Magierin**. Die Welt ist ein Königreich mit Rittern, Raben-Armee
+   und **Drachen als Endgegnern**. Stil: **Märchen-Fantasy**. Verwandlungen: Junge **Drachenpanzer** (im Code
+   weiter `stein`), Mädchen **Sturm**. Alle Prompts in `FIGUREN.md` sind darauf umgeschrieben. Eine
+   Drachen-Mission kommt, sobald ein Drachen-Modell da ist.
 
 ## 3. Der Weg hierher – bitte nicht erneut vorschlagen
 | Versuch | Ergebnis |
@@ -46,6 +53,7 @@ Ein **Kampf- und Aufbauspiel im Anime-Stil** fürs Handy, als Web-App:
 | Figuren als Miniatur- oder Sammelfiguren | verworfen, er will gezeichneten Anime-Stil |
 | Kampf Zug um Zug, Seitenansicht mit Kombos, Kampf der von selbst läuft | zur Wahl gestellt, er wählte **Echtzeit von schräg oben** |
 | Frei platzierbare Gebäude auf einem Raster | zur Wahl gestellt, er wählte **feste Bauplätze** |
+| Anigosha-Figuren in Alltagskleidung (Pulli), Anime-Look, Wachstum Pulli → Abenteurer → Magier | ersetzt durch Helden in Ritter-/Magier-Kleidung im Märchen-Stil (23.11.) |
 
 Die alten Prototypen liegen im privaten Repo `almaz6380/brainstorm`, Branch `claude/admiring-faraday-vea7ur`,
 Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `arena/`). Seit 22.11.2026 liegt es in der Wurzel des Repos
@@ -54,7 +62,7 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
 ## 4. Was fertig ist
 - **Kampf:** Laufen (Steuerkreis links), Angriff als Dreier-Folge, Ausweichrolle (unverwundbar), Spezial
   (Verwandlung für 5 s bei voller Leiste), Zielhilfe, Schonfrist nach einer Schlagfolge.
-- **Charaktere:** Junge (Steinriese) und Mädchen (Sturm). Gegner: Rabenritter, Schergen, Hauptmann.
+- **Charaktere:** Junge (Drachenpanzer) und Mädchen (Sturm). Gegner: Rabenritter, Schergen, Hauptmann.
 - **Modi:** Duell (2 Siege) und Wellen (3 Angriffe mit einem Leben).
 - **Computer-Gegner** in zehn Stufen (Stufe kommt jetzt aus der Mission).
 - **Dorf, erste Fassung (22.11.):** Startbild ist das Dorf mit fünf festen Bauplätzen und Rohstoff-Leiste

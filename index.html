@@ -178,12 +178,12 @@ const K = {
   SPEZIAL_DAUER: 5, E_AUSTEILEN: 12, E_EINSTECKEN: 9,
   SCHUTZ: 0.55,                     // nach dem dritten Schlag einer Folge ist der Getroffene kurz unverwundbar
   STEIN: 1.3, STURM: 1.4,           // Schaden-Faktor während der Verwandlung
-  STEIN_TEMPO: 0.8, STURM_TEMPO: 1.4, STURM_SCHLAG: 0.68, // der Steinriese ist langsam, der Sturm schnell
+  STEIN_TEMPO: 0.8, STURM_TEMPO: 1.4, STURM_SCHLAG: 0.68, // der Drachenpanzer ist langsam, der Sturm schnell
   RUNDE_ZEIT: 60, WELLE_ZEIT: 120, DREH: 16, ZIELHILFE: 3.2,
   ZAEHLEN: 2.4, PAUSE: 2.0, SIEGE: 2, HEILUNG: 25,
 };
 // Kämpfer-Werte. flink < 1 = schnellere Schläge. spezial (Verwandlung, in der man nicht taumelt):
-// 'stein' = größer, mehr Reichweite, langsam, kaum wegzustoßen; 'sturm' = schnell, trifft im Halbkreis
+// 'stein' (Drachenpanzer) = größer, mehr Reichweite, langsam, kaum wegzustoßen; 'sturm' = schnell, trifft im Halbkreis
 const TYPEN = {
   junge:    { name: 'Junge',    leben: 100, tempo: 4.5, schaden: [6, 6, 10],   reichweite: 1.5,  spezial: 'stein' },
   maedchen: { name: 'Mädchen',  leben: 92,  tempo: 5.0, schaden: [6, 6, 9],    reichweite: 1.5,  spezial: 'sturm', flink: 0.85 },
@@ -266,7 +266,7 @@ class Kampf {
       if (d > 0.5 && (dx * rx + dz * rz) / d < (sturm ? -0.2 : K.WINKEL)) continue;
       const schaden = Math.round(t.schaden[f.kette] * (stein ? K.STEIN : sturm ? K.STURM : 1) * f.sf);
       g.leben -= schaden; if (f.spezial <= 0) f.energie = Math.min(100, f.energie + K.E_AUSTEILEN * f.ef); if (g.spezial <= 0) g.energie = Math.min(100, g.energie + K.E_EINSTECKEN * g.ef);
-      // Wer verwandelt ist, taumelt nicht; nur der Steinriese lässt sich auch kaum wegstoßen
+      // Wer verwandelt ist, taumelt nicht; nur wer den Drachenpanzer trägt, lässt sich auch kaum wegstoßen
       const fest = g.spezial > 0, schwer = fest && TYPEN[g.typ].spezial === 'stein', nx = d > 1e-4 ? dx / d : rx, nz = d > 1e-4 ? dz / d : rz, stoss = K.RUECK[f.kette] * (stein ? 1.3 : 1) * (schwer ? 0.2 : 1);
       g.sx = nx * stoss; g.sz = nz * stoss;
       if (g.leben <= 0) { g.leben = 0; g.zustand = 'tot'; g.sx *= 1.4; g.sz *= 1.4; this.ereignisse.push({ art: 'ko', von: f.i, auf: g.i, x: g.x, z: g.z }); }
@@ -360,7 +360,7 @@ const MISSIONEN = [
   { name: 'Nachtwache', text: 'Halte das Dorftor die ganze Nacht.', modus: 'wellen', stufe: 3, lohn: { holz: 50, stein: 40, zutaten: 20 } },
   { name: 'Ritter der Raben', text: 'Ein erfahrener Ritter fordert dich heraus.', modus: 'duell', gegner: 'ritter', stufe: 5, lohn: { holz: 50, stein: 40, gold: 30 } },
   { name: 'Sturm auf das Lager', text: 'Die Schergen greifen mit aller Kraft an.', modus: 'wellen', stufe: 4, lohn: { holz: 60, stein: 50, gold: 25, zutaten: 25 } },
-  { name: 'Meister der Arena', text: 'Der stärkste Rabenritter. Danach bist du bereit für mehr.', modus: 'duell', gegner: 'ritter', stufe: 7, lohn: { holz: 60, stein: 50, gold: 50 } },
+  { name: 'Meister der Arena', text: 'Der stärkste Rabenritter. Danach wartet der Drache.', modus: 'duell', gegner: 'ritter', stufe: 7, lohn: { holz: 60, stein: 50, gold: 50 } },
 ];
 function lohnFür(i, schonGeschafft) { const l = {}; for (const [r, v] of Object.entries(MISSIONEN[i].lohn)) l[r] = schonGeschafft ? Math.round(v / 2) : v; return l; }
 /* SIM-END */
@@ -470,7 +470,7 @@ function zeigeFigur(fig, f, dt, anteil) {
   if (fig.r === undefined) fig.r = f.r; let dr = f.r - fig.r; dr = Math.atan2(Math.sin(dr), Math.cos(dr));
   fig.r += dr * (1 - Math.exp(-dt * 28)); fig.grp.rotation.y = fig.r;
   fig.gross = lerp(fig.gross, stein ? 1.32 : 1, 1 - Math.exp(-dt * 9)); fig.grp.scale.setScalar(fig.gross);
-  // Farbe: Treffer-Blitz, Steinriese grau, Sturm bläulich
+  // Farbe: Treffer-Blitz, Drachenpanzer grau, Sturm bläulich
   fig.blitz = Math.max(0, fig.blitz - dt * 6);
   for (const m of fig.mats) { m.color.copy(m.userData.grund); if (stein) m.color.lerp(_grau, 0.6).multiplyScalar(1.15); if (sturm) m.color.lerp(_blau, 0.45);
     if (fig.blitz > 0) m.color.lerp(_weiss, fig.blitz * 0.8).multiplyScalar(1 + fig.blitz * 2); if (m.emissive) m.emissiveIntensity = sturm ? 0.5 : 0.12; }
@@ -514,7 +514,7 @@ function fx(e) { // Ereignisse aus der Simulation ⇒ Bild, Ton, Vibration
     ton(e.stark ? 110 : 150, e.stark ? 0.2 : 0.12, 'sawtooth', e.stark ? 0.13 : 0.09, 40); if (ich) vib(e.stark ? 60 : 25); }
   else if (e.art === 'ko') { zeitlupe = 0.9; wackel = 0.45; funken(e.x, 1, e.z, 0xff9050, 22, 6); ton(90, 0.5, 'sawtooth', 0.14, 30); vib(e.auf === 0 ? [80, 40, 120] : 50); }
   else if (e.art === 'rolle') { funken(e.x, 0.2, e.z, 0xd8c8a8, 5, 1.5); ton(420, 0.1, 'sine', 0.04, 200); }
-  else if (e.art === 'spezial') { funken(e.x, 1, e.z, e.sorte === 'stein' ? 0xffc070 : 0x9fe8ff, 30, 6); wackel = 0.35; stopp = 0.12; ton(220, 0.5, 'square', 0.1, 880); if (e.von === 0) { vib([40, 30, 80]); banner(e.sorte === 'stein' ? 'Steinriese!' : 'Sturm!', '', 800); } }
+  else if (e.art === 'spezial') { funken(e.x, 1, e.z, e.sorte === 'stein' ? 0xffc070 : 0x9fe8ff, 30, 6); wackel = 0.35; stopp = 0.12; ton(220, 0.5, 'square', 0.1, 880); if (e.von === 0) { vib([40, 30, 80]); banner(e.sorte === 'stein' ? 'Drachenpanzer!' : 'Sturm!', '', 800); } }
   else if (e.art === 'los') { banner('Los!', '', 600); ton(660, 0.25, 'square', 0.08, 990); }
   else if (e.art === 'zeit') banner('Zeit um!', '', 1000);
   else if (e.art === 'rundeEnde') { const m = app.match; if (m.gewonnen === null) banner(m.opt.modus === 'wellen' ? `Welle ${m.welle} geschafft!` : e.sieger === 0 ? 'Runde gewonnen!' : e.sieger === 1 ? 'Runde verloren' : 'Unentschieden', '', 1500); }
@@ -654,7 +654,7 @@ function zeigeBau(id) {
 function zeigeMissionen() {
   const c = $('wahlChar'); c.innerHTML = '';
   for (const typ of ['junge', 'maedchen']) { const frei = dorf.figuren.includes(typ), b = document.createElement('button'); b.className = 'wahl' + (dorf.char === typ ? ' an' : ''); b.dataset.char = typ; b.disabled = !frei;
-    b.innerHTML = frei ? `${TYPEN[typ].name}<small>${TYPEN[typ].spezial === 'stein' ? 'wird zum Steinriesen' : 'entfesselt den Sturm'}</small>` : `🔒 ???<small>schließt sich später an</small>`;
+    b.innerHTML = frei ? `${TYPEN[typ].name}<small>${TYPEN[typ].spezial === 'stein' ? 'legt den Drachenpanzer an' : 'entfesselt den Sturm'}</small>` : `🔒 ???<small>schließt sich später an</small>`;
     b.addEventListener('click', () => { dorf.char = typ; speichereDorf(); zeigeMissionen(); }); c.appendChild(b); }
   const l = $('mListe'); l.innerHTML = ''; const offen = dorf.geschafft.length ? Math.max(...dorf.geschafft) + 1 : 0;
   MISSIONEN.forEach((m, i) => { const fertig = dorf.geschafft.includes(i), zu = i > offen, b = document.createElement('button');

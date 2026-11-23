@@ -7,14 +7,15 @@ Der User ist kein Programmierer, schreibt kurz auf Deutsch und arbeitet **nur am
 ohne Fachbegriffe. Immer ehrlich sagen, was nur simuliert geprüft ist.
 
 ## Wohin das Ganze soll (vom User am 22.11. festgelegt)
-Ein **Kampf- und Aufbauspiel** im Anime-Stil:
+Ein **Kampf- und Aufbauspiel** in einem **Königreich mit Rittern und Drachen**, **Märchen-Stil** (seit 23.11.):
 - **Kämpfe in Echtzeit** in einer Arena, als Missionen (Duell oder Wellen). ← gebaut
 - **Eigenes Dorf mit festen Bauplätzen** als Zuhause; Missionen bringen Rohstoffe, Gebäude machen stärker
   (Trainingsplatz, Schmiede, Zauberküche, Taverne, Arena). ← erste Fassung gebaut, mit Platzhalter-Bild
 - Gegner: Computer und **online gegen Freunde** (wie Worm Attack, Gastgeber rechnet). Noch nicht gebaut.
 - **Jeder Charakter hat eine Verwandlung als Spezialfähigkeit.**
 - **Hauptfigur: der Junge aus Anigosha**, das **Mädchen aus Anigosha** als zweiter Charakter. Beide gehören dem
-  User (Repo `almaz6380/anigosha`, Vorlagen in `figuren/vorlagen/`). Orte im Miniatur-Schaukasten-Look.
+  User (Repo `almaz6380/anigosha`, Vorlagen in `figuren/vorlagen/`), aber in Fantasy-Kleidung: Junge als Knappe →
+  Ritter → Drachenritter, Mädchen als Sturm-Magierin. Drachen als Endgegner. Orte im Miniatur-Schaukasten-Look.
 - **Start immer mit dem Jungen**; das Mädchen schließt sich nach einer frühen Mission an (besiegt als Gegnerin),
   weitere Figuren über die Taverne. Umbau zusammen mit Dorf/Missionen.
 - Reihenfolge: erst Kampf (fertig), dann Dorf, Missionen mit Belohnungen, Online.
@@ -36,7 +37,7 @@ Vorgeschichte und verworfene Wege stehen in `UEBERGABE.md`. Figuren-Prompts: `FI
 | --- | --- |
 | `index.html` | Das ganze Spiel |
 | `lib/` | three.js r170 mit GLTFLoader und SkeletonUtils |
-| `figuren/vorlagen/`, `FIGUREN.md` | Charakterblatt und Bilder der eigenen Figuren, Prompts für alle Figuren |
+| `figuren/vorlagen/`, `FIGUREN.md` | Charakterblatt und Bilder der eigenen Figuren; Prompts (Märchen-Stil) für Helden, Gegner, Drache, Dorf- und Arena-Bild |
 | `manifest.webmanifest`, `icons/` | Web-App zum Ablegen auf dem Startbildschirm (noch ohne Offline-Betrieb) |
 | `UEBERGABE.md` | Stand, Entscheidungen, nächste Schritte |
 | `modelle/` | Platzhalter-Kämpfer (Quaternius, CC0) mit Animationen steh, lauf, schlag1, schlag2, treffer, tod, rolle |
@@ -51,14 +52,14 @@ Vorgeschichte und verworfene Wege stehen in `UEBERGABE.md`. Figuren-Prompts: `FI
 - **Zielhilfe:** Ein Gegner näher als 2 m oder ungefähr in Schlagrichtung wird genau anvisiert.
 - **Ausweichen:** Rolle 0,36 s, unverwundbar, danach 0,85 s Pause. Nach dem eigenen Treffer bricht sie den Schlag ab.
 - **Spezial:** Energie +12 je ausgeteiltem, +9 je eingestecktem Treffer; bei 100 Verwandlung für 5 s. Verwandelte
-  taumeln nicht. Stein: Schaden ×1,3, Reichweite ×1,25, Tempo ×0,8, kaum wegzustoßen. Sturm: Schaden ×1,4,
+  taumeln nicht. Drachenpanzer (im Code `stein`): Schaden ×1,3, Reichweite ×1,25, Tempo ×0,8, kaum wegzustoßen. Sturm: Schaden ×1,4,
   Tempo ×1,4, Schläge schneller und im Halbkreis.
 - **Duell:** 2 Siege, 60 s je Runde (danach gewinnt, wer anteilig mehr Leben hat), höchstens 5 Runden.
 - **Wellen:** 2 Schergen, 3 Schergen, 1 Hauptmann; 120 s je Welle; zwischen den Wellen +25 Leben.
 
 | Typ | Leben | Tempo | Schaden | Reichweite | Spezial |
 | --- | --- | --- | --- | --- | --- |
-| Junge | 100 | 4,5 | 6/6/10 | 1,5 | Stein |
+| Junge | 100 | 4,5 | 6/6/10 | 1,5 | Drachenpanzer |
 | Mädchen | 92 | 5,0 | 6/6/9, Schläge 15 % schneller | 1,5 | Sturm |
 | Rabenritter (Duell-Gegner) | 100 | 4,3 | 6/6/10 | 1,55 | Stein |
 | Scherge | 30 | 3,7 | 4/4/6 | 1,35 | – |

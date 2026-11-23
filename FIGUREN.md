@@ -1,116 +1,98 @@
-# Figuren-Prompts für „Der Zauberlehrling“
+# Bild-Vorlagen (Prompts) – Königreich im Märchen-Stil
 
-**Hauptfigur ist der Junge aus Anigosha** (eigene Figur des Users), **das Mädchen aus Anigosha ist seine
-Begleiterin**. Vorlagen liegen in `figuren/vorlagen/`: `charakterblatt.jpg` (beide Figuren), `junge-ganz.jpg`,
-`maedchen-ganz.jpg`, `junge-freigestellt.png`. Bei jedem Prompt mit „reference“ das Charakterblatt mit hochladen.
-Danach das Bild in Tripo zu 3D machen (bewegliche Figuren mit Skelett und Idle, Walk, Run) und als GLB exportieren.
+Entschieden am 23.11.2026: Die Helden bleiben **der Junge und das Mädchen aus Anigosha** (eigene Figuren des
+Users), aber in Fantasy-Kleidung. Die Welt ist ein **Königreich mit Rittern und Drachen**, gezeichnet im
+**Märchen-Stil** (weich, verspielt, wie ein Bilderbuch). Die Anime-Fassungen im Alltagslook und die alten
+Affen-Nebenfiguren aus dem Prototyp „Zauberlehrling“ sind verworfen.
+
+## So gehst du vor
+1. Bild mit Gemini oder kie.ai erzeugen. Bei Junge und Mädchen **immer das Charakterblatt mit hochladen**
+   (`figuren/vorlagen/charakterblatt.jpg`), damit Gesicht und Frisur gleich bleiben.
+2. Figuren in **Tripo** zu 3D machen: Skelett dazu, Bewegungen **Stehen, Laufen, ein Schlag, Getroffen-werden,
+   Umfallen**, wenn möglich auch eine **Rolle**. Als GLB herunterladen.
+3. Datei über die GitHub-Seite in den Ordner `eingang/` hochladen oder im Chat schicken.
 
 Tipps:
-- Verschmilzt ein Gegenstand mit dem Körper (Stab, Hammer, Speer): das Bild ohne den Gegenstand neu erzeugen.
-- Werden die Haarstacheln in Tripo zu einem Klumpen: `only a few thick chunky hair spikes` anhängen.
-- Nebenfiguren ohne Vorlage: Charakterblatt trotzdem hochladen und `Same art style as this character sheet.` davorschreiben.
+- Verschmilzt ein Gegenstand mit dem Körper (Schwert, Stab), das Bild **ohne** den Gegenstand neu erzeugen.
+- Werden die Haarstacheln in Tripo zu einem Klumpen, `only a few thick chunky hair spikes` anhängen.
+- Für alle Figuren gilt derselbe Stil-Satz am Ende. So passt alles zusammen.
 
-## Hauptfigur und Begleiterin (in Tripo mit Skelett und Idle, Walk, Run)
+Stil-Satz für Figuren (steht unten in jedem Figuren-Prompt):
+`Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.`
 
-### 1. Held: der Junge (Stufe 1)
+## Der Held: der Junge (drei Wachstumsstufen)
+Erkennungszeichen in jeder Stufe: **dunkelgrüne Stachelfrisur** und **Orange** als Hauptfarbe.
+
+### Stufe 1: Knappe (zuerst erzeugen, er ist die Hauptfigur)
 ```
-The same boy character from this character sheet: spiky dark teal hair, orange hoodie with white drawstrings over a white shirt, black shorts, black wristbands, black and orange sneakers, friendly confident smile, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart. Same anime art style as the reference, clean line art, soft cel shading, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
-```
-
-### 2. Begleiterin: das Mädchen
-```
-The same girl character from this character sheet: long lavender hair in a high ponytail, olive green bomber jacket over a black top, black leggings, white sneakers, a thin choker, calm confident smile, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart. Same anime art style as the reference, clean line art, soft cel shading, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
-```
-
-## Wachstumsstufen des Helden (in Tripo mit Skelett und Idle, Walk, Run)
-
-Der Junge wächst im Lauf der Geschichte dauerhaft in drei Stufen. Frisur und Orange bleiben das Erkennungszeichen.
-
-### Stufe 2: Abenteurer
-```
-The same boy character from this character sheet, a little older and now an adventurer: the same spiky dark teal hair but slightly longer and wilder, his orange hoodie now worn under a short dark travel cloak with an orange lining, a leather belt with small potion bottles, fingerless gloves, sturdy boots, determined confident expression, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart. Same anime art style as the reference, clean line art, soft cel shading, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+The same boy character from this character sheet, now a young squire in a fairy-tale kingdom: spiky dark teal hair, friendly confident smile, an orange padded tunic with a simple dark brown leather vest, a short orange hooded cape, brown leather belt, simple leather bracers, dark trousers and sturdy brown boots. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-### Stufe 3: Magier
+### Stufe 2: Ritter
 ```
-The same boy character from this character sheet, grown into a young mage: the same spiky dark teal hair grown into a longer wild mane with softly glowing teal tips, a long open mage coat in dark grey with orange trim and glowing teal rune embroidery, the orange hood still visible at the collar, a belt with potion bottles, calm powerful expression, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart. Same anime art style as the reference, clean line art, soft cel shading, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
-```
-
-## Verwandlungen durch Tränke (in Tripo mit Skelett und Idle, Walk, Run)
-
-Es gibt sie je einmal; sie sehen in jeder Stufe gleich aus. Winzig, Glut und Schatten entstehen im Code.
-
-### Stein-Gestalt
-```
-The same boy character from this character sheet transformed by a magic potion into a living stone golem version of himself: body and clothes made of mossy grey rock with glowing orange cracks, broad shoulders and big fists, the same spiky hairstyle now formed from dark teal crystal shards, the hoodie shape still recognizable in stone, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart. Same anime art style as the reference, clean line art, soft cel shading, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+The same boy character from this character sheet, a little older and now a young knight: the same spiky dark teal hair, determined smile, light silver armor over an orange tunic, a breastplate with a small orange sun emblem, an orange cape, leather gloves, armored boots. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-### Feder-Gestalt
+### Stufe 3: Drachenritter
 ```
-The same boy character from this character sheet transformed by a magic potion into a bird-like version of himself: arms covered in soft teal and orange feathers, two small wings folded flat against the back, a fluffy feather collar around the orange hoodie, the same spiky dark teal hair with a few feathers in it, light bare bird-like feet, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart. Same anime art style as the reference, clean line art, soft cel shading, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
-```
-
-### Wasser-Gestalt
-```
-The same boy character from this character sheet transformed by a magic potion into an aquatic version of himself: smooth blue-teal skin, webbed hands and feet, small fins on the forearms and a fin along the back, the same spiky dark teal hair now sleek and wet, the orange hoodie replaced by an orange swim top, tiny water droplets, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart. Same anime art style as the reference, clean line art, soft cel shading, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+The same boy character from this character sheet, grown into a heroic dragon knight: the same spiky dark teal hair a bit longer and wilder, calm powerful expression, ornate armor in dark silver with orange dragon-scale plates, small dragon-wing shapes on the shoulder guards, a long orange cape with a dragon emblem. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-## Freunde und Helfer (in Tripo ohne Skelett, nur stehend)
-
-### 5. Meister: alter Orang-Utan-Zauberer
+### Verwandlung des Jungen: Drachenpanzer
 ```
-A single old orangutan wizard, long orange fur, kind wise face with a grey beard, wearing a tall crooked patched wizard hat and a worn star-patterned robe, holding a gnarled wooden staff upright in one hand, standing calmly. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+The same boy character from this character sheet transformed by magic into a heavy dragon-armored form: bulky glowing orange and deep red dragon-scale armor covering the whole body, broad shoulders, big armored gauntlets, small horns on the helmet, his spiky dark teal hair still visible under the helmet, glowing orange cracks between the scales. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-### 6. Händler: Wanderer mit Laterne
-Dein vorhandenes Bild ist im Miniatur-Stil. Für einen einheitlichen Look hiermit neu erzeugen.
+## Die Heldin: das Mädchen
+Erkennungszeichen: **lila hoher Pferdeschwanz**, **Olivgrün** als Hauptfarbe.
+
+### Junge Sturm-Magierin
 ```
-A single young human wanderer with a friendly smile, short green hooded cloak, patched brown clothes, a large leather satchel, holding a small brass lantern in one hand, standing with arms slightly away from the body. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+The same girl character from this character sheet, now a young storm mage in a fairy-tale kingdom: long lavender hair in a high ponytail, calm confident smile, an olive green hooded mage coat with silver lightning-shaped trim, a short light blue scarf, a brown belt with a small spell book pouch, dark leggings and soft brown boots. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-### 7. Gorilla-Schmied
+### Verwandlung des Mädchens: Sturmgestalt
 ```
-A single big gentle gorilla blacksmith, dark fur with a silver back, wearing a scorched leather apron and thick gloves, holding a heavy hammer resting on one shoulder, soot marks on the arms, standing firmly. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
-```
-
-### 8. Mandrill-Schamanin
-```
-A single female mandrill shaman, colorful blue and red face, wearing a headdress of feathers and beads, a woven shawl, holding a small hand drum in one hand, calm mysterious expression, standing upright. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+The same girl character from this character sheet transformed by storm magic: her lavender ponytail floating upward and glowing at the tips, the olive green mage coat turned into flowing light blue and white wind-like fabric, small sparks of lightning around her hands and boots, glowing light blue eyes. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-### 9. Gibbon-Bote
+## Gegner (in Tripo mit Skelett und den Kampfbewegungen)
+
+### Rabenritter (Duell-Gegner)
 ```
-A single slim gibbon messenger with very long arms, light golden fur, wearing a small blue courier cap and a messenger bag across the chest, holding a sealed letter in one hand, cheerful hurried expression, standing upright. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+A single knight in black armor decorated with raven feathers, a helmet shaped like a raven's head with a short beak visor, a tattered dark purple cape, a stern but not scary look. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-### 10. Pavian-Wächter
+### Raben-Scherge (kommt in Wellen)
 ```
-A single stern baboon guard, grey-brown fur, wearing a dented bronze helmet and a simple leather chest piece, holding a wooden spear upright in one hand, standing at attention. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
-```
-
-### 11. Faultier-Bibliothekar
-```
-A single sleepy sloth librarian, shaggy beige fur, round spectacles on the nose, wearing a knitted scarf, hugging a thick old book with both arms, gentle slow smile, standing upright. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+A single small clumsy henchman in a dented black helmet with a raven feather, a dark purple tunic over simple chainmail, a mischievous grin, short and stocky. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-## Gegenspieler (in Tripo ohne Skelett, nur stehend)
-
-### 12. Rabenkönig
+### Hauptmann (großer Gegner am Ende der Wellen)
 ```
-A single large raven king standing upright like a person, glossy black feathers, a small tarnished crown, a tattered dark cape, sharp clever eyes, wings folded at the sides, slightly menacing but not scary. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+A single big broad-shouldered captain of the raven army, heavy black and dark red armor, a horned helmet with raven feathers, a thick fur collar, a gruff face with a bushy beard. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-### 13. Elster-Diebin
+### Drache (späterer Endgegner)
+In Tripo mit Skelett. Bewegungen: Stehen, Laufen, Biss oder Prankenhieb, Getroffen-werden, Umfallen.
 ```
-A single mischievous magpie thief standing upright like a person, black and white feathers with a blue shimmer, a little cloth mask over the eyes, a small sack full of shiny trinkets over one shoulder, a silver spoon in the beak, cheeky expression, wings folded at the sides. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
-```
-
-### 14. Krähen-Wache
-```
-A single grumpy crow guard standing upright like a person, matte black feathers, a small round wooden shield strapped to one wing, a tiny iron cap on the head, wings folded at the sides, watchful expression. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+A single large dragon standing on four legs, dark slate blue scales with a glowing ember-orange belly, small folded wings, short curved horns, a long tail, a proud but not frightening face. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions, warm friendly colors, full body, side view slightly from the front, neutral standing pose with all four legs visible and the tail stretched out behind, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-### 15. Eule: abtrünnige Gelehrte
+## Orte (als Bild in voller Größe, kein 3D)
+
+### Dorf-Bild mit fünf leeren Bauplätzen
+Die Plätze müssen ungefähr dort liegen, wo sie im Spiel sitzen (Tabelle `PLÄTZE` in `index.html`). Danach setze
+ich die Gebäude-Bilder genau darauf.
 ```
-A single elegant owl scholar standing upright like a person, brown and cream feathers, large amber eyes, a dark purple scholar's cloak with a high collar, a rolled scroll tucked under one wing, proud and secretive expression. Anime character design, expressive anime eyes, clean line art, soft cel shading, bright warm colors, full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+A cozy fairy-tale village seen from above at a slight angle, like a hand-built miniature diorama in warm golden evening light, portrait format 2:3. A winding sandy dirt path runs from the bottom center to the top center. In the middle there is a small round village square with a campfire. Around it are five empty round building plots with flat packed earth and a ring of small stones, and nothing built on them: one at the upper left, one at the upper right, one at the lower left, one at the lower right, and one at the bottom center. Green meadows, small trees, flowers, a little stream, soft shadows. Storybook fairy-tale fantasy style, soft painterly shading, no people, no text.
 ```
+
+### Arena-Bild (runder Kampfplatz von oben)
+```
+A round fighting arena seen from directly above, like a hand-built miniature diorama in warm golden evening light, square format. A circular floor of worn sandstone tiles with a simple ring pattern, surrounded by a low wooden fence, a few standing stones and torches around the edge, grass and small flowers outside the ring. Storybook fairy-tale fantasy style, soft painterly shading, no people, no text.
+```
+
+### Gebäude für die Bauplätze (später, je drei Ausbaustufen)
+Erst wenn das Dorf-Bild steht. Dann schreibe ich je Gebäude drei Prompts (klein, mittel, groß) im selben Stil:
+Trainingsplatz, Schmiede, Zauberküche, Taverne, Arena.
