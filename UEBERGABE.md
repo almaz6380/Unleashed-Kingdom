@@ -107,6 +107,11 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   Tripo bot ihm keine Bewegungen an. FBX hatte Skelett, aber keine Farb-Textur (aus dem Retopo-GLB übernommen).
   Bewegungen jetzt selbst im Code (`knochenBewegung`). Test-Link `?figur=knappe`. Wenn er zufrieden ist: zum
   normalen Jungen machen (`AUSSEHEN.junge`). Für schönere Bewegungen später mixamo.com (kostenloses Adobe-Konto).
+- Rückmeldung: „schlägt nicht mit der Faust, Laufen nicht flüssig“. Er wählte **beides**: (A) ich verbessere selbst
+  (Faust, Kampfstellung, Laufen nach echter Strecke ohne Rutschen, gerade Schläge, Aufwärtshaken) – erledigt;
+  (B) er holt echte Bewegungen von mixamo.com (Anleitung im Chat: Fighting Idle, Running, Jab Cross/Punching,
+  Hook/Uppercut, Hit Reaction, Dying, Sprinting Forward Roll; FBX Binary, Without Skin, 30 fps, In Place; alles als
+  ZIP per Drive-Datei-Link). Dann Bewegungen in `modelle/knappe.glb` einfügen wie `werkzeug/baue-figuren.mjs`.
 - Alter nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist

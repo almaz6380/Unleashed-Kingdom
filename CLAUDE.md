@@ -124,8 +124,10 @@ Figuren **ohne Skelett** bekommen Ersatz-Bewegungen im Code (`ersatzBewegung`: w
 umfallen). Figuren **mit Mixamo-Skelett, aber ohne Animationen** (Tripo-Rig) bekommen zusätzlich `knochenBewegung`:
 Knochen werden über ihre Namen gefunden (`findeKnochen`, `KNOCHEN`), jedes Bild aus der Ruhelage im Raum der Figur
 gedreht (`drehe`: +z vorn, +y oben, +x links; positiver Winkel um x schwingt ein hängendes Bein nach hinten).
-Haltungen: Stehen, Laufen (Beine und Arme gegengleich), Schlag 1 rechts / 2 links / 3 über Kopf, Treffer, Rolle,
-K. o. Der Knappe mit Skelett (`modelle/knappe.glb`, 1,4 MB, schaut schon nach +z, `dreh: 0`) läuft so über
+Haltungen: Kampfstellung (Fäuste vor dem Kinn), Laufen (Schrittfolge aus der echten Strecke, `SCHRITT` 0,65 m, Knie
+beim Durchschwingen, Fuß rollt ab, Hüfte senkt und dreht sich), gerade Rechte / gerade Linke / Aufwärtshaken, Treffer,
+Rolle, K. o. Finger: Krümm-Achse je Glied in der Ruhelage berechnet (Spitze wandert zur Handfläche, Handfläche = Seite
+des Daumens), `faust` 0..1. Der Knappe mit Skelett (`modelle/knappe.glb`, 1,4 MB, schaut schon nach +z, `dreh: 0`) läuft so über
 `?figur=knappe`. Tripo-FBX mit Skelett enthält **keine Farb-Textur**: aus dem Retopo-Export derselben Figur nehmen.
 
 
