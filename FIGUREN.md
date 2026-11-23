@@ -20,6 +20,30 @@ Tipps:
 Stil-Satz für Figuren (steht unten in jedem Figuren-Prompt):
 `Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, slightly cute proportions with a large head, warm friendly colors, full body from head to feet, front view, standing upright in a neutral A-pose with both arms slightly away from the body, hands open and empty, legs slightly apart, plain light grey background, even lighting, no ground shadow, no text.`
 
+## Zwei Fassungen: niedlich und mit normalen Körpermaßen (Test seit 23.11.)
+Die Figuren sollen sich später vielleicht auch in anderen Spielen nutzen lassen, zum Beispiel in einem Ego-Shooter.
+Fertige Bewegungen (Zielen, Waffe halten, Ducken) passen nur zu normalen Körpermaßen, nicht zum großen
+Märchen-Kopf. Deshalb wird der Knappe testweise zweimal gebaut:
+- **Fassung A, niedlich:** für dieses Spiel, mit dem Stil-Satz oben.
+- **Fassung B, normale Maße:** für spätere Spiele, mit dem Stil-Satz B. Gleicher Malstil und gleiche Kleidung.
+- Immer **Bild und GLB aufheben**, im Ordner `eingang/` (Namen siehe `eingang/LIESMICH.md`).
+- Ob Tripo die zweite Fassung kostenlos baut, prüft der User. Kostet es Geld, bleibt es bei einer Fassung.
+
+Stil-Satz B (normale Maße):
+`Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, realistic teenage body proportions with the head only slightly larger than normal, normal-length arms and legs, warm friendly colors, full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.`
+
+### Knappe, Fassung A (niedlich, ohne Umhang)
+Mit dem ersten Knappen-Bild (`eingang/knappe-niedlich-mit-umhang.webp`) und dem Charakterblatt hochladen.
+```
+The same boy squire as in the first image, same face, same spiky dark teal hair, same storybook art style, but with teal-green eyes and WITHOUT the cape: orange padded tunic with stitched seams, dark brown leather vest, brown leather belt, leather bracers, dark grey trousers, brown boots, a short orange hood resting on his shoulders. Standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, fingers relaxed, legs slightly apart with a gap between them. Full body from head to feet, front view, plain light grey background, even lighting, no ground shadow, no text.
+```
+
+### Knappe, Fassung B (normale Maße)
+Mit dem ersten Knappen-Bild und dem Charakterblatt hochladen.
+```
+The same boy squire as in the first image, same face, same spiky dark teal hair, teal-green eyes, same clothes but WITHOUT the cape: orange padded tunic with stitched seams, dark brown leather vest, brown leather belt, leather bracers, dark grey trousers, brown boots, a short orange hood resting on his shoulders. Drawn as a slim teenager of about 15 with realistic body proportions: the head only slightly larger than normal, normal-length arms and legs. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, warm friendly colors, full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
+```
+
 ## Der Held: der Junge (drei Wachstumsstufen)
 Erkennungszeichen in jeder Stufe: **dunkelgrüne Stachelfrisur** und **Orange** als Hauptfarbe.
 

@@ -43,6 +43,12 @@ Ein **Kampf- und Aufbauspiel** fürs Handy, als Web-App, in einem **Königreich 
    weiter `stein`), Mädchen **Sturm**. Alle Prompts in `FIGUREN.md` sind darauf umgeschrieben. Eine
    Drachen-Mission kommt, sobald ein Drachen-Modell da ist.
 
+10. **Zwei Fassungen (Test, 23.11.):** Der User will die Figuren später vielleicht in einem Ego-Shooter nutzen.
+   Deshalb wird der Knappe zweimal gebaut: **niedlich** (großer Kopf, für dieses Spiel) und mit **normalen
+   Körpermaßen** (für spätere Spiele, fertige Bewegungen passen dann besser). Er glaubt, Tripo baut die zweite
+   Fassung kostenlos; das prüft er selbst. Alle Bilder und GLB-Dateien werden in `eingang/` aufgehoben. Beide
+   Fassungen in der Arena zeigen, dann entscheidet er, welche dieses Spiel bekommt.
+
 ## 3. Der Weg hierher – bitte nicht erneut vorschlagen
 | Versuch | Ergebnis |
 | --- | --- |
