@@ -15,3 +15,5 @@ Namen (klein, mit Bindestrich):
 Schon da:
 - `knappe-niedlich-mit-umhang.webp`: erstes Knappen-Bild (23.11.), Stil-Vorlage für alle weiteren Figuren
 - `knappe-niedlich.webp`: Fassung A ohne Umhang (23.11.), für Tripo freigegeben
+- `knappe-niedlich.fbx`: Fassung A aus Tripo nach Retopo (Quad, 10.000), etwa 18.600 Dreiecke, **noch ohne Skelett**.
+  Kam per Google-Drive-Link (der Chat nimmt keine 3D-Dateien, GitHub-Upload nur bis 25 MB).

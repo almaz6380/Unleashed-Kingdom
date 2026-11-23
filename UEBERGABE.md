@@ -89,6 +89,15 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   zwischen Stehen und Laufen, kein Rücksprung beim dritten Schlag, Bewegung zwischen den Rechenschritten
   eingeblendet. Noch nicht auf dem echten Handy bestätigt; nachfragen.
 
+### Knappe aus Tripo (23.11.)
+- Bild A ohne Umhang → Tripo → Retopo (Quad, 10.000) → als FBX per Google-Drive-Link geschickt. **Noch ohne
+  Skelett.** Umgewandelt nach `modelle/knappe.glb` (18.600 Dreiecke, 0,9 MB). Test-Link: `?figur=knappe`, dort
+  bewegt er sich mit einfachen Ersatz-Bewegungen (wippen, neigen, Überschlag, umfallen).
+- Der User wollte die große Fassung (1,9 Mio. Flächen) auch testen; sie war zu groß für Chat und GitHub-Upload.
+  **Er entscheidet selbst**, nicht für ihn mitentscheiden (er hat sich darüber geärgert). Große Dateien: Link über
+  Google Drive, Dropbox oder WeTransfer, alle drei sind von hier erreichbar.
+- Nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
+
 ## 5. Was noch Platzhalter ist
 - **Dorf:** Das gemalte Dorf-Bild des Users ist drin (`bilder/dorf.webp`, 23.11.). Die Gebäude sind noch Emoji auf
   Holzschildern. Das Bild hat nur vier Bauplätze, die Arena steht deshalb unten auf dem Weg. Es ist nur 687 px breit

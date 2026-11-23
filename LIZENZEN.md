@@ -12,3 +12,4 @@ Arena-Boden, Steine, Feuerschein, Effekte und Töne entstehen im Code.
 
 ## Bilder
 - `bilder/dorf.webp`: Dorf-Bild, vom User selbst mit einem Bild-Werkzeug erzeugt (23.11.2026). Gehört dem User.
+- `modelle/knappe.glb` (aus `eingang/knappe-niedlich.fbx`): Knappe, vom User aus seinem eigenen Bild mit Tripo erzeugt (23.11.2026). Gehört dem User.

@@ -107,9 +107,21 @@ für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zah
 | `window.AR` | Für Tests: `info()`, `app`, `stand`, `dorf`, `starte()`, `starteMission()`, `baue()`, `zeigeDorf()`, `Kampf`, `Bot`, `Match`, `K`, `TYPEN` |
 
 Schalter: `?start`, `?auto` (Computer spielt den Spieler), `?tempo=6`, `?modus=duell|wellen`, `?stufe=`,
-`?spielerStufe=`, `?seed=`, `?neu` (leeres Dorf), `?ohne=modelle`.
+`?spielerStufe=`, `?seed=`, `?neu` (leeres Dorf), `?ohne=modelle`, `?figur=knappe` (Junge als Tripo-Knappe, Test).
 
 ## Eigene Figuren einsetzen
+**Weg vom Tripo-Export ins Spiel** (Knappe, 23.11.): Der User schickt einen Google-Drive-Link (Download über
+`https://drive.usercontent.google.com/download?id=<ID>&export=download&confirm=t`). Original nach `eingang/`.
+Im Scratchpad `npm i fbx2gltf @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions sharp`,
+dann `node_modules/fbx2gltf/bin/Linux/FBX2glTF --binary --input <fbx> --output <name>`, danach nur die Farb-Textur
+behalten (Normal-/Rauheits-Karten weg, Licht ist Lambert), `dedup`, `prune`, `weld`, `textureCompress` WebP 1024.
+Ergebnis in `modelle/`. Der Knappe hat so 18.600 Dreiecke und 0,9 MB.
+Tripo-Modelle schauen nach +x: in `EIGENE` mit `dreh: -Math.PI / 2` nach vorn drehen. `hell` regelt die
+Helligkeit (Tripo-Texturen sind heller als die Platzhalter, 1,15 statt 1,45).
+Figuren **ohne Skelett** bekommen Ersatz-Bewegungen im Code (`ersatzBewegung`: wippen, neigen, Überschlag,
+umfallen). Eingebaut nur per Schalter `?figur=knappe`, bis die Fassung mit Skelett da ist.
+
+
 In `AUSSEHEN` Datei, Höhe und Farbton eintragen. Das Modell braucht die Animationen **Idle, Run, Schlag, Getroffen,
 Umfallen**, möglichst eine Rolle (deutsche oder englische Namen, siehe `NAMEN`). Fehlende Animationen: Die Figur
 bleibt dann in der letzten Haltung; für Tripo-Modelle ohne Kampfbewegungen einfache Bewegungen im Code ergänzen.

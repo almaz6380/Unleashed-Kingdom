@@ -425,6 +425,10 @@ const AUSSEHEN = {
   scherge:  { datei: 'modelle/schurkin.glb', höhe: 1.5,  ton: 0x8a6aa8 },
   boss:     { datei: 'modelle/krieger.glb',  höhe: 2.3,  ton: 0xc07070 },
 };
+// Eigene Figuren des Users (Tripo). dreh = Drehung um die Hochachse, damit die Figur nach vorn (+z) schaut;
+// hell = Helligkeit der Farbe (Platzhalter brauchen 1,45). Noch ohne Skelett, deshalb nur über ?figur=knappe.
+const EIGENE = { knappe: { datei: 'modelle/knappe.glb', höhe: 1.6, ton: 0xffffff, dreh: -Math.PI / 2, hell: 1.15 } };
+if (EIGENE[Q.get('figur')]) AUSSEHEN.junge = EIGENE[Q.get('figur')];
 const NAMEN = { steh: /^steh$|idle/i, lauf: /^lauf$|run/i, schlag1: /^schlag1$|attack(?!2)|punch|slash/i, schlag2: /^schlag2$|attack2|kick/i, treffer: /^treffer$|hit/i, tod: /^tod$|death|die|knock/i, rolle: /^rolle$|roll|dodge/i };
 const vorlagen = {};
 async function ladeVorlagen() {
@@ -434,9 +438,12 @@ async function ladeVorlagen() {
 }
 function baueFigur(f) {
   const a = AUSSEHEN[f.typ], v = vorlagen[a.datei], grp = new THREE.Group(), fig = { grp, mixer: null, akt: {}, jetzt: null, mats: [], gross: 1, schlagNr: -1, zustand: '', a, blitz: 0 };
-  if (v) { const m = kloneSkelett(v.szene); m.position.y = -v.y0; m.scale.setScalar(1); const halter = new THREE.Group(); halter.add(m); halter.scale.setScalar(a.höhe / v.h); grp.add(halter);
+  // körper: Drehpunkt in Körpermitte, für Ersatz-Bewegungen bei Figuren ohne Skelett; grp dreht nur um die Hochachse
+  const körper = new THREE.Group(), mitte = a.höhe * 0.5, innen = new THREE.Group(); körper.position.y = mitte; innen.position.y = -mitte; körper.add(innen); grp.add(körper);
+  fig.körper = körper; fig.mitte = mitte; fig.ohneAnim = !v || !v.clips.length; fig.phase = 0;
+  if (v) { const m = kloneSkelett(v.szene); m.position.y = -v.y0; m.scale.setScalar(1); const halter = new THREE.Group(); halter.add(m); halter.scale.setScalar(a.höhe / v.h); halter.rotation.y = a.dreh ?? 0; innen.add(halter);
     m.traverse(o => { if (!o.isMesh) return; o.castShadow = true; o.frustumCulled = false; const alt = o.material, neu = new THREE.MeshLambertMaterial({ map: alt.map, color: a.ton });
-      neu.color.multiplyScalar(1.45); neu.emissive = new THREE.Color(0xffffff); neu.emissiveMap = alt.map; neu.emissiveIntensity = 0.12; neu.userData.grund = neu.color.clone(); o.material = neu; fig.mats.push(neu); });
+      neu.color.multiplyScalar(a.hell ?? 1.45); neu.emissive = new THREE.Color(0xffffff); neu.emissiveMap = alt.map; neu.emissiveIntensity = 0.12; neu.userData.grund = neu.color.clone(); o.material = neu; fig.mats.push(neu); });
     fig.mixer = new THREE.AnimationMixer(m);
     for (const clip of v.clips) for (const [name, re] of Object.entries(NAMEN)) if (re.test(clip.name) && !fig.akt[name]) fig.akt[name] = fig.mixer.clipAction(clip);
     if (fig.akt.schlag1) fig.akt.schlag3 = fig.mixer.clipAction(fig.akt.schlag1.getClip().clone()); // eigene Kopie: Schlag 3 blendet weich aus Schlag 1/2 über
@@ -444,7 +451,7 @@ function baueFigur(f) {
     const mat = new THREE.MeshLambertMaterial({ color: f.team === 0 ? 0xe2a048 : 0xa05868 }); mat.userData.grund = mat.color.clone(); fig.mats.push(mat);
     const k = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, a.höhe - 1.0, 6, 12), mat); k.position.y = a.höhe / 2 - 0.1; k.castShadow = true;
     const kopf = new THREE.Mesh(new THREE.SphereGeometry(0.26, 14, 10), mat); kopf.position.y = a.höhe - 0.22; kopf.castShadow = true;
-    const nase = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.3), mat); nase.position.set(0, a.höhe - 0.25, 0.26); grp.add(k, kopf, nase); }
+    const nase = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.3), mat); nase.position.set(0, a.höhe - 0.25, 0.26); innen.add(k, kopf, nase); }
   // Ring am Boden: gold = du, rot = Gegner
   const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.62, 28).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: f.team === 0 ? 0xffd27a : 0xff5a4a, transparent: true, opacity: 0.85, depthWrite: false }));
   ring.position.y = 0.03; grp.add(ring); fig.ring = ring; scene.add(grp); return fig;
@@ -478,7 +485,21 @@ function zeigeFigur(fig, f, dt, anteil) {
     else if (f.zustand === 'tot') spiele(fig, 'tod', true, 0.9); else spiele(fig, lauf ? 'lauf' : 'steh', false); }
   if (f.zustand === 'frei' && fig.jetzt === fig.akt.lauf) fig.jetzt.timeScale = t.tempo / 4.2 * (sturm ? 1.35 : 1) * klemme(stark, 0.55, 1);
   fig.zustand = f.zustand; fig.mixer?.update(dt);
-  if (!fig.mixer) { fig.grp.rotation.x = f.zustand === 'tot' ? -1.5 : f.zustand === 'schlag' ? 0.25 : f.zustand === 'taumel' ? -0.3 : 0; fig.grp.position.y = f.zustand === 'tot' ? 0.3 : 0; }
+  if (fig.ohneAnim) ersatzBewegung(fig, f, dt, lauf ? klemme(stark, 0.4, 1) * t.tempo / 4.5 : 0);
+}
+// Einfache Bewegungen für Figuren ohne Skelett: wippen beim Laufen, neigen beim Schlag, Überschlag bei der Rolle,
+// zur Seite umfallen beim K. o. Positive Drehung um x neigt nach vorn (Figur schaut nach +z).
+function ersatzBewegung(fig, f, dt, lauf) {
+  const k = fig.körper, glatt = 1 - Math.exp(-dt * 14); let rx = 0, rz = 0, y = fig.mitte, sy = 1;
+  if (f.zustand === 'frei') { fig.phase += dt * (lauf ? 9 * (0.6 + 0.4 * lauf) : 2.2);
+    if (lauf) { rx = 0.14 * lauf; rz = Math.sin(fig.phase) * 0.07; y += Math.abs(Math.sin(fig.phase)) * 0.07; } else sy = 1 + Math.sin(fig.phase) * 0.012; }
+  else if (f.zustand === 'schlag') { const d = K.SCHLAG_ZEIT[f.kette]; rx = 0.42 * Math.sin(Math.PI * klemme(f.t / d, 0, 1)) * (f.kette === 2 ? 1.4 : 1); rz = (f.kette === 1 ? -1 : 1) * 0.12 * Math.sin(Math.PI * klemme(f.t / d, 0, 1)); }
+  else if (f.zustand === 'taumel') { rx = -0.38; }
+  else if (f.zustand === 'rolle') { const p = 1 - klemme(f.t / K.ROLLE_ZEIT, 0, 1); k.rotation.x = p * Math.PI * 2; k.rotation.z = 0; k.position.y = fig.mitte * (1 - 0.35 * Math.sin(Math.PI * p)); k.scale.y = 1; return; }
+  else if (f.zustand === 'tot') { rz = 1.5; y = 0.28; }
+  if (k.rotation.x > Math.PI) k.rotation.x -= Math.PI * 2;                  // nach der Rolle nicht zurückdrehen
+  k.rotation.x = lerp(k.rotation.x, rx, glatt); k.rotation.z = lerp(k.rotation.z, rz, f.zustand === 'tot' ? 1 - Math.exp(-dt * 6) : glatt);
+  k.position.y = lerp(k.position.y, y, f.zustand === 'tot' ? 1 - Math.exp(-dt * 6) : glatt); k.scale.y = sy;
 }
 const _grau = new THREE.Color(0x9a9a92), _blau = new THREE.Color(0x7fd8ff), _weiss = new THREE.Color(0xffffff);
 
