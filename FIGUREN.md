@@ -117,6 +117,12 @@ A cozy fairy-tale village seen from above at a slight angle, like a hand-built m
 A round fighting arena seen from directly above, like a hand-built miniature diorama in warm golden evening light, square format. A circular floor of worn sandstone tiles with a simple ring pattern, surrounded by a low wooden fence, a few standing stones and torches around the edge, grass and small flowers outside the ring. Storybook fairy-tale fantasy style, soft painterly shading, no people, no text.
 ```
 
+### Schwert des Knappen (optional, ersetzt das im Spiel gebaute)
+Ohne Skelett in Tripo, als GLB. Dann am Knochen `RightHand` statt der Grundformen anhängen.
+```
+A single fairy-tale knight sword lying flat, a straight glowing golden-white blade with soft orange light along the edges, a golden crossguard shaped like small dragon wings, a brown leather grip and a round golden pommel. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, warm friendly colors, the whole sword visible, plain light grey background, even lighting, no ground shadow, no text.
+```
+
 ### Gebäude für die Bauplätze (später, je drei Ausbaustufen)
 Erst wenn das Dorf-Bild steht. Dann schreibe ich je Gebäude drei Prompts (klein, mittel, groß) im selben Stil:
 Trainingsplatz, Schmiede, Zauberküche, Taverne, Arena.

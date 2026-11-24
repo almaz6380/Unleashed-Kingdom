@@ -53,14 +53,16 @@ Vorgeschichte und verworfene Wege stehen in `UEBERGABE.md`. Figuren-Prompts: `FI
 - **Zielhilfe:** Ein Gegner näher als 2 m oder ungefähr in Schlagrichtung wird genau anvisiert.
 - **Ausweichen:** Rolle 0,36 s, unverwundbar, danach 0,85 s Pause. Nach dem eigenen Treffer bricht sie den Schlag ab.
 - **Spezial:** Energie +12 je ausgeteiltem, +9 je eingestecktem Treffer; bei 100 Verwandlung für 5 s. Verwandelte
-  taumeln nicht. Drachenpanzer (im Code `stein`): Schaden ×1,3, Reichweite ×1,25, Tempo ×0,8, kaum wegzustoßen. Sturm: Schaden ×1,4,
+  taumeln nicht. Panzer (`stein`, Rabenritter/Hauptmann): Schaden ×1,3, Reichweite ×1,25, Tempo ×0,8, kaum wegzustoßen.
+  **Drachenpanzer mit Schwert** (`drache`, nur Junge, seit 24.11.): wie Panzer, dazu Reichweite ×1,5 (`K.DRACHE_WEIT`)
+  und Treffer im Halbkreis; `istPanzer()` gilt für beide. Sturm: Schaden ×1,4,
   Tempo ×1,4, Schläge schneller und im Halbkreis.
 - **Duell:** 2 Siege, 60 s je Runde (danach gewinnt, wer anteilig mehr Leben hat), höchstens 5 Runden.
 - **Wellen:** 2 Schergen, 3 Schergen, 1 Hauptmann; 120 s je Welle; zwischen den Wellen +25 Leben.
 
 | Typ | Leben | Tempo | Schaden | Reichweite | Spezial |
 | --- | --- | --- | --- | --- | --- |
-| Junge | 100 | 4,5 | 6/6/10 | 1,5 | Drachenpanzer |
+| Junge | 100 | 4,5 | 6/6/10 | 1,5 | Drachenpanzer mit Schwert |
 | Mädchen | 92 | 5,0 | 6/6/9, Schläge 15 % schneller | 1,5 | Sturm |
 | Rabenritter (Duell-Gegner) | 100 | 4,3 | 6/6/10 | 1,55 | Stein |
 | Scherge | 30 | 3,7 | 4/4/6 | 1,35 | – |
@@ -80,7 +82,7 @@ Schergen kämpfen zwei Stufen schwächer als eingestellt.
 
 **Gemessen** (`sim.test.js`, Bot gegen Bot, je 200 Runden): Stufe 10 schlägt Stufe 1 in 100 %, Stufe 5 schlägt
 Stufe 1 in 98 %, Stufe 10 schlägt Stufe 5 in 98 %; gleiche Stufe 56 %, Rundendauer etwa 16 s. Figuren auf Stufe 5:
-Junge gegen Rabenritter 45 %, Mädchen gegen Rabenritter 45 %, Junge gegen Mädchen 42 %. Wellen gegen Stufe 3: ein
+Junge gegen Rabenritter 45 %, Mädchen gegen Rabenritter 45 %, Junge gegen Mädchen 46 % (mit Schwert, vorher 42 %). Wellen gegen Stufe 3: ein
 Bot der Stufe 7 schafft 48 %, einer der Stufe 2 fast nie. **Die Stufen liegen für Bots sehr weit auseinander; ob das
 für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zahlen vorher und nachher vergleichen.
 
@@ -99,6 +101,7 @@ für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zah
 | `Bot` | `denke(kampf, i)` setzt Laufrichtung und Wünsche |
 | `Match` | Runden bzw. Wellen, Phasen `count → play → end → over`, `tick()` |
 | `AUSSEHEN`, `NAMEN`, `ladeVorlagen`, `baueFigur`, `zeigeFigur` | Modell je Typ, Animationen am Namen erkennen, Zustand → Animation. Flüssig: Position zwischen zwei Rechenschritten eingeblendet (`vx0/vz0`), Drehung folgt weich, Überblenden 0,06 s (Schläge) bis 0,18 s (Stehen/Laufen), Schlag 3 als eigene Kopie |
+| `baueSchwert`, `zeigeSchwert`, `SCHWERT` | Leuchtendes Schwert aus Grundformen am Knochen `RightHand` (Klinge von Pinky1 Richtung Index1), wächst bei der Verwandlung heraus; Hiebe = Kopien des rechten Schlags (`schwert1–3`) plus Armschwung im Code (`drehe` nach `mixer.update`) |
 | `fx(e)` | Ereignisse ⇒ Funken, Schlagbogen, Schadenszahlen, Wackeln, Treffer-Stopp, Zeitlupe, Töne, Vibration |
 | `bewegeKamera` | hält Spieler und nächsten Gegner im Bild |
 | Bedienung | Steuerkreis links (zuletzt aufgesetzter Finger, Loslassen überall abgefangen), drei Knöpfe rechts |
@@ -107,7 +110,8 @@ für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zah
 | `window.AR` | Für Tests: `info()`, `app`, `stand`, `dorf`, `starte()`, `starteMission()`, `baue()`, `zeigeDorf()`, `Kampf`, `Bot`, `Match`, `K`, `TYPEN` |
 
 Schalter: `?start`, `?auto` (Computer spielt den Spieler), `?tempo=6`, `?modus=duell|wellen`, `?stufe=`,
-`?spielerStufe=`, `?seed=`, `?neu` (leeres Dorf), `?ohne=modelle`, `?figur=knappe` (Junge als Tripo-Knappe, Test), `?figur=knappe-gross` (unverkleinerter Export, 16 MB). Mit `?figur=`
+`?spielerStufe=`, `?seed=`, `?neu` (leeres Dorf), `?ohne=modelle`, `?figur=` (andere Figur für den Jungen: `knappe-gross`
+unverkleinerter Export, `moench` alter Platzhalter). Der Knappe ist seit 24.11. **fest der Junge** (`AUSSEHEN.junge`). Mit `?figur=`
 zeigt das Spiel unter der Uhr Ladezeit und Bilder pro Sekunde (`messung`). `GLTFLoader` hat `MeshoptDecoder`
 (`lib/jsm/libs/`), weil Tripo große Modelle damit packt.
 

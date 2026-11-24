@@ -116,6 +116,11 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   7 Bewegungen geladen und im Chat geschickt. `modelle/knappe.glb` hat jetzt echte Bewegungen (Kampfstellung,
   Laufen, Jab, Cross, Uppercut, Treffer, Umfallen, Rolle). Test-Link `?figur=knappe`. Offen: Rückmeldung vom Handy,
   dann zum festen Jungen machen (`AUSSEHEN.junge`).
+- **24.11.: Knappe ist fest der Junge.** Spezial auf seinen Wunsch: **Verwandlung mit Schwert** (Drachenpanzer, orange
+  glühend, leuchtendes Schwert aus Grundformen in der rechten Hand, Hiebe weiter und im Halbkreis). Er wählte das
+  Schwert „im Spiel gebaut“ statt aus Tripo; ein echtes Schwert-Modell kann später ersetzen. Balance unverändert
+  (Junge–Rabenritter 45 %). Offen: Rückmeldung zum Schwert vom Handy; schönere Schwerthiebe gäbe es auf Mixamo
+  („Great Sword Slash“) für dieselbe Figur.
 - Alter nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist

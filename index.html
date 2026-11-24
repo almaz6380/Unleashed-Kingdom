@@ -176,14 +176,16 @@ const K = {
   SPEZIAL_DAUER: 5, E_AUSTEILEN: 12, E_EINSTECKEN: 9,
   SCHUTZ: 0.55,                     // nach dem dritten Schlag einer Folge ist der Getroffene kurz unverwundbar
   STEIN: 1.3, STURM: 1.4,           // Schaden-Faktor während der Verwandlung
+  DRACHE_WEIT: 1.5,                 // Reichweite mit dem Schwert der Verwandlung (Junge)
   STEIN_TEMPO: 0.8, STURM_TEMPO: 1.4, STURM_SCHLAG: 0.68, // der Drachenpanzer ist langsam, der Sturm schnell
   RUNDE_ZEIT: 60, WELLE_ZEIT: 120, DREH: 16, ZIELHILFE: 3.2,
   ZAEHLEN: 2.4, PAUSE: 2.0, SIEGE: 2, HEILUNG: 25,
 };
 // Kämpfer-Werte. flink < 1 = schnellere Schläge. spezial (Verwandlung, in der man nicht taumelt):
-// 'stein' (Drachenpanzer) = größer, mehr Reichweite, langsam, kaum wegzustoßen; 'sturm' = schnell, trifft im Halbkreis
+// 'stein' (Panzer) = größer, mehr Reichweite, langsam, kaum wegzustoßen; 'drache' (Junge: Drachenpanzer mit Schwert) =
+// wie 'stein', dazu Schwert: Reichweite ×1,5 und Treffer im Halbkreis; 'sturm' = schnell, trifft im Halbkreis
 const TYPEN = {
-  junge:    { name: 'Junge',    leben: 100, tempo: 4.5, schaden: [6, 6, 10],   reichweite: 1.5,  spezial: 'stein' },
+  junge:    { name: 'Junge',    leben: 100, tempo: 4.5, schaden: [6, 6, 10],   reichweite: 1.5,  spezial: 'drache' },
   maedchen: { name: 'Mädchen',  leben: 92,  tempo: 5.0, schaden: [6, 6, 9],    reichweite: 1.5,  spezial: 'sturm', flink: 0.85 },
   ritter:   { name: 'Rabenritter', leben: 100, tempo: 4.3, schaden: [6, 6, 10], reichweite: 1.55, spezial: 'stein' },
   scherge:  { name: 'Scherge',  leben: 30,  tempo: 3.7, schaden: [4, 4, 6],    reichweite: 1.35, spezial: null },
@@ -193,6 +195,7 @@ const WELLEN = [['scherge', 'scherge'], ['scherge', 'scherge', 'scherge'], ['bos
 function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
+const istPanzer = s => s === 'stein' || s === 'drache';   // gepanzerte Verwandlungen
 // Eine Runde. Eingaben je Kämpfer: mx, mz (Laufrichtung, Länge bis 1) und wunsch.angriff / .rolle / .spezial.
 // Richtung r: Blick zeigt nach (sin r, cos r). Team 0 startet unten (z > 0), Team 1 oben.
 class Kampf {
@@ -223,7 +226,7 @@ class Kampf {
     const t = TYPEN[f.typ], w = f.wunsch;
     if (f.rollePause > 0) f.rollePause -= DT; if (f.schutz > 0) f.schutz -= DT;
     if (f.spezial > 0) { f.spezial -= DT; if (f.spezial <= 0) { f.spezial = 0; this.ereignisse.push({ art: 'spezialEnde', von: f.i }); } }
-    const sturm = f.spezial > 0 && t.spezial === 'sturm', stein = f.spezial > 0 && t.spezial === 'stein';
+    const sturm = f.spezial > 0 && t.spezial === 'sturm', stein = f.spezial > 0 && istPanzer(t.spezial);
     f.x += f.sx * DT; f.z += f.sz * DT; const ab = Math.exp(-DT * 9); f.sx *= ab; f.sz *= ab;   // Rückstoß klingt ab
     const ml = Math.hypot(f.mx, f.mz), ex = ml > 1 ? f.mx / ml : f.mx, ez = ml > 1 ? f.mz / ml : f.mz;
     if (f.zustand === 'taumel') { w.angriff = w.rolle = false; f.t -= DT; if (f.t <= 0) f.zustand = 'frei'; return; }
@@ -257,15 +260,15 @@ class Kampf {
     this.ereignisse.push({ art: 'schlag', von: f.i, kette });
   }
   schlagTrifft(f) {
-    const t = TYPEN[f.typ], stein = f.spezial > 0 && t.spezial === 'stein', sturm = f.spezial > 0 && t.spezial === 'sturm';
-    const rx = Math.sin(f.r), rz = Math.cos(f.r), weit = t.reichweite * (stein ? 1.25 : 1) + K.KOERPER;
+    const t = TYPEN[f.typ], stein = f.spezial > 0 && istPanzer(t.spezial), sturm = f.spezial > 0 && t.spezial === 'sturm', drache = f.spezial > 0 && t.spezial === 'drache';
+    const rx = Math.sin(f.r), rz = Math.cos(f.r), weit = t.reichweite * (drache ? K.DRACHE_WEIT : stein ? 1.25 : 1) + K.KOERPER;
     for (const g of this.k) { if (g.team === f.team || g.zustand === 'tot' || g.zustand === 'rolle' || g.schutz > 0) continue;
       const dx = g.x - f.x, dz = g.z - f.z, d = Math.hypot(dx, dz); if (d > weit) continue;
-      if (d > 0.5 && (dx * rx + dz * rz) / d < (sturm ? -0.2 : K.WINKEL)) continue;
+      if (d > 0.5 && (dx * rx + dz * rz) / d < (sturm || drache ? -0.2 : K.WINKEL)) continue;
       const schaden = Math.round(t.schaden[f.kette] * (stein ? K.STEIN : sturm ? K.STURM : 1) * f.sf);
       g.leben -= schaden; if (f.spezial <= 0) f.energie = Math.min(100, f.energie + K.E_AUSTEILEN * f.ef); if (g.spezial <= 0) g.energie = Math.min(100, g.energie + K.E_EINSTECKEN * g.ef);
       // Wer verwandelt ist, taumelt nicht; nur wer den Drachenpanzer trägt, lässt sich auch kaum wegstoßen
-      const fest = g.spezial > 0, schwer = fest && TYPEN[g.typ].spezial === 'stein', nx = d > 1e-4 ? dx / d : rx, nz = d > 1e-4 ? dz / d : rz, stoss = K.RUECK[f.kette] * (stein ? 1.3 : 1) * (schwer ? 0.2 : 1);
+      const fest = g.spezial > 0, schwer = fest && istPanzer(TYPEN[g.typ].spezial), nx = d > 1e-4 ? dx / d : rx, nz = d > 1e-4 ? dz / d : rz, stoss = K.RUECK[f.kette] * (stein ? 1.3 : 1) * (schwer ? 0.2 : 1);
       g.sx = nx * stoss; g.sz = nz * stoss;
       if (g.leben <= 0) { g.leben = 0; g.zustand = 'tot'; g.sx *= 1.4; g.sz *= 1.4; this.ereignisse.push({ art: 'ko', von: f.i, auf: g.i, x: g.x, z: g.z }); }
       else if (!fest) { g.zustand = 'taumel'; g.t = K.TAUMEL[f.kette]; g.kette = 0; if (f.kette === 2) g.schutz = K.TAUMEL[2] + K.SCHUTZ; }
@@ -420,17 +423,17 @@ const feuer = [];
 // Zuordnung Kämpfer-Typ → Modell. Die Figuren des Users werden hier eingetragen (datei, höhe, ton).
 // Erwartete Animationsnamen im Modell: steh, lauf, schlag1, schlag2, treffer, tod, rolle
 // (auch englische Namen werden erkannt: idle, run, attack/punch, hit, death, roll).
+// Junge = Knappe des Users (Tripo-Figur, Bewegungen von Mixamo, siehe CLAUDE.md „Eigene Figuren einsetzen“)
 const AUSSEHEN = {
-  junge:    { datei: 'modelle/moench.glb',   höhe: 1.75, ton: 0xffffff },
+  junge:    { datei: 'modelle/knappe.glb',   höhe: 1.6,  ton: 0xffffff, dreh: 0, hell: 1.15 },
   maedchen: { datei: 'modelle/schurkin.glb', höhe: 1.68, ton: 0xffffff },
   ritter:   { datei: 'modelle/krieger.glb',  höhe: 1.85, ton: 0xffffff },
   scherge:  { datei: 'modelle/schurkin.glb', höhe: 1.5,  ton: 0x8a6aa8 },
   boss:     { datei: 'modelle/krieger.glb',  höhe: 2.3,  ton: 0xc07070 },
 };
-// Eigene Figuren des Users (Tripo). dreh = Drehung um die Hochachse, damit die Figur nach vorn (+z) schaut;
-// hell = Helligkeit der Farbe (Platzhalter brauchen 1,45). Noch ohne Skelett, deshalb nur über ?figur=knappe.
-// knappe-gross: unverkleinerter Tripo-Export (16 MB, 1,9 Mio. Dreiecke), nur zum Vergleich auf dem Handy
-const EIGENE = { knappe: { datei: 'modelle/knappe.glb', höhe: 1.6, ton: 0xffffff, dreh: 0, hell: 1.15 },
+// Test-Figuren für den Jungen über ?figur=. dreh = Drehung um die Hochachse, damit die Figur nach vorn (+z) schaut;
+// hell = Helligkeit der Farbe (Platzhalter brauchen 1,45). knappe-gross: unverkleinerter Tripo-Export (16 MB), moench: alter Platzhalter
+const EIGENE = { knappe: { datei: 'modelle/knappe.glb', höhe: 1.6, ton: 0xffffff, dreh: 0, hell: 1.15 }, moench: { datei: 'modelle/moench.glb', höhe: 1.75, ton: 0xffffff },
   'knappe-gross': { datei: 'modelle/knappe-gross.glb', höhe: 1.6, ton: 0xffffff, dreh: -Math.PI / 2, hell: 1.15 } };
 if (EIGENE[Q.get('figur')]) AUSSEHEN.junge = EIGENE[Q.get('figur')];
 const NAMEN = { steh: /^steh$|idle/i, lauf: /^lauf$|run/i, schlag1: /^schlag1$|attack(?!2)|punch|slash/i, schlag2: /^schlag2$|attack2|kick/i, schlag3: /^schlag3$/, treffer: /^treffer$|hit/i, tod: /^tod$|death|die|knock/i, rolle: /^rolle$|roll|dodge/i };
@@ -451,6 +454,7 @@ function baueFigur(f) {
     fig.mixer = new THREE.AnimationMixer(m);
     for (const clip of v.clips) for (const [name, re] of Object.entries(NAMEN)) if (re.test(clip.name) && !fig.akt[name]) fig.akt[name] = fig.mixer.clipAction(clip);
     if (!v.clips.length) fig.knochen = findeKnochen(m);
+    if (TYPEN[f.typ].spezial === 'drache') baueSchwert(fig, m);
     if (fig.akt.schlag1 && !fig.akt.schlag3) fig.akt.schlag3 = fig.mixer.clipAction(fig.akt.schlag1.getClip().clone()); // eigene Kopie: Schlag 3 blendet weich aus Schlag 1/2 über
   } else { // Ersatzfigur, falls das Modell fehlt
     const mat = new THREE.MeshLambertMaterial({ color: f.team === 0 ? 0xe2a048 : 0xa05868 }); mat.userData.grund = mat.color.clone(); fig.mats.push(mat);
@@ -470,7 +474,7 @@ function spiele(fig, name, einmal, dauer) { // Animation wechseln; dauer = so la
   if (fig.jetzt && fig.jetzt !== a) { a.crossFadeFrom(fig.jetzt, blende, false); a.play(); } else a.fadeIn(blende).play(); fig.jetzt = a;
 }
 function zeigeFigur(fig, f, dt, anteil) {
-  const t = TYPEN[f.typ], stein = f.spezial > 0 && t.spezial === 'stein', sturm = f.spezial > 0 && t.spezial === 'sturm';
+  const t = TYPEN[f.typ], stein = f.spezial > 0 && istPanzer(t.spezial), sturm = f.spezial > 0 && t.spezial === 'sturm', drache = f.spezial > 0 && t.spezial === 'drache';
   // Zwischen letztem und jetzigem Rechenschritt einblenden, damit nichts hakt (Bildrate ≠ 60/s)
   const x = f.vx0 === undefined ? f.x : lerp(f.vx0, f.x, anteil), z = f.vz0 === undefined ? f.z : lerp(f.vz0, f.z, anteil);
   fig.grp.position.set(x, 0, z);
@@ -480,11 +484,12 @@ function zeigeFigur(fig, f, dt, anteil) {
   fig.gross = lerp(fig.gross, stein ? 1.32 : 1, 1 - Math.exp(-dt * 9)); fig.grp.scale.setScalar(fig.gross);
   // Farbe: Treffer-Blitz, Drachenpanzer grau, Sturm bläulich
   fig.blitz = Math.max(0, fig.blitz - dt * 6);
-  for (const m of fig.mats) { m.color.copy(m.userData.grund); if (stein) m.color.lerp(_grau, 0.6).multiplyScalar(1.15); if (sturm) m.color.lerp(_blau, 0.45);
+  for (const m of fig.mats) { m.color.copy(m.userData.grund); if (drache) m.color.lerp(_glut, 0.35).multiplyScalar(1.1); else if (stein) m.color.lerp(_grau, 0.6).multiplyScalar(1.15); if (sturm) m.color.lerp(_blau, 0.45);
     if (fig.blitz > 0) m.color.lerp(_weiss, fig.blitz * 0.8).multiplyScalar(1 + fig.blitz * 2); if (m.emissive) m.emissiveIntensity = sturm ? 0.5 : 0.12; }
   fig.ring.visible = f.zustand !== 'tot'; fig.ring.material.opacity = f.energie >= 100 ? 0.6 + 0.4 * Math.sin(zeit * 12) : 0.8;
   const stark = Math.hypot(f.mx, f.mz), lauf = fig.jetzt === fig.akt.lauf ? stark > 0.06 : stark > 0.15;   // kein Flackern zwischen Stehen und Laufen
-  if (f.zustand === 'schlag') { if (fig.schlagNr !== f.schlagNr) { fig.schlagNr = f.schlagNr; spiele(fig, ['schlag1', 'schlag2', 'schlag3'][f.kette], true, K.SCHLAG_ZEIT[f.kette] * 1.5); } }
+  if (f.zustand === 'schlag') { if (fig.schlagNr !== f.schlagNr) { fig.schlagNr = f.schlagNr;   // mit Schwert: immer der rechte Arm (eigene Kopien, damit Hiebe ineinander überblenden)
+    spiele(fig, (drache && fig.schwert?.akt ? ['schwert1', 'schwert2', 'schwert3'] : ['schlag1', 'schlag2', 'schlag3'])[f.kette], true, K.SCHLAG_ZEIT[f.kette] * 1.5); } }
   else if (f.zustand !== fig.zustand || f.zustand === 'frei') {
     // Lange Bewegungen (Mixamo) nicht zu stark beschleunigen: Treffer höchstens 1,7-fach, Umfallen fast in echter Länge
     const länge = n => fig.akt[n]?.getClip().duration ?? 0;
@@ -492,6 +497,7 @@ function zeigeFigur(fig, f, dt, anteil) {
     else if (f.zustand === 'tot') spiele(fig, 'tod', true, Math.max(0.9, länge('tod') * 0.85)); else spiele(fig, lauf ? 'lauf' : 'steh', false); }
   if (f.zustand === 'frei' && fig.jetzt === fig.akt.lauf) fig.jetzt.timeScale = t.tempo / 4.2 * (sturm ? 1.35 : 1) * klemme(stark, 0.55, 1);
   fig.zustand = f.zustand; fig.mixer?.update(dt);
+  if (fig.schwert) zeigeSchwert(fig, f, dt, drache);
   if (fig.ohneAnim) { const l = lauf ? klemme(stark, 0.4, 1) * t.tempo / 4.5 : 0; ersatzBewegung(fig, f, dt, l); if (fig.knochen) knochenBewegung(fig, f, dt, l); }
 }
 // Einfache Bewegungen für Figuren ohne Skelett: wippen beim Laufen, neigen beim Schlag, Überschlag bei der Rolle,
@@ -583,14 +589,50 @@ function knochenBewegung(fig, f, dt, lauf) {
   drehe(kn, 'RightUpLeg', X, h.br); drehe(kn, 'RightLeg', X, h.kr); drehe(kn, 'RightFoot', X, h.fr);
   for (const fi of kn.finger) fi.b.quaternion.copy(fi.ruhe).premultiply(_qa.setFromAxisAngle(fi.achse, h.faust * (fi.daumen ? (fi.glied === 1 ? 0.5 : 0.7) : 1.45)));
 }
-const _grau = new THREE.Color(0x9a9a92), _blau = new THREE.Color(0x7fd8ff), _weiss = new THREE.Color(0xffffff);
+// ---------- Schwert der Verwandlung (Junge, Sorte 'drache'), aus einfachen Formen ----------
+// Hängt am Knochen RightHand. Die Klinge zeigt quer durch die Faust zur Daumenseite (von Pinky1 nach Index1).
+const SCHWERT = { klinge: 0.85, breit: 0.07 };
+function baueSchwert(fig, m) {
+  let hand, zeige, klein; m.traverse(o => { const n = o.name.replace(/^mixamorig:?/i, ''); if (n === 'RightHand') hand = o; if (n === 'RightHandIndex1') zeige = o; if (n === 'RightHandPinky1') klein = o; });
+  if (!hand || !zeige || !klein) return;
+  const g = new THREE.Group(), innen = new THREE.Group(); g.add(innen);
+  const leuchten = new THREE.MeshBasicMaterial({ color: 0xffe7b0 }), schein = new THREE.MeshBasicMaterial({ color: 0xff9a3a, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false });
+  const gold = new THREE.MeshLambertMaterial({ color: 0xd9a441, emissive: 0x5a3a08 }), leder = new THREE.MeshLambertMaterial({ color: 0x5a3a22 });
+  const k = SCHWERT.klinge, teil = (geo, mat, y) => { const t = new THREE.Mesh(geo, mat); t.position.y = y; innen.add(t); return t; };
+  teil(new THREE.BoxGeometry(SCHWERT.breit, k, 0.016), leuchten, 0.12 + k / 2);
+  teil(new THREE.ConeGeometry(SCHWERT.breit * 0.72, 0.12, 4).rotateY(Math.PI / 4).scale(1, 1, 0.23), leuchten, 0.12 + k + 0.06);
+  teil(new THREE.BoxGeometry(SCHWERT.breit * 2.2, k + 0.1, 0.06), schein, 0.12 + k / 2);
+  teil(new THREE.BoxGeometry(0.26, 0.035, 0.05), gold, 0.1);
+  teil(new THREE.CylinderGeometry(0.019, 0.019, 0.2, 8), leder, 0);
+  teil(new THREE.SphereGeometry(0.035, 10, 8), gold, -0.11);
+  // Lage in der Hand: alles im Raum des Hand-Knochens, Größe gegen die Knochen-Skalierung ausgleichen
+  m.updateWorldMatrix(true, true); const inv = hand.matrixWorld.clone().invert(), p = o => o.getWorldPosition(new THREE.Vector3()).applyMatrix4(inv);
+  const pz = p(zeige), pk = p(klein), richtung = pz.clone().sub(pk).normalize(), skal = hand.getWorldScale(new THREE.Vector3()).x / fig.grp.scale.x;
+  g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), richtung);
+  g.position.copy(pz.clone().add(pk).multiplyScalar(0.5)).multiplyScalar(0.75);
+  g.scale.setScalar(1 / skal); innen.scale.setScalar(0.001); g.visible = false; hand.add(g);
+  fig.schwert = { g, innen, s: 0 };
+  // Schwerthiebe: Kopien des rechten Schlags (Cross), dazu ein Armschwung im Code (zeigeSchwert)
+  if (fig.akt.schlag2) { fig.schwert.akt = true; for (const n of ['schwert1', 'schwert2', 'schwert3']) fig.akt[n] = fig.mixer.clipAction(fig.akt.schlag2.getClip().clone()); }
+  let arm, rumpf; m.traverse(o => { const n = o.name.replace(/^mixamorig:?/i, ''); if (n === 'RightArm') arm = o; if (n === 'Spine2') rumpf = o; });
+  if (arm && rumpf) fig.schwert.kn = { b: { RightArm: arm, Spine2: rumpf }, wurzel: m };
+}
+function zeigeSchwert(fig, f, dt, drache) {
+  const sw = fig.schwert; sw.s = lerp(sw.s, drache ? 1 : 0, 1 - Math.exp(-dt * (drache ? 9 : 6)));
+  sw.g.visible = sw.s > 0.02; sw.innen.scale.setScalar(Math.max(0.001, sw.s)); if (!drache || f.zustand !== 'schlag' || !sw.kn) return;
+  // Hieb: Arm schwingt waagerecht von außen (rechts) nach innen, beim dritten Hieb von oben nach unten
+  const q = klemme(f.t / K.SCHLAG_ZEIT[f.kette], 0, 1), e = q < 0.2 ? q / 0.2 : q < 0.55 ? 1 : 1 - (q - 0.55) / 0.45, zug = q < 0.2 ? 0 : Math.min(1, (q - 0.2) / 0.3);
+  if (f.kette === 2) { drehe(sw.kn, 'RightArm', X, lerp(-1.3, 0.5, zug) * e); drehe(sw.kn, 'Spine2', X, 0.25 * zug * e); }
+  else { const r = f.kette === 0 ? 1 : -1; drehe(sw.kn, 'RightArm', Y, lerp(-1.0, 0.9, zug) * r * e); drehe(sw.kn, 'Spine2', Y, lerp(-0.4, 0.35, zug) * r * e); }
+}
+const _glut = new THREE.Color(0xff7a3a), _grau = new THREE.Color(0x9a9a92), _blau = new THREE.Color(0x7fd8ff), _weiss = new THREE.Color(0xffffff);
 
 // ---------- Effekte: Funken, Schlagbogen, Zahlen, Töne ----------
 const teile = [];
 function funken(x, y, z, farbe, n, wucht) { for (let i = 0; i < n; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: fleck, color: farbe, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
     const a = Math.random() * 6.283, v = (0.5 + Math.random()) * wucht; s.position.set(x, y, z); s.userData = { vx: Math.cos(a) * v, vy: 1 + Math.random() * wucht, vz: Math.sin(a) * v, t: 0, d: 0.35 + Math.random() * 0.25, g: 0.18 + Math.random() * 0.22 }; scene.add(s); teile.push(s); } }
-function bogen(f, kette) { const t = TYPEN[f.typ], sturm = f.spezial > 0 && t.spezial === 'sturm', stein = f.spezial > 0 && t.spezial === 'stein', halb = sturm ? 1.75 : 1.1, weit = t.reichweite * (stein ? 1.25 : 1) + 0.3;
-  const m = new THREE.Mesh(new THREE.RingGeometry(0.55, weit, 20, 1, Math.PI / 2 - halb, halb * 2).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: f.team === 0 ? 0xfff0c0 : 0xffb0a0, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+function bogen(f, kette) { const t = TYPEN[f.typ], sturm = f.spezial > 0 && t.spezial === 'sturm', drache = f.spezial > 0 && t.spezial === 'drache', stein = f.spezial > 0 && istPanzer(t.spezial), halb = sturm || drache ? 1.75 : 1.1, weit = t.reichweite * (drache ? K.DRACHE_WEIT : stein ? 1.25 : 1) + 0.3;
+  const m = new THREE.Mesh(new THREE.RingGeometry(0.55, weit, 20, 1, Math.PI / 2 - halb, halb * 2).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: drache ? 0xffc04a : f.team === 0 ? 0xfff0c0 : 0xffb0a0, transparent: true, opacity: drache ? 0.8 : 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
   m.position.set(f.x, 0.9, f.z); m.rotation.y = f.r + Math.PI; /* Bogen wird nach −z gebaut, Blick zeigt nach (sin r, cos r) */ m.userData = { t: 0, d: kette === 2 ? 0.26 : 0.18, bogen: true }; scene.add(m); teile.push(m); }
 function bewegeTeile(dt) { for (let i = teile.length - 1; i >= 0; i--) { const s = teile[i], u = s.userData; u.t += dt; const k = u.t / u.d;
     if (k >= 1) { scene.remove(s); s.material.dispose(); if (u.bogen) s.geometry.dispose(); teile.splice(i, 1); continue; }
@@ -613,7 +655,7 @@ function fx(e) { // Ereignisse aus der Simulation ⇒ Bild, Ton, Vibration
     ton(e.stark ? 110 : 150, e.stark ? 0.2 : 0.12, 'sawtooth', e.stark ? 0.13 : 0.09, 40); if (ich) vib(e.stark ? 60 : 25); }
   else if (e.art === 'ko') { zeitlupe = 0.9; wackel = 0.45; funken(e.x, 1, e.z, 0xff9050, 22, 6); ton(90, 0.5, 'sawtooth', 0.14, 30); vib(e.auf === 0 ? [80, 40, 120] : 50); }
   else if (e.art === 'rolle') { funken(e.x, 0.2, e.z, 0xd8c8a8, 5, 1.5); ton(420, 0.1, 'sine', 0.04, 200); }
-  else if (e.art === 'spezial') { funken(e.x, 1, e.z, e.sorte === 'stein' ? 0xffc070 : 0x9fe8ff, 30, 6); wackel = 0.35; stopp = 0.12; ton(220, 0.5, 'square', 0.1, 880); if (e.von === 0) { vib([40, 30, 80]); banner(e.sorte === 'stein' ? 'Drachenpanzer!' : 'Sturm!', '', 800); } }
+  else if (e.art === 'spezial') { funken(e.x, 1, e.z, istPanzer(e.sorte) ? 0xffc070 : 0x9fe8ff, 30, 6); wackel = 0.35; stopp = 0.12; ton(220, 0.5, 'square', 0.1, 880); if (e.von === 0) { vib([40, 30, 80]); banner(istPanzer(e.sorte) ? 'Drachenpanzer!' : 'Sturm!', e.sorte === 'drache' ? 'mit Schwert' : '', 900); } }
   else if (e.art === 'los') { banner('Los!', '', 600); ton(660, 0.25, 'square', 0.08, 990); }
   else if (e.art === 'zeit') banner('Zeit um!', '', 1000);
   else if (e.art === 'rundeEnde') { const m = app.match; if (m.gewonnen === null) banner(m.opt.modus === 'wellen' ? `Welle ${m.welle} geschafft!` : e.sieger === 0 ? 'Runde gewonnen!' : e.sieger === 1 ? 'Runde verloren' : 'Unentschieden', '', 1500); }
@@ -753,7 +795,7 @@ function zeigeBau(id) {
 function zeigeMissionen() {
   const c = $('wahlChar'); c.innerHTML = '';
   for (const typ of ['junge', 'maedchen']) { const frei = dorf.figuren.includes(typ), b = document.createElement('button'); b.className = 'wahl' + (dorf.char === typ ? ' an' : ''); b.dataset.char = typ; b.disabled = !frei;
-    b.innerHTML = frei ? `${TYPEN[typ].name}<small>${TYPEN[typ].spezial === 'stein' ? 'legt den Drachenpanzer an' : 'entfesselt den Sturm'}</small>` : `🔒 ???<small>schließt sich später an</small>`;
+    b.innerHTML = frei ? `${TYPEN[typ].name}<small>${istPanzer(TYPEN[typ].spezial) ? 'Drachenpanzer mit Schwert' : 'entfesselt den Sturm'}</small>` : `🔒 ???<small>schließt sich später an</small>`;
     b.addEventListener('click', () => { dorf.char = typ; speichereDorf(); zeigeMissionen(); }); c.appendChild(b); }
   const l = $('mListe'); l.innerHTML = ''; const offen = dorf.geschafft.length ? Math.max(...dorf.geschafft) + 1 : 0;
   MISSIONEN.forEach((m, i) => { const fertig = dorf.geschafft.includes(i), zu = i > offen, b = document.createElement('button');
