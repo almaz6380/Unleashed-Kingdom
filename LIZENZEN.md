@@ -15,3 +15,4 @@ Arena-Boden, Steine, Feuerschein, Effekte und Töne entstehen im Code.
 - `modelle/knappe.glb` (aus `eingang/knappe-niedlich.fbx`): Knappe, vom User aus seinem eigenen Bild mit Tripo erzeugt (23.11.2026). Gehört dem User.
 - `modelle/knappe-gross.glb`: dasselbe, unverkleinerter Tripo-Export (Vergleichstest). Gehört dem User.
 - `lib/jsm/libs/meshopt_decoder.module.js`: aus three.js r170 (MIT-Lizenz), entpackt Meshopt-gepackte Modelle.
+- Bewegungen des Knappen (`modelle/knappe.glb`): Adobe Mixamo (mixamo.com), vom User mit seinem Adobe-Konto geladen. Mixamo-Bewegungen dürfen laut Adobe kostenlos in eigenen Spielen genutzt werden (nicht als Einzeldateien weiterverteilt).

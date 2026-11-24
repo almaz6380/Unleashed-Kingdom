@@ -433,7 +433,7 @@ const AUSSEHEN = {
 const EIGENE = { knappe: { datei: 'modelle/knappe.glb', höhe: 1.6, ton: 0xffffff, dreh: 0, hell: 1.15 },
   'knappe-gross': { datei: 'modelle/knappe-gross.glb', höhe: 1.6, ton: 0xffffff, dreh: -Math.PI / 2, hell: 1.15 } };
 if (EIGENE[Q.get('figur')]) AUSSEHEN.junge = EIGENE[Q.get('figur')];
-const NAMEN = { steh: /^steh$|idle/i, lauf: /^lauf$|run/i, schlag1: /^schlag1$|attack(?!2)|punch|slash/i, schlag2: /^schlag2$|attack2|kick/i, treffer: /^treffer$|hit/i, tod: /^tod$|death|die|knock/i, rolle: /^rolle$|roll|dodge/i };
+const NAMEN = { steh: /^steh$|idle/i, lauf: /^lauf$|run/i, schlag1: /^schlag1$|attack(?!2)|punch|slash/i, schlag2: /^schlag2$|attack2|kick/i, schlag3: /^schlag3$/, treffer: /^treffer$|hit/i, tod: /^tod$|death|die|knock/i, rolle: /^rolle$|roll|dodge/i };
 const vorlagen = {};
 async function ladeVorlagen() {
   const dateien = [...new Set(Object.values(AUSSEHEN).map(a => a.datei))];
@@ -451,7 +451,7 @@ function baueFigur(f) {
     fig.mixer = new THREE.AnimationMixer(m);
     for (const clip of v.clips) for (const [name, re] of Object.entries(NAMEN)) if (re.test(clip.name) && !fig.akt[name]) fig.akt[name] = fig.mixer.clipAction(clip);
     if (!v.clips.length) fig.knochen = findeKnochen(m);
-    if (fig.akt.schlag1) fig.akt.schlag3 = fig.mixer.clipAction(fig.akt.schlag1.getClip().clone()); // eigene Kopie: Schlag 3 blendet weich aus Schlag 1/2 über
+    if (fig.akt.schlag1 && !fig.akt.schlag3) fig.akt.schlag3 = fig.mixer.clipAction(fig.akt.schlag1.getClip().clone()); // eigene Kopie: Schlag 3 blendet weich aus Schlag 1/2 über
   } else { // Ersatzfigur, falls das Modell fehlt
     const mat = new THREE.MeshLambertMaterial({ color: f.team === 0 ? 0xe2a048 : 0xa05868 }); mat.userData.grund = mat.color.clone(); fig.mats.push(mat);
     const k = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, a.höhe - 1.0, 6, 12), mat); k.position.y = a.höhe / 2 - 0.1; k.castShadow = true;
@@ -486,8 +486,10 @@ function zeigeFigur(fig, f, dt, anteil) {
   const stark = Math.hypot(f.mx, f.mz), lauf = fig.jetzt === fig.akt.lauf ? stark > 0.06 : stark > 0.15;   // kein Flackern zwischen Stehen und Laufen
   if (f.zustand === 'schlag') { if (fig.schlagNr !== f.schlagNr) { fig.schlagNr = f.schlagNr; spiele(fig, ['schlag1', 'schlag2', 'schlag3'][f.kette], true, K.SCHLAG_ZEIT[f.kette] * 1.5); } }
   else if (f.zustand !== fig.zustand || f.zustand === 'frei') {
-    if (f.zustand === 'taumel') spiele(fig, 'treffer', true, 0.5); else if (f.zustand === 'rolle') spiele(fig, 'rolle', true, K.ROLLE_ZEIT * 1.15);
-    else if (f.zustand === 'tot') spiele(fig, 'tod', true, 0.9); else spiele(fig, lauf ? 'lauf' : 'steh', false); }
+    // Lange Bewegungen (Mixamo) nicht zu stark beschleunigen: Treffer höchstens 1,7-fach, Umfallen fast in echter Länge
+    const länge = n => fig.akt[n]?.getClip().duration ?? 0;
+    if (f.zustand === 'taumel') spiele(fig, 'treffer', true, Math.max(0.5, länge('treffer') * 0.6)); else if (f.zustand === 'rolle') spiele(fig, 'rolle', true, K.ROLLE_ZEIT * 1.15);
+    else if (f.zustand === 'tot') spiele(fig, 'tod', true, Math.max(0.9, länge('tod') * 0.85)); else spiele(fig, lauf ? 'lauf' : 'steh', false); }
   if (f.zustand === 'frei' && fig.jetzt === fig.akt.lauf) fig.jetzt.timeScale = t.tempo / 4.2 * (sturm ? 1.35 : 1) * klemme(stark, 0.55, 1);
   fig.zustand = f.zustand; fig.mixer?.update(dt);
   if (fig.ohneAnim) { const l = lauf ? klemme(stark, 0.4, 1) * t.tempo / 4.5 : 0; ersatzBewegung(fig, f, dt, l); if (fig.knochen) knochenBewegung(fig, f, dt, l); }

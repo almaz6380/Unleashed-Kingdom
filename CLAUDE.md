@@ -130,6 +130,15 @@ Rolle, K. o. Finger: Krümm-Achse je Glied in der Ruhelage berechnet (Spitze wan
 des Daumens), `faust` 0..1. Der Knappe mit Skelett (`modelle/knappe.glb`, 1,4 MB, schaut schon nach +z, `dreh: 0`) läuft so über
 `?figur=knappe`. Tripo-FBX mit Skelett enthält **keine Farb-Textur**: aus dem Retopo-Export derselben Figur nehmen.
 
+**Echte Bewegungen über Mixamo (24.11., so ist `modelle/knappe.glb` jetzt gebaut):** Mixamo nimmt Tripo-FBX nicht an.
+Weg: Retopo-GLB → `werkzeug/obj-fuer-mixamo.mjs` (OBJ + Textur, 170 cm, als ZIP) → User lädt die ZIP bei Mixamo
+hoch, setzt die Marker → lädt Bewegungen als FBX (30 fps) und schickt sie **direkt im Chat** (geht, ~2,5 MB je
+Datei) → `FBX2glTF` je Datei → `werkzeug/baue-knappe-mixamo.mjs`: Figur + Skelett aus fight-idle, Bewegungen
+zugeschnitten (`TEILE`: von/bis in Sekunden, Jab Cross in zwei Schläge geteilt), Hüfte waagerecht festgehalten
+(`ort`), Textur WebP 1024. Ergebnis 1,7 MB, 8 Bewegungen `steh lauf schlag1 schlag2 schlag3 treffer tod rolle`.
+Mixamo-Figuren schauen nach +z (`dreh: 0`). `NAMEN` kennt `schlag3`; Treffer und Umfallen werden höchstens mäßig
+beschleunigt (`länge` in `zeigeFigur`). Mit Animationen ist `knochenBewegung` aus.
+
 
 In `AUSSEHEN` Datei, Höhe und Farbton eintragen. Das Modell braucht die Animationen **Idle, Run, Schlag, Getroffen,
 Umfallen**, möglichst eine Rolle (deutsche oder englische Namen, siehe `NAMEN`). Fehlende Animationen: Die Figur

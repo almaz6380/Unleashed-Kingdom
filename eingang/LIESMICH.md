@@ -22,3 +22,9 @@ Schon da:
 - `knappe-rig.fbx`: schlanke Fassung nach Retopo (9.500 Punkte) mit **Skelett** (Tripo-Rig, Humanoid, Mixamo-Knochen,
   65 Knochen), ohne Bewegungen. **Die Farb-Textur fehlt in der FBX** (Tripo bettet sie nicht ein); sie wurde aus
   dem Retopo-Export ohne Skelett übernommen (gleiche Figur, gleiche UV). Daraus entsteht `modelle/knappe.glb`.
+- `knappe-fuer-mixamo.zip`: schlanke Retopo-Figur als OBJ mit Farb-Textur, 170 cm, ohne Skelett (aus dem Retopo-GLB
+  gebaut mit `werkzeug/obj-fuer-mixamo.mjs`). **Nur so** nahm Mixamo die Figur an; Tripo-FBX (mit und ohne Skelett)
+  scheiterte („unable to map your existing skeleton“).
+- `mixamo/`: die 7 Mixamo-Bewegungen (alle „With Skin“, 30 fps): fight-idle, running, jab-cross, uppercut,
+  hit-reaction, dying, roll (Sprinting Forward Roll, lief trotz „In Place“ 4,7 m weit). Daraus entsteht
+  `modelle/knappe.glb` mit `werkzeug/baue-knappe-mixamo.mjs`.

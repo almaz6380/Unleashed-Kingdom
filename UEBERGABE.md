@@ -112,6 +112,10 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   (B) er holt echte Bewegungen von mixamo.com (Anleitung im Chat: Fighting Idle, Running, Jab Cross/Punching,
   Hook/Uppercut, Hit Reaction, Dying, Sprinting Forward Roll; FBX Binary, Without Skin, 30 fps, In Place; alles als
   ZIP per Drive-Datei-Link). Dann Bewegungen in `modelle/knappe.glb` einfügen wie `werkzeug/baue-figuren.mjs`.
+- **Mixamo geschafft (24.11.):** Tripo-FBX lehnte Mixamo ab, die von mir gebaute OBJ-ZIP nahm es an. Der User hat
+  7 Bewegungen geladen und im Chat geschickt. `modelle/knappe.glb` hat jetzt echte Bewegungen (Kampfstellung,
+  Laufen, Jab, Cross, Uppercut, Treffer, Umfallen, Rolle). Test-Link `?figur=knappe`. Offen: Rückmeldung vom Handy,
+  dann zum festen Jungen machen (`AUSSEHEN.junge`).
 - Alter nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist
