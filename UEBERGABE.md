@@ -125,6 +125,10 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   (Prompt im Chat und in `FIGUREN.md`, ohne Rig, Retopo ~3.000 Flächen, Datei im Chat). Bis dahin Verwandlung ohne
   sichtbares Schwert, Regeln (Reichweite ×1,5, Halbkreis) bleiben. Danach: `SCHWERT.datei` setzen, Lage prüfen,
   fragen, ob die Hiebe passen (sonst Mixamo-Schwerthiebe).
+- **25.11.: Qualität.** Er fragte, ob ein iPhone 15 nicht mehr schafft (ja: sein Test zeigte 2 Mio. Flächen flüssig).
+  Entscheidung: **mittlere Qualität** (Figuren ~80.000 Dreiecke, Texturen 2K) plus **Grafik-Stufen** hoch/sparsam
+  mit automatischer Messung und Schalter im Dorf. Knappe ist jetzt fein (aus seinem großen Export, Skelett
+  übertragen, er musste nichts tun). Schwert: Retopo auf 10.000, GLB 2K, Datei im Chat – steht noch aus.
 - Alter nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist

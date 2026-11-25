@@ -129,7 +129,7 @@
   </div>
   <div id="dorfUnten">
     <button class="gross" id="zuMissionen" disabled>⚔️ Missionen</button>
-    <div id="schalter"><button id="sTon"></button><button id="sVib"></button></div>
+    <div id="schalter"><button id="sTon"></button><button id="sVib"></button><button id="sGrafik"></button></div>
     <div id="meldung">Lädt …</div>
   </div>
 </div>
@@ -381,6 +381,13 @@ const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder), fehlend = [];
 // Speicher (Präfix ar_), läuft auch ohne
 const speicher = { lies: (k, d) => { try { const v = localStorage.getItem('ar_' + k); return v === null ? d : v; } catch (e) { return d; } }, schreib: (k, v) => { try { localStorage.setItem('ar_' + k, v); } catch (e) {} } };
 const stand = { stufe: 1, modus: 'duell', ton: speicher.lies('ton', '1') === '1', vib: speicher.lies('vib', '1') === '1' };
+// Grafik-Stufe: 'hoch' (Bildschärfe bis 2×, Schatten 2048, Texturen voll) oder 'sparsam' (1,25×, Schatten 1024, Texturen ≤ 1024,
+// halb so viele Funken). Wahl 'auto' misst im ersten Kampf 4 s lang die Bilder pro Sekunde und schaltet unter 40 auf sparsam.
+// ?grafik=hoch|sparsam erzwingt eine Stufe (Tests), ohne sie zu speichern.
+const GRAFIK_WAHL = ['auto', 'hoch', 'sparsam'];
+const grafik = { wahl: GRAFIK_WAHL.includes(Q.get('grafik')) ? Q.get('grafik') : GRAFIK_WAHL.includes(speicher.lies('grafik', 'auto')) ? speicher.lies('grafik', 'auto') : 'auto',
+  auto: speicher.lies('grafikAuto', 'hoch'), stufe: 'hoch', mess: { t: 0, n: 0, fertig: (Q.has('grafik') && Q.get('grafik') !== 'auto') || speicher.lies('grafikAuto', '') !== '' } };
+grafik.stufe = grafik.wahl === 'auto' ? grafik.auto : grafik.wahl;
 
 // ---------- Licht und Arena ----------
 scene.add(new THREE.HemisphereLight(0xffe2bb, 0x4a3324, 1.15));
@@ -441,7 +448,7 @@ const vorlagen = {};
 async function ladeVorlagen() {
   const dateien = [...new Set(Object.values(AUSSEHEN).map(a => a.datei).concat(SCHWERT.datei ? [SCHWERT.datei] : []))];
   await Promise.all(dateien.map(async d => { if (Q.get('ohne') === 'modelle') { fehlend.push(d); return; }
-    try { const g = await loader.loadAsync(d), box = new THREE.Box3().setFromObject(g.scene); vorlagen[d] = { szene: g.scene, clips: g.animations, h: box.max.y - box.min.y, y0: box.min.y }; } catch (e) { fehlend.push(d); } }));
+    try { const g = await loader.loadAsync(d), box = new THREE.Box3().setFromObject(g.scene); merkeTexturen(g.scene); vorlagen[d] = { szene: g.scene, clips: g.animations, h: box.max.y - box.min.y, y0: box.min.y }; } catch (e) { fehlend.push(d); } }));
 }
 function baueFigur(f) {
   const a = AUSSEHEN[f.typ], v = vorlagen[a.datei], grp = new THREE.Group(), fig = { grp, mixer: null, akt: {}, jetzt: null, mats: [], gross: 1, schlagNr: -1, zustand: '', a, blitz: 0 };
@@ -627,7 +634,7 @@ const _glut = new THREE.Color(0xff7a3a), _grau = new THREE.Color(0x9a9a92), _bla
 
 // ---------- Effekte: Funken, Schlagbogen, Zahlen, Töne ----------
 const teile = [];
-function funken(x, y, z, farbe, n, wucht) { for (let i = 0; i < n; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: fleck, color: farbe, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+function funken(x, y, z, farbe, n, wucht) { if (grafik.stufe === 'sparsam') n = Math.ceil(n / 2); for (let i = 0; i < n; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: fleck, color: farbe, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
     const a = Math.random() * 6.283, v = (0.5 + Math.random()) * wucht; s.position.set(x, y, z); s.userData = { vx: Math.cos(a) * v, vy: 1 + Math.random() * wucht, vz: Math.sin(a) * v, t: 0, d: 0.35 + Math.random() * 0.25, g: 0.18 + Math.random() * 0.22 }; scene.add(s); teile.push(s); } }
 function bogen(f, kette) { const t = TYPEN[f.typ], sturm = f.spezial > 0 && t.spezial === 'sturm', drache = f.spezial > 0 && t.spezial === 'drache', stein = f.spezial > 0 && istPanzer(t.spezial), halb = sturm || drache ? 1.75 : 1.1, weit = t.reichweite * (drache ? K.DRACHE_WEIT : stein ? 1.25 : 1) + 0.3;
   const m = new THREE.Mesh(new THREE.RingGeometry(0.55, weit, 20, 1, Math.PI / 2 - halb, halb * 2).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: drache ? 0xffc04a : f.team === 0 ? 0xfff0c0 : 0xffb0a0, transparent: true, opacity: drache ? 0.8 : 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
@@ -778,6 +785,7 @@ function zeichneDorf() {
     el.innerHTML = `<div class="sockel"><span>${pl.bild}</span></div><span class="sterne">${g.bald ? '' : '★'.repeat(s) + '☆'.repeat(max - s)}</span><span class="schild">${g.name}${g.bald ? ' · bald' : ''}</span>`;
     el.addEventListener('click', () => zeigeBau(g.id)); p.appendChild(el); }
   $('sTon').textContent = 'Ton: ' + (stand.ton ? 'an' : 'aus'); $('sVib').textContent = 'Vibration: ' + (stand.vib ? 'an' : 'aus');
+  $('sGrafik').textContent = 'Grafik: ' + (grafik.wahl === 'auto' ? `automatisch (${grafik.stufe})` : grafik.wahl);
 }
 function zeigeBau(id) {
   const g = GEBAEUDE.find(x => x.id === id), s = dorf.bau[id], max = g.kosten.length, preis = g.kosten[s];
@@ -810,19 +818,36 @@ $('zuMissionen').addEventListener('click', zeigeMissionen); $('mZu').addEventLis
 $('bauZu').addEventListener('click', () => $('bau').classList.remove('an'));
 $('sTon').addEventListener('click', () => { stand.ton = !stand.ton; speicher.schreib('ton', stand.ton ? '1' : '0'); zeichneDorf(); });
 $('sVib').addEventListener('click', () => { stand.vib = !stand.vib; speicher.schreib('vib', stand.vib ? '1' : '0'); zeichneDorf(); });
+$('sGrafik').addEventListener('click', () => { grafik.wahl = GRAFIK_WAHL[(GRAFIK_WAHL.indexOf(grafik.wahl) + 1) % 3]; speicher.schreib('grafik', grafik.wahl);
+  setzeGrafik(grafik.wahl === 'auto' ? grafik.auto : grafik.wahl); zeichneDorf(); });
 $('nochmal').addEventListener('click', () => starte(app.letzte.opt, app.letzte.mission)); $('zumMenü').addEventListener('click', zeigeDorf);
 
 // ---------- Hauptschleife ----------
 const uhr = new THREE.Clock();
-function passeAn() { renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.fov = innerHeight > innerWidth ? 40 : 46; camera.updateProjectionMatrix(); }
+function passeAn() { renderer.setPixelRatio(Math.min(devicePixelRatio || 1, grafik.stufe === 'sparsam' ? 1.25 : 2)); renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.fov = innerHeight > innerWidth ? 40 : 46; camera.updateProjectionMatrix(); }
 window.addEventListener('resize', passeAn);
+// Texturen der Modelle: Original merken, bei 'sparsam' auf höchstens 1024 Pixel verkleinert zeigen
+const texturen = new Set();
+function merkeTexturen(szene) { szene.traverse(o => { if (!o.isMesh) return; for (const m of [].concat(o.material)) for (const k of ['map', 'emissiveMap']) { const t = m[k]; if (t?.image && !texturen.has(t)) { t.userData.voll = t.image; texturen.add(t); } } }); }
+function passeTexturAn(t) { const voll = t.userData.voll, b = voll.width, h = voll.height, max = 1024;
+  if (grafik.stufe === 'sparsam' && Math.max(b, h) > max) { if (!t.userData.klein) { const f = max / Math.max(b, h), c = document.createElement('canvas'); c.width = Math.round(b * f); c.height = Math.round(h * f);
+      c.getContext('2d').drawImage(voll, 0, 0, c.width, c.height); t.userData.klein = c; } t.image = t.userData.klein; }
+  else t.image = voll;
+  t.needsUpdate = true; }
+function setzeGrafik(stufe) { grafik.stufe = stufe; const sm = stufe === 'sparsam' ? 1024 : 2048;
+  if (sonne.shadow.mapSize.x !== sm) { sonne.shadow.mapSize.set(sm, sm); sonne.shadow.map?.dispose(); sonne.shadow.map = null; }
+  for (const t of texturen) passeTexturAn(t); passeAn(); }
+function misstGrafik(echt) { // nur bei Wahl 'auto', einmal im ersten Kampf
+  const g = grafik.mess; if (g.fertig || grafik.wahl !== 'auto' || !app.läuft || app.match?.phase !== 'play') return;
+  g.t += echt; g.n++; if (g.t < 4) return; g.fertig = true; const bps = g.n / g.t;
+  grafik.auto = bps < 40 ? 'sparsam' : 'hoch'; speicher.schreib('grafikAuto', grafik.auto); if (grafik.auto !== grafik.stufe) setzeGrafik(grafik.auto); }
 // Mess-Anzeige für Figuren-Tests (?figur=): Ladezeit und Bilder pro Sekunde
 const messung = { an: Q.has('figur'), laden: 0, bilder: 0, seit: performance.now(), bps: 0 };
 function messe() { if (!messung.an) return; messung.bilder++; const jetzt = performance.now();
   if (jetzt - messung.seit >= 1000) { messung.bps = Math.round(messung.bilder * 1000 / (jetzt - messung.seit)); messung.bilder = 0; messung.seit = jetzt;
     $('messung').textContent = `Laden ${(messung.laden / 1000).toFixed(1)} s · ${messung.bps} Bilder/s`; } }
 function bild() {
-  requestAnimationFrame(bild); messe(); const echt = Math.min(0.05, uhr.getDelta()); zeit += echt; if (app.imDorf) return;   // Dorf ist reines Bild, Kampfszene ruht
+  requestAnimationFrame(bild); messe(); const echt = Math.min(0.05, uhr.getDelta()); misstGrafik(echt); zeit += echt; if (app.imDorf) return;   // Dorf ist reines Bild, Kampfszene ruht
   let dt = echt; if (zeitlupe > 0) { zeitlupe -= echt; dt *= 0.3; } if (stopp > 0) { stopp -= echt; dt = 0; }      // Treffer-Stopp und Zeitlupe sind nur Darstellung
   const m = app.match;
   if (m && m.phase !== 'over') { app.rest += dt * app.tempo; let n = 0;
@@ -834,12 +859,12 @@ function bild() {
 }
 
 async function init() {
-  passeAn(); baueArena(); zeichneDorf(); await ladeVorlagen();
+  passeAn(); baueArena(); zeichneDorf(); await ladeVorlagen(); setzeGrafik(grafik.stufe);
   bewegeKamera(0, true); renderer.compile(scene, camera); requestAnimationFrame(bild);
-  $('meldung').textContent = fehlend.length ? 'Figuren nicht geladen, es geht mit Ersatzfiguren weiter.' : 'Die Figuren sind Platzhalter, bis deine eigenen da sind.'; $('zuMissionen').disabled = false;
+  $('meldung').textContent = fehlend.length ? 'Figuren nicht geladen, es geht mit Ersatzfiguren weiter.' : 'Mädchen und Gegner sind noch Platzhalter, bis deine eigenen da sind.'; $('zuMissionen').disabled = false;
   messung.laden = performance.now(); AR.bereit = true; if (Q.has('start')) starte({ ...(Q.get('modus') ? { modus: Q.get('modus') } : {}), ...(Q.get('stufe') ? { stufe: +Q.get('stufe') } : {}), ...(Q.get('seed') ? { seed: +Q.get('seed') } : {}), ...(Q.get('spielerStufe') ? { spielerStufe: +Q.get('spielerStufe') } : {}) });
 }
-const AR = window.AR = { bereit: false, messung, K, TYPEN, WELLEN, Kampf, Bot, Match, app, stand, eingabe, fehlend, starte, zeigeDorf, dorf, GEBAEUDE, MISSIONEN, baue, starteMission, zeigeMissionen,
+const AR = window.AR = { bereit: false, messung, grafik, setzeGrafik, K, TYPEN, WELLEN, Kampf, Bot, Match, app, stand, eingabe, fehlend, starte, zeigeDorf, dorf, GEBAEUDE, MISSIONEN, baue, starteMission, zeigeMissionen,
   info: () => { const m = app.match, k = m.kampf, ich = k.k[0], g = k.k.filter(f => f.team === 1);
     return { läuft: app.läuft, phase: m.phase, modus: m.opt.modus, punkte: [...m.punkte], welle: m.welle, gewonnen: m.gewonnen, zeit: k.zeit,
       ich: { x: ich.x, z: ich.z, leben: ich.leben, energie: ich.energie, zustand: ich.zustand, spezial: ich.spezial, kette: ich.kette }, gegner: g.map(f => ({ x: f.x, z: f.z, leben: f.leben, zustand: f.zustand })) }; } };

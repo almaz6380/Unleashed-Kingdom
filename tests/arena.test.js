@@ -14,7 +14,7 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const neu = async (query, dsf = 1) => { const ctx = await browser.newContext({ viewport: { width: 390, height: 780 }, deviceScaleFactor: dsf });
     const page = await ctx.newPage(); page.fehler = []; page.on('pageerror', e => page.fehler.push(e.message)); page.on('console', m => { if (m.type() === 'error') page.fehler.push(m.text()); });
-    await page.goto(URL + '?' + query); await page.waitForFunction('window.AR && AR.bereit', null, { timeout: 90000 }); return page; };
+    await page.goto(URL + '?' + query + (/grafik=/.test(query) ? '' : '&grafik=hoch')); await page.waitForFunction('window.AR && AR.bereit', null, { timeout: 90000 }); return page; };
   const info = page => page.evaluate(() => AR.info());
   const warte = (page, f, arg, ms = 60000) => page.waitForFunction(f, arg, { timeout: ms }).then(() => true).catch(() => false);
   const bild = (page, name) => page.screenshot({ path: path.join(SHOTS, name + '.png'), timeout: 90000 });
@@ -94,6 +94,15 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   page = await neu('neu&start&auto&tempo=6&modus=wellen&stufe=3&spielerStufe=9&seed=104');
   ok(await warte(page, () => AR.info().phase === 'over', null, 300000), 'Wellen-Lauf läuft bis zum Ende');
   const w = await info(page); ok(w.gewonnen !== null, `Wellen-Ergebnis steht fest (${w.gewonnen ? 'gewonnen' : 'verloren in Welle ' + (w.welle + 1)})`);
+  await page.context().close();
+
+  console.log('Grafik-Stufen');
+  page = await neu('neu&start&auto&grafik=auto');
+  ok(await page.evaluate(() => AR.grafik.stufe === 'hoch' && AR.grafik.wahl === 'auto'), 'Start mit Grafik „automatisch (hoch)“');
+  ok(await warte(page, () => AR.grafik.mess.fertig, null, 120000) && await page.evaluate(() => AR.grafik.stufe === 'sparsam'), 'ohne Grafikkarte (wenige Bilder/s) schaltet das Spiel selbst auf „sparsam“');
+  ok(await page.evaluate(() => [...document.querySelectorAll('canvas')][0].width <= innerWidth * 1.25 + 1), 'sparsam: Bildschärfe höchstens 1,25-fach');
+  await page.evaluate(() => AR.zeigeDorf()); await page.click('#sGrafik');
+  ok(await page.evaluate(() => AR.grafik.wahl === 'hoch' && AR.grafik.stufe === 'hoch') && (await page.textContent('#sGrafik')).includes('hoch'), 'Schalter im Dorf stellt auf „hoch“');
   await page.context().close();
 
   console.log('Fehlende Modelle');

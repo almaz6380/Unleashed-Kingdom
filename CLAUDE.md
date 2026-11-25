@@ -115,7 +115,21 @@ unverkleinerter Export, `moench` alter Platzhalter). Der Knappe ist seit 24.11. 
 zeigt das Spiel unter der Uhr Ladezeit und Bilder pro Sekunde (`messung`). `GLTFLoader` hat `MeshoptDecoder`
 (`lib/jsm/libs/`), weil Tripo große Modelle damit packt.
 
+## Grafik-Stufen (seit 25.11.)
+`grafik.stufe` 'hoch' (Bildschärfe bis 2×, Schatten 2048, Texturen voll) oder 'sparsam' (1,25×, Schatten 1024, Texturen
+≤ 1024 über `passeTexturAn`, halb so viele Funken). Wahl 'auto' (Standard) misst im ersten Kampf 4 s die Bilder/s
+(`misstGrafik`), unter 40 → sparsam, gespeichert in `ar_grafikAuto`. Schalter im Dorf (`#sGrafik`, `ar_grafik`).
+`?grafik=hoch|sparsam|auto` erzwingt eine Wahl; `tests/arena.test.js` öffnet alles mit `grafik=hoch`, außer dem Test
+der Auto-Stufe (ohne Grafikkarte schaltet sie auf sparsam).
+
 ## Eigene Figuren einsetzen
+**Knappe in mittlerer Qualität (25.11., so ist `modelle/knappe.glb` jetzt gebaut):** `werkzeug/knappe-fein.mjs`
+vereinfacht den großen Tripo-Export (`eingang/knappe-gross.glb`, 1,9 Mio. Dreiecke) auf 80.000 Dreiecke, dreht ihn in
+den Raum der Mixamo-Figur (prüft beide 90°-Richtungen, mittlerer Abstand 0,7 cm), überträgt die Skelett-Gewichte der
+groben Mixamo-Figur (4 nächste Punkte, nach Nähe gemischt) und setzt das feine Netz samt 2K-Textur in die vorhandene
+Datei. Skelett und alle 8 Bewegungen bleiben. Ergebnis 4 MB. So lassen sich künftige Figuren fein machen, ohne sie
+erneut bei Mixamo hochzuladen: grobe Fassung zu Mixamo, feine Fassung danach übertragen.
+
 **Weg vom Tripo-Export ins Spiel** (Knappe, 23.11.): Der User schickt einen Google-Drive-Link (Download über
 `https://drive.usercontent.google.com/download?id=<ID>&export=download&confirm=t`). Original nach `eingang/`.
 Im Scratchpad `npm i fbx2gltf @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions sharp`,
