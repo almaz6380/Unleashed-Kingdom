@@ -82,6 +82,7 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   await page.evaluate(() => AR.starte({ modus: 'duell', gegner: 'ritter', stufe: 1, spielerStufe: 9, seed: 11 }, 0));
   ok(await warte(page, () => AR.info().phase === 'over', null, 240000), 'Mission 1 läuft bis zum Ende');
   ok((await info(page)).gewonnen === true && await warte(page, () => document.getElementById('ergebnis').classList.contains('an'), null, 10000), 'Sieg, Ergebnis erscheint');
+  ok(await page.evaluate(() => { const f = AR.app.match.kampf.k[0]; return f.zustand === 'frei' && f.mx === 0 && f.mz === 0 && f.spezial === 0; }), 'nach dem Sieg steht der Sieger ruhig (läuft nicht, nicht mehr verwandelt)');
   ok(await page.evaluate(() => AR.dorf.geschafft.includes(0) && AR.dorf.roh.holz === 40 && AR.dorf.roh.stein === 20), 'Belohnung kommt im Dorf an');
   await page.evaluate(() => AR.starte({ modus: 'duell', gegner: 'maedchen', stufe: 2, spielerStufe: 9, seed: 12 }, 1));
   await warte(page, () => AR.info().phase === 'over', null, 240000); await warte(page, () => document.getElementById('ergebnis').classList.contains('an'), null, 10000);

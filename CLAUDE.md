@@ -57,6 +57,8 @@ Vorgeschichte und verworfene Wege stehen in `UEBERGABE.md`. Figuren-Prompts: `FI
   **Drachenpanzer mit Schwert** (`drache`, nur Junge, seit 24.11.): wie Panzer, dazu Reichweite ×1,5 (`K.DRACHE_WEIT`)
   und Treffer im Halbkreis; `istPanzer()` gilt für beide. Sturm: Schaden ×1,4,
   Tempo ×1,4, Schläge schneller und im Halbkreis.
+- **Rundenende** (`Kampf.beende`): Überlebende werden `frei`, Laufrichtung 0, Verwandlung endet; der Sieger dreht sich
+  in `zeigeFigur` langsam zur Kamera (seit 25.11., vorher lief/schlug er eingefroren weiter).
 - **Duell:** 2 Siege, 60 s je Runde (danach gewinnt, wer anteilig mehr Leben hat), höchstens 5 Runden.
 - **Wellen:** 2 Schergen, 3 Schergen, 1 Hauptmann; 120 s je Welle; zwischen den Wellen +25 Leben.
 

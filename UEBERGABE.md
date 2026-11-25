@@ -132,6 +132,9 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
 - **25.11.: Schwert aus Tripo ist drin** (`eingang/schwert.glb` → `modelle/schwert.glb`, Retopo Quad 10.000, Farben 2K).
   Liegt in der rechten Faust, erscheint bei der Verwandlung. Offen: Gefällt es ihm, passen die Hiebe (sonst
   Mixamo-Schwerthiebe)?
+- **25.11.:** Schwert passt ihm. „Nach dem Sieg bewegt er sich komisch“ → behoben: am Rundenende kommen Überlebende
+  zur Ruhe (kein Weiterlaufen/eingefrorener Schlag, Verwandlung endet), Sieger dreht sich zur Kamera. Angeboten:
+  Jubel-Bewegung von Mixamo („Victory“) als `jubel`.
 - Alter nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist

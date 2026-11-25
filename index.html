@@ -207,6 +207,9 @@ class Kampf {
         leben: e.leben ?? t.leben + (e.bonus?.leben ?? 0), maxLeben: t.leben + (e.bonus?.leben ?? 0), energie: e.energie ?? 0, sf: e.bonus?.schaden ?? 1, ef: e.bonus?.energie ?? 1, zustand: 'frei', t: 0, kette: 0, traf: false, puffer: false, schlagNr: 0,
         rollePause: 0, schutz: 0, rx: 0, rz: 0, spezial: 0, mx: 0, mz: 0, wunsch: { angriff: false, rolle: false, spezial: false } }; });
   }
+  // Rundenende: Wer noch steht, kommt zur Ruhe (kein Weiterlaufen, kein eingefrorener Schlag, Verwandlung endet)
+  beende() { for (const f of this.k) { if (f.zustand === 'tot') continue;
+    f.zustand = 'frei'; f.t = 0; f.kette = 0; f.puffer = false; f.mx = f.mz = 0; f.sx = f.sz = 0; f.spezial = 0; f.wunsch.angriff = f.wunsch.rolle = f.wunsch.spezial = false; } }
   lebend(team) { return this.k.filter(f => f.team === team && f.zustand !== 'tot'); }
   step() {
     this.ereignisse.length = 0; if (this.fertig) return; this.zeit += DT;
@@ -221,6 +224,7 @@ class Kampf {
     if (a === 0 || b === 0) { this.fertig = true; this.sieger = a > 0 ? 0 : b > 0 ? 1 : -1; }
     else if (this.zeit >= this.limit) { this.fertig = true; const teil = t => this.k.filter(f => f.team === t).reduce((s, f) => s + Math.max(0, f.leben) / f.maxLeben, 0) / this.k.filter(f => f.team === t).length;
       const u = teil(0), v = teil(1); this.sieger = Math.abs(u - v) < 0.01 ? -1 : u > v ? 0 : 1; this.ereignisse.push({ art: 'zeit' }); }
+    if (this.fertig) this.beende();
   }
   bewege(f) {
     const t = TYPEN[f.typ], w = f.wunsch;
@@ -486,8 +490,9 @@ function zeigeFigur(fig, f, dt, anteil) {
   const x = f.vx0 === undefined ? f.x : lerp(f.vx0, f.x, anteil), z = f.vz0 === undefined ? f.z : lerp(f.vz0, f.z, anteil);
   fig.grp.position.set(x, 0, z);
   // Drehung folgt weich, auch wenn die Regeln sie springen lassen (Zielhilfe, Rolle)
-  if (fig.r === undefined) fig.r = f.r; let dr = f.r - fig.r; dr = Math.atan2(Math.sin(dr), Math.cos(dr));
-  fig.r += dr * (1 - Math.exp(-dt * 28)); fig.grp.rotation.y = fig.r;
+  const kampf = app.match?.kampf, sieg = kampf?.fertig && f.zustand !== 'tot' && kampf.sieger === f.team, zielR = sieg ? 0 : f.r;   // Sieger schaut zur Kamera
+  if (fig.r === undefined) fig.r = f.r; let dr = zielR - fig.r; dr = Math.atan2(Math.sin(dr), Math.cos(dr));
+  fig.r += dr * (1 - Math.exp(-dt * (sieg ? 4 : 28))); fig.grp.rotation.y = fig.r;
   fig.gross = lerp(fig.gross, stein ? 1.32 : 1, 1 - Math.exp(-dt * 9)); fig.grp.scale.setScalar(fig.gross);
   // Farbe: Treffer-Blitz, Drachenpanzer grau, Sturm bläulich
   fig.blitz = Math.max(0, fig.blitz - dt * 6);
