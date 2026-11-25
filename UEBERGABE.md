@@ -129,6 +129,9 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   Entscheidung: **mittlere Qualität** (Figuren ~80.000 Dreiecke, Texturen 2K) plus **Grafik-Stufen** hoch/sparsam
   mit automatischer Messung und Schalter im Dorf. Knappe ist jetzt fein (aus seinem großen Export, Skelett
   übertragen, er musste nichts tun). Schwert: Retopo auf 10.000, GLB 2K, Datei im Chat – steht noch aus.
+- **25.11.: Schwert aus Tripo ist drin** (`eingang/schwert.glb` → `modelle/schwert.glb`, Retopo Quad 10.000, Farben 2K).
+  Liegt in der rechten Faust, erscheint bei der Verwandlung. Offen: Gefällt es ihm, passen die Hiebe (sonst
+  Mixamo-Schwerthiebe)?
 - Alter nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist

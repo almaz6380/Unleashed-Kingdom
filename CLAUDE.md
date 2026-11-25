@@ -101,7 +101,7 @@ für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zah
 | `Bot` | `denke(kampf, i)` setzt Laufrichtung und Wünsche |
 | `Match` | Runden bzw. Wellen, Phasen `count → play → end → over`, `tick()` |
 | `AUSSEHEN`, `NAMEN`, `ladeVorlagen`, `baueFigur`, `zeigeFigur` | Modell je Typ, Animationen am Namen erkennen, Zustand → Animation. Flüssig: Position zwischen zwei Rechenschritten eingeblendet (`vx0/vz0`), Drehung folgt weich, Überblenden 0,06 s (Schläge) bis 0,18 s (Stehen/Laufen), Schlag 3 als eigene Kopie |
-| `baueSchwert`, `zeigeSchwert`, `SCHWERT` | Schwert-Modell aus Tripo (`SCHWERT.datei`, senkrecht, Spitze oben; noch `null` = kein sichtbares Schwert) am Knochen `RightHand` (Klinge von Pinky1 Richtung Index1), wächst bei der Verwandlung heraus; Hiebe = Kopien des rechten Schlags (`schwert1–3`) plus Armschwung im Code. Das Schwert aus Grundformen (24.11.) fand der User „sehr schlecht“ und ist entfernt |
+| `baueSchwert`, `zeigeSchwert`, `SCHWERT` | Schwert-Modell des Users aus Tripo (`modelle/schwert.glb`, 25.000 Dreiecke, 1,2 MB, senkrecht, Spitze oben; `SCHWERT.griff` = Griffmitte als Anteil von unten, `laenge` 0,95 m; `datei: null` = kein sichtbares Schwert) am Knochen `RightHand` (Klinge von Pinky1 Richtung Index1), wächst bei der Verwandlung heraus; Hiebe = Kopien des rechten Schlags (`schwert1–3`) plus Armschwung im Code. Das Schwert aus Grundformen (24.11.) fand der User „sehr schlecht“ und ist entfernt |
 | `fx(e)` | Ereignisse ⇒ Funken, Schlagbogen, Schadenszahlen, Wackeln, Treffer-Stopp, Zeitlupe, Töne, Vibration |
 | `bewegeKamera` | hält Spieler und nächsten Gegner im Bild |
 | Bedienung | Steuerkreis links (zuletzt aufgesetzter Finger, Loslassen überall abgefangen), drei Knöpfe rechts |

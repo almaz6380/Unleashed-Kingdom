@@ -28,3 +28,4 @@ Schon da:
 - `mixamo/`: die 7 Mixamo-Bewegungen (alle „With Skin“, 30 fps): fight-idle, running, jab-cross, uppercut,
   hit-reaction, dying, roll (Sprinting Forward Roll, lief trotz „In Place“ 4,7 m weit). Daraus entsteht
   `modelle/knappe.glb` mit `werkzeug/baue-knappe-mixamo.mjs`.
+- `schwert.glb`: Schwert aus Tripo (Retopo Quad 10.000, 25.000 Dreiecke), daraus `modelle/schwert.glb`.

@@ -600,7 +600,7 @@ function knochenBewegung(fig, f, dt, lauf) {
 // Hängt am Knochen RightHand. Die Klinge zeigt quer durch die Faust zur Daumenseite (von Pinky1 nach Index1).
 // Schwert-Modell aus Tripo (`datei`, null = noch keins: dann bleibt die Verwandlung ohne sichtbares Schwert).
 // Erwartet: Schwert senkrecht, Spitze oben (+y), Knauf unten. laenge = Gesamtlänge in Metern, griff = Anteil von unten.
-const SCHWERT = { datei: null, laenge: 1.0, griff: 0.12, leuchten: 0.35 };
+const SCHWERT = { datei: 'modelle/schwert.glb', laenge: 0.95, griff: 0.17, leuchten: 0.25 };   // Schwert des Users aus Tripo
 function baueSchwert(fig, m) {
   const v = SCHWERT.datei && vorlagen[SCHWERT.datei]; if (!v) return;
   let hand, zeige, klein; m.traverse(o => { const n = o.name.replace(/^mixamorig:?/i, ''); if (n === 'RightHand') hand = o; if (n === 'RightHandIndex1') zeige = o; if (n === 'RightHandPinky1') klein = o; });
