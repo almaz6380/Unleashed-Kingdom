@@ -101,7 +101,7 @@ für Menschen passt, ist ungeprüft.** Wer an `K`, `TYPEN` oder `Bot` dreht: Zah
 | `Bot` | `denke(kampf, i)` setzt Laufrichtung und Wünsche |
 | `Match` | Runden bzw. Wellen, Phasen `count → play → end → over`, `tick()` |
 | `AUSSEHEN`, `NAMEN`, `ladeVorlagen`, `baueFigur`, `zeigeFigur` | Modell je Typ, Animationen am Namen erkennen, Zustand → Animation. Flüssig: Position zwischen zwei Rechenschritten eingeblendet (`vx0/vz0`), Drehung folgt weich, Überblenden 0,06 s (Schläge) bis 0,18 s (Stehen/Laufen), Schlag 3 als eigene Kopie |
-| `baueSchwert`, `zeigeSchwert`, `SCHWERT` | Leuchtendes Schwert aus Grundformen am Knochen `RightHand` (Klinge von Pinky1 Richtung Index1), wächst bei der Verwandlung heraus; Hiebe = Kopien des rechten Schlags (`schwert1–3`) plus Armschwung im Code (`drehe` nach `mixer.update`) |
+| `baueSchwert`, `zeigeSchwert`, `SCHWERT` | Schwert-Modell aus Tripo (`SCHWERT.datei`, senkrecht, Spitze oben; noch `null` = kein sichtbares Schwert) am Knochen `RightHand` (Klinge von Pinky1 Richtung Index1), wächst bei der Verwandlung heraus; Hiebe = Kopien des rechten Schlags (`schwert1–3`) plus Armschwung im Code. Das Schwert aus Grundformen (24.11.) fand der User „sehr schlecht“ und ist entfernt |
 | `fx(e)` | Ereignisse ⇒ Funken, Schlagbogen, Schadenszahlen, Wackeln, Treffer-Stopp, Zeitlupe, Töne, Vibration |
 | `bewegeKamera` | hält Spieler und nächsten Gegner im Bild |
 | Bedienung | Steuerkreis links (zuletzt aufgesetzter Finger, Loslassen überall abgefangen), drei Knöpfe rechts |

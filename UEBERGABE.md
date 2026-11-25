@@ -121,6 +121,10 @@ Ordner `welt-3d/` und `kulisse/`. Von dort stammt auch dieses Spiel (Ordner `are
   Schwert „im Spiel gebaut“ statt aus Tripo; ein echtes Schwert-Modell kann später ersetzen. Balance unverändert
   (Junge–Rabenritter 45 %). Offen: Rückmeldung zum Schwert vom Handy; schönere Schwerthiebe gäbe es auf Mixamo
   („Great Sword Slash“) für dieselbe Figur.
+- **25.11.:** Das Schwert aus Grundformen fand er „sehr schlecht“ → entfernt. Er macht das Schwert in Tripo
+  (Prompt im Chat und in `FIGUREN.md`, ohne Rig, Retopo ~3.000 Flächen, Datei im Chat). Bis dahin Verwandlung ohne
+  sichtbares Schwert, Regeln (Reichweite ×1,5, Halbkreis) bleiben. Danach: `SCHWERT.datei` setzen, Lage prüfen,
+  fragen, ob die Hiebe passen (sonst Mixamo-Schwerthiebe).
 - Alter nächster Schritt: in Tripo **Rig** (Humanoid) mit Stehen, Laufen, Schlag, Getroffen, Umfallen, dann fest einbauen.
 
 ## 5. Was noch Platzhalter ist

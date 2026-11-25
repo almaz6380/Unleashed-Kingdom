@@ -439,7 +439,7 @@ if (EIGENE[Q.get('figur')]) AUSSEHEN.junge = EIGENE[Q.get('figur')];
 const NAMEN = { steh: /^steh$|idle/i, lauf: /^lauf$|run/i, schlag1: /^schlag1$|attack(?!2)|punch|slash/i, schlag2: /^schlag2$|attack2|kick/i, schlag3: /^schlag3$/, treffer: /^treffer$|hit/i, tod: /^tod$|death|die|knock/i, rolle: /^rolle$|roll|dodge/i };
 const vorlagen = {};
 async function ladeVorlagen() {
-  const dateien = [...new Set(Object.values(AUSSEHEN).map(a => a.datei))];
+  const dateien = [...new Set(Object.values(AUSSEHEN).map(a => a.datei).concat(SCHWERT.datei ? [SCHWERT.datei] : []))];
   await Promise.all(dateien.map(async d => { if (Q.get('ohne') === 'modelle') { fehlend.push(d); return; }
     try { const g = await loader.loadAsync(d), box = new THREE.Box3().setFromObject(g.scene); vorlagen[d] = { szene: g.scene, clips: g.animations, h: box.max.y - box.min.y, y0: box.min.y }; } catch (e) { fehlend.push(d); } }));
 }
@@ -591,27 +591,25 @@ function knochenBewegung(fig, f, dt, lauf) {
 }
 // ---------- Schwert der Verwandlung (Junge, Sorte 'drache'), aus einfachen Formen ----------
 // Hängt am Knochen RightHand. Die Klinge zeigt quer durch die Faust zur Daumenseite (von Pinky1 nach Index1).
-const SCHWERT = { klinge: 0.85, breit: 0.07 };
+// Schwert-Modell aus Tripo (`datei`, null = noch keins: dann bleibt die Verwandlung ohne sichtbares Schwert).
+// Erwartet: Schwert senkrecht, Spitze oben (+y), Knauf unten. laenge = Gesamtlänge in Metern, griff = Anteil von unten.
+const SCHWERT = { datei: null, laenge: 1.0, griff: 0.12, leuchten: 0.35 };
 function baueSchwert(fig, m) {
+  const v = SCHWERT.datei && vorlagen[SCHWERT.datei]; if (!v) return;
   let hand, zeige, klein; m.traverse(o => { const n = o.name.replace(/^mixamorig:?/i, ''); if (n === 'RightHand') hand = o; if (n === 'RightHandIndex1') zeige = o; if (n === 'RightHandPinky1') klein = o; });
   if (!hand || !zeige || !klein) return;
-  const g = new THREE.Group(), innen = new THREE.Group(); g.add(innen);
-  const leuchten = new THREE.MeshBasicMaterial({ color: 0xffe7b0 }), schein = new THREE.MeshBasicMaterial({ color: 0xff9a3a, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false });
-  const gold = new THREE.MeshLambertMaterial({ color: 0xd9a441, emissive: 0x5a3a08 }), leder = new THREE.MeshLambertMaterial({ color: 0x5a3a22 });
-  const k = SCHWERT.klinge, teil = (geo, mat, y) => { const t = new THREE.Mesh(geo, mat); t.position.y = y; innen.add(t); return t; };
-  teil(new THREE.BoxGeometry(SCHWERT.breit, k, 0.016), leuchten, 0.12 + k / 2);
-  teil(new THREE.ConeGeometry(SCHWERT.breit * 0.72, 0.12, 4).rotateY(Math.PI / 4).scale(1, 1, 0.23), leuchten, 0.12 + k + 0.06);
-  teil(new THREE.BoxGeometry(SCHWERT.breit * 2.2, k + 0.1, 0.06), schein, 0.12 + k / 2);
-  teil(new THREE.BoxGeometry(0.26, 0.035, 0.05), gold, 0.1);
-  teil(new THREE.CylinderGeometry(0.019, 0.019, 0.2, 8), leder, 0);
-  teil(new THREE.SphereGeometry(0.035, 10, 8), gold, -0.11);
+  const g = new THREE.Group(), innen = new THREE.Group(), modell = v.szene.clone(true); g.add(innen); innen.add(modell);
+  const box = new THREE.Box3().setFromObject(modell), mitte = box.getCenter(new THREE.Vector3()), h = box.max.y - box.min.y, f = SCHWERT.laenge / h;
+  modell.scale.setScalar(f); modell.position.set(-mitte.x * f, -(box.min.y + h * SCHWERT.griff) * f, -mitte.z * f);   // Griff-Punkt in den Ursprung
+  const mats = []; modell.traverse(o => { if (!o.isMesh) return; o.castShadow = true; const alt = o.material, neu = new THREE.MeshLambertMaterial({ map: alt.map, color: 0xffffff });
+    neu.emissive = new THREE.Color(0xffb050); neu.emissiveMap = alt.map; neu.emissiveIntensity = SCHWERT.leuchten; o.material = neu; mats.push(neu); });
   // Lage in der Hand: alles im Raum des Hand-Knochens, Größe gegen die Knochen-Skalierung ausgleichen
   m.updateWorldMatrix(true, true); const inv = hand.matrixWorld.clone().invert(), p = o => o.getWorldPosition(new THREE.Vector3()).applyMatrix4(inv);
   const pz = p(zeige), pk = p(klein), richtung = pz.clone().sub(pk).normalize(), skal = hand.getWorldScale(new THREE.Vector3()).x / fig.grp.scale.x;
   g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), richtung);
   g.position.copy(pz.clone().add(pk).multiplyScalar(0.5)).multiplyScalar(0.75);
   g.scale.setScalar(1 / skal); innen.scale.setScalar(0.001); g.visible = false; hand.add(g);
-  fig.schwert = { g, innen, s: 0 };
+  fig.schwert = { g, innen, s: 0, mats };
   // Schwerthiebe: Kopien des rechten Schlags (Cross), dazu ein Armschwung im Code (zeigeSchwert)
   if (fig.akt.schlag2) { fig.schwert.akt = true; for (const n of ['schwert1', 'schwert2', 'schwert3']) fig.akt[n] = fig.mixer.clipAction(fig.akt.schlag2.getClip().clone()); }
   let arm, rumpf; m.traverse(o => { const n = o.name.replace(/^mixamorig:?/i, ''); if (n === 'RightArm') arm = o; if (n === 'Spine2') rumpf = o; });
@@ -655,7 +653,7 @@ function fx(e) { // Ereignisse aus der Simulation ⇒ Bild, Ton, Vibration
     ton(e.stark ? 110 : 150, e.stark ? 0.2 : 0.12, 'sawtooth', e.stark ? 0.13 : 0.09, 40); if (ich) vib(e.stark ? 60 : 25); }
   else if (e.art === 'ko') { zeitlupe = 0.9; wackel = 0.45; funken(e.x, 1, e.z, 0xff9050, 22, 6); ton(90, 0.5, 'sawtooth', 0.14, 30); vib(e.auf === 0 ? [80, 40, 120] : 50); }
   else if (e.art === 'rolle') { funken(e.x, 0.2, e.z, 0xd8c8a8, 5, 1.5); ton(420, 0.1, 'sine', 0.04, 200); }
-  else if (e.art === 'spezial') { funken(e.x, 1, e.z, istPanzer(e.sorte) ? 0xffc070 : 0x9fe8ff, 30, 6); wackel = 0.35; stopp = 0.12; ton(220, 0.5, 'square', 0.1, 880); if (e.von === 0) { vib([40, 30, 80]); banner(istPanzer(e.sorte) ? 'Drachenpanzer!' : 'Sturm!', e.sorte === 'drache' ? 'mit Schwert' : '', 900); } }
+  else if (e.art === 'spezial') { funken(e.x, 1, e.z, istPanzer(e.sorte) ? 0xffc070 : 0x9fe8ff, 30, 6); wackel = 0.35; stopp = 0.12; ton(220, 0.5, 'square', 0.1, 880); if (e.von === 0) { vib([40, 30, 80]); banner(istPanzer(e.sorte) ? 'Drachenpanzer!' : 'Sturm!', e.sorte === 'drache' && SCHWERT.datei ? 'mit Schwert' : '', 900); } }
   else if (e.art === 'los') { banner('Los!', '', 600); ton(660, 0.25, 'square', 0.08, 990); }
   else if (e.art === 'zeit') banner('Zeit um!', '', 1000);
   else if (e.art === 'rundeEnde') { const m = app.match; if (m.gewonnen === null) banner(m.opt.modus === 'wellen' ? `Welle ${m.welle} geschafft!` : e.sieger === 0 ? 'Runde gewonnen!' : e.sieger === 1 ? 'Runde verloren' : 'Unentschieden', '', 1500); }
@@ -795,7 +793,7 @@ function zeigeBau(id) {
 function zeigeMissionen() {
   const c = $('wahlChar'); c.innerHTML = '';
   for (const typ of ['junge', 'maedchen']) { const frei = dorf.figuren.includes(typ), b = document.createElement('button'); b.className = 'wahl' + (dorf.char === typ ? ' an' : ''); b.dataset.char = typ; b.disabled = !frei;
-    b.innerHTML = frei ? `${TYPEN[typ].name}<small>${istPanzer(TYPEN[typ].spezial) ? 'Drachenpanzer mit Schwert' : 'entfesselt den Sturm'}</small>` : `🔒 ???<small>schließt sich später an</small>`;
+    b.innerHTML = frei ? `${TYPEN[typ].name}<small>${istPanzer(TYPEN[typ].spezial) ? (SCHWERT.datei ? 'Drachenpanzer mit Schwert' : 'legt den Drachenpanzer an') : 'entfesselt den Sturm'}</small>` : `🔒 ???<small>schließt sich später an</small>`;
     b.addEventListener('click', () => { dorf.char = typ; speichereDorf(); zeigeMissionen(); }); c.appendChild(b); }
   const l = $('mListe'); l.innerHTML = ''; const offen = dorf.geschafft.length ? Math.max(...dorf.geschafft) + 1 : 0;
   MISSIONEN.forEach((m, i) => { const fertig = dorf.geschafft.includes(i), zu = i > offen, b = document.createElement('button');
