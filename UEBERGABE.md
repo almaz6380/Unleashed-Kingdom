@@ -1,10 +1,19 @@
-# Übergabe – Stand 22.11.2026
+# Übergabe – Stand 26.11.2026
 
 Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst, danach `CLAUDE.md`
 (Regeln, Kampfwerte, Aufbau des Codes).
 
+> **Richtungswechsel am 26.11.2026: Wikinger-Spiel („Vikings“ als Arbeitstitel).** Der User will Bauen, Clans,
+> Spielersuche über Supabase und richtig gute 3D-Grafik. Die Analyse dazu steht in
+> [`VIKINGS-ANALYSE.md`](VIKINGS-ANALYSE.md): Spielsinn, Bausteine, Online, Grafik, Kosten, Etappen. **Am Spiel ist
+> dafür noch nichts geändert, die Entscheidungen aus Abschnitt 9 der Analyse sind offen.** Erst fragen, dann bauen.
+> Alles Weitere in dieser Datei beschreibt den Stand davor (Königreich mit Rittern und Drachen). Kampf, Dorf,
+> Missionen und der Figuren-Weg (Tripo, Mixamo) sollen nach meiner Empfehlung bleiben und nur umgekleidet werden.
+> Name, Figuren und Aussehen aus der Serie „Vikings“ oder aus bekannten Wikinger-Spielen werden nicht übernommen.
+
 ## 1. Mit wem du arbeitest
-- Der User ist **kein Programmierer**, schreibt **kurz und auf Deutsch** und arbeitet **nur am Handy**.
+- Der User ist **kein Programmierer**, schreibt **kurz und auf Deutsch** und arbeitet meist **am Handy**. Für
+  Tripo und Mixamo nutzt er inzwischen auch einen Mac. Dateien bis etwa 6 MB schickt er direkt im Chat.
 - Antworte auf Deutsch, ohne Fachbegriffe. Zeige Ergebnisse als **Bilder im Chat**.
 - Sag immer ehrlich, was nur im simulierten Browser geprüft ist. **Auf einem echten Handy lief das Spiel noch nie.**
 - Er ändert seine Meinung oft und schnell. Frag bei Richtungswechseln kurz nach, bevor du viel baust, und halte
@@ -157,6 +166,8 @@ Lässt sich eine GLB-Datei nicht im Chat schicken, kann er sie über die GitHub-
 (Ordner `eingang/` vorschlagen).
 
 ## 7. Nächste Schritte, in dieser Reihenfolge
+**Seit 26.11. zuerst:** die vier Entscheidungen zum Wikinger-Spiel einholen (umbauen oder neu, Stil, Held, Dorf als
+Bild oder in 3D), hier festhalten, dann Etappe 1 aus `VIKINGS-ANALYSE.md`. Die Liste darunter ist der alte Plan.
 1. **Rückmeldung vom echten Handy einholen:** Fühlt sich der Kampf gut an? Sitzen die Knöpfe? Ist Stufe 1 zu
    leicht oder zu schwer? Ruckelt es? Danach an `K`, `TYPEN` und `Bot` nachstellen (Zahlen vorher und nachher
    vergleichen).
