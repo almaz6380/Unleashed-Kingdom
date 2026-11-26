@@ -6,11 +6,13 @@ verworfene Wege, nächste Schritte.
 Der User ist kein Programmierer, schreibt kurz auf Deutsch und arbeitet meist **am Handy**. Antworten auf Deutsch,
 ohne Fachbegriffe. Immer ehrlich sagen, was nur simuliert geprüft ist.
 
-**Richtungswechsel am 26.11.2026:** Das Spiel soll ein **Wikinger-Spiel** werden („Vikings“ als Arbeitstitel) mit
-Bauen, Clans, Spielersuche über Supabase und besserer 3D-Grafik. Analyse und Etappen: `VIKINGS-ANALYSE.md`. Am Code
-ist dafür noch nichts geändert, die Entscheidungen des Users sind offen (siehe `UEBERGABE.md`). Bis dahin gilt
-alles unten weiter. Mit Online fallen später zwei feste Regeln: „keine Schlüssel“ (wird „keine geheimen
-Schlüssel“) und „alles in `index.html`“.
+**Richtungswechsel am 26.11.2026:** Der User will ein **neues Wikinger-Spiel** („Vikings“ als Arbeitstitel) mit
+Bauen, Clans, Spielersuche über Supabase und besserer 3D-Grafik. Er hat entschieden: **neu anfangen** (dieses
+Spiel bleibt liegen und ist nur Vorlage), Krieger werden **einzeln losgeschickt**, einige Figuren wie der Anführer
+haben eine Spezialfähigkeit, neuer Held (junger Wikinger), Dorf als gemaltes Bild. Stil und Einzelheiten des Kampfs
+sind offen. Analyse, Etappen und Stil-Prompts: `VIKINGS-ANALYSE.md`, Stand der Entscheidungen: `UEBERGABE.md`.
+Gebaut ist dafür noch nichts. Alles unten beschreibt das alte Spiel. Mit Online fallen im neuen Spiel zwei feste
+Regeln: „keine Schlüssel“ (wird „keine geheimen Schlüssel“) und „alles in `index.html`“.
 
 ## Wohin das Ganze soll (vom User am 22.11. festgelegt)
 Ein **Kampf- und Aufbauspiel** in einem **Königreich mit Rittern und Drachen**, **Märchen-Stil** (seit 23.11.):

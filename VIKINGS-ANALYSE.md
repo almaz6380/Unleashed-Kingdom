@@ -176,3 +176,31 @@ Gute Grafik kommt weniger von mehr Flächen als von Stil, Umgebung, Licht, Beweg
 5. **Supabase:** Bist du einverstanden, ein Konto anzulegen und die Regel „keine Schlüssel“ auf „keine geheimen
    Schlüssel“ zu ändern? Das brauche ich erst in Etappe 3.
 6. **Clan-Verständigung:** feste Sätze oder freier Chat? Das brauche ich erst in Etappe 5.
+
+## 10. Nach der Analyse entschieden (26.11.2026)
+Der User hat vier der Fragen beantwortet, teils anders als empfohlen:
+- **Neu anfangen** statt umbauen. Das alte Spiel ist nur noch Vorlage.
+- **Kampf:** Krieger werden einzeln losgeschickt und kämpfen von selbst. Einige Figuren, zum Beispiel der Anführer,
+  haben eine Spezialfähigkeit. Die Abschnitte 1, 2 und 8 oben gehen noch vom selbst gesteuerten Helden aus und
+  müssen entsprechend gelesen werden: Etappe 1 ist jetzt ein Probekampf mit losgeschickten Kriegern.
+- **Held:** eine neue Figur, ein junger Wikinger, der Anführer.
+- **Dorf:** gemaltes Bild mit Gebäude-Bildern.
+- **Stil:** offen, er wählt nach drei Probe-Bildern.
+
+### Stil-Proben: der Anführer in drei Stilen
+Dieselbe Figur, dreimal anders gemalt. Haltung und Hintergrund sind schon so, dass das Bild direkt in Tripo kann.
+
+Freundlich (Märchen-Stil):
+```
+A single young Viking chieftain, about 20 years old, dark blond hair tied back with a few loose strands, light stubble, a grey wolf-fur mantle over the shoulders, a deep blue wool tunic with a simple woven trim, a wide leather belt with a round bronze buckle, leather bracers, wrapped leg bindings and sturdy leather boots, no helmet, no weapons. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, warm friendly colors, a confident friendly smile, realistic body proportions with the head only slightly larger than normal. Full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
+```
+
+Kräftig (dazwischen):
+```
+A single young Viking chieftain, about 20 years old, dark blond hair tied back with a few loose strands, light stubble, a grey wolf-fur mantle over the shoulders, a deep blue wool tunic with a simple woven trim, a wide leather belt with a round bronze buckle, leather bracers, wrapped leg bindings and sturdy leather boots, no helmet, no weapons. Stylized game character art, bold chunky shapes with a strong clear silhouette, slightly exaggerated broad shoulders and big hands, hand-painted textures, cool northern color palette with one strong accent color, determined expression. Full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
+```
+
+Rau und ernst:
+```
+A single young Viking chieftain, about 20 years old, dark blond hair tied back with a few loose strands, light stubble, a grey wolf-fur mantle over the shoulders, a deep blue wool tunic with a simple woven trim, a wide leather belt with a round bronze buckle, leather bracers, wrapped leg bindings and sturdy leather boots, no helmet, no weapons. Gritty semi-realistic style, realistic body proportions, weathered skin with a small scar on the cheek, worn and patched clothing, muted earthy colors, cold overcast light, grim serious expression. Full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
+```

@@ -3,12 +3,27 @@
 Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst, danach `CLAUDE.md`
 (Regeln, Kampfwerte, Aufbau des Codes).
 
-> **Richtungswechsel am 26.11.2026: Wikinger-Spiel („Vikings“ als Arbeitstitel).** Der User will Bauen, Clans,
+> **Richtungswechsel am 26.11.2026: neues Wikinger-Spiel („Vikings“ als Arbeitstitel).** Der User will Bauen, Clans,
 > Spielersuche über Supabase und richtig gute 3D-Grafik. Die Analyse dazu steht in
-> [`VIKINGS-ANALYSE.md`](VIKINGS-ANALYSE.md): Spielsinn, Bausteine, Online, Grafik, Kosten, Etappen. **Am Spiel ist
-> dafür noch nichts geändert, die Entscheidungen aus Abschnitt 9 der Analyse sind offen.** Erst fragen, dann bauen.
-> Alles Weitere in dieser Datei beschreibt den Stand davor (Königreich mit Rittern und Drachen). Kampf, Dorf,
-> Missionen und der Figuren-Weg (Tripo, Mixamo) sollen nach meiner Empfehlung bleiben und nur umgekleidet werden.
+> [`VIKINGS-ANALYSE.md`](VIKINGS-ANALYSE.md): Spielsinn, Bausteine, Online, Grafik, Kosten, Etappen.
+>
+> **Von ihm entschieden am 26.11.:**
+> - **Neu anfangen**, nicht umbauen. Ich hatte Umbauen empfohlen, er entscheidet. Das bisherige Spiel bleibt
+>   unverändert liegen und dient nur als Vorlage: wiederholbare Kampf-Rechnung, Tests, Figuren-Weg über Tripo und
+>   Mixamo, Grafik-Stufen.
+> - **Kampf**, in seinen Worten: „Figuren einzeln losschicken und einige Figuren (wie bspw. der Wikingerführer)
+>   haben Spezialfähigkeit“. Mein Verständnis, **von ihm noch zu bestätigen**: Raubzug auf ein Dorf, man setzt
+>   Krieger einzeln aufs Feld, sie kämpfen von selbst. Der Anführer ist eine besondere Figur mit einem Knopf für
+>   seine Spezialfähigkeit. Einen selbst gesteuerten Helden gibt es dann nicht mehr.
+> - **Held:** eine ganz neue Figur, ein junger Wikinger (der Anführer). Nicht mehr der Junge aus Anigosha.
+> - **Dorf:** gemaltes Bild mit Gebäude-Bildern in Stufen, kein 3D-Dorf.
+> - **Stil:** offen. Er wollte Beispiele und hat drei Prompts für den Anführer bekommen (freundlich, kräftig, rau;
+>   sie stehen in Abschnitt 10 der Analyse). Er wählt nach den Bildern.
+> - Später zu klären: Supabase-Konto und Schlüssel-Regel (Etappe Konto), Clan-Chat (Etappe Clans), eigener Name.
+>
+> **Noch nichts gebaut.** Mein Vorschlag: das neue Spiel in einem eigenen Ordner `vikings/` in diesem Repo, in
+> mehreren Dateien. Erst sein OK zum Kampf-Verständnis einholen, dann einen ersten Probekampf mit Platzhaltern.
+> Alles Weitere in dieser Datei beschreibt das alte Spiel (Königreich mit Rittern und Drachen).
 > Name, Figuren und Aussehen aus der Serie „Vikings“ oder aus bekannten Wikinger-Spielen werden nicht übernommen.
 
 ## 1. Mit wem du arbeitest
@@ -166,8 +181,9 @@ Lässt sich eine GLB-Datei nicht im Chat schicken, kann er sie über die GitHub-
 (Ordner `eingang/` vorschlagen).
 
 ## 7. Nächste Schritte, in dieser Reihenfolge
-**Seit 26.11. zuerst:** die vier Entscheidungen zum Wikinger-Spiel einholen (umbauen oder neu, Stil, Held, Dorf als
-Bild oder in 3D), hier festhalten, dann Etappe 1 aus `VIKINGS-ANALYSE.md`. Die Liste darunter ist der alte Plan.
+**Seit 26.11. zuerst:** (1) sein OK zu meinem Verständnis des neuen Kampfs einholen, (2) seine Stil-Wahl nach den
+drei Probe-Bildern, (3) dann das neue Spiel beginnen: Probekampf mit Platzhaltern, danach der Anführer aus Tripo
+und Mixamo. Die Liste darunter ist der Plan des alten Spiels und gilt nicht mehr.
 1. **Rückmeldung vom echten Handy einholen:** Fühlt sich der Kampf gut an? Sitzen die Knöpfe? Ist Stufe 1 zu
    leicht oder zu schwer? Ruckelt es? Danach an `K`, `TYPEN` und `Bot` nachstellen (Zahlen vorher und nachher
    vergleichen).
