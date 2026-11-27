@@ -55,14 +55,18 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   await page.click('[data-karte=anfuehrer]'); await tippe(page, 0, SZ);
   ok(await warte(page, () => getComputedStyle(document.getElementById('schrei')).display !== 'none', null, 10000) && (await info(page)).schreiMoeglich, 'mit dem Anführer erscheint der Kriegsschrei-Knopf');
   ok(await page.evaluate(() => document.querySelector('[data-karte=anfuehrer]').disabled), 'die Anführer-Karte ist verbraucht');
+  ok(await warte(page, () => { const f = VK.app.r.anfuehrer(), s = f && VK.app.figBild.get(f.id); return !!s && ['steh', 'lauf', 'schlag1', 'schlag2', 'schrei', 'tod'].every(n => s.akt[n]); }, null, 20000),
+    'der Anführer ist die eigene Figur des Users mit allen sechs Bewegungen');
   // den Rest der Truppe absetzen und schneller laufen lassen
   await page.evaluate(sz => { const r = VK.app.r; let k = 0; for (const typ of ['schild', 'axt', 'bogen']) while (r.vorrat[typ] > 0) VK.absetzenWelt(typ, -5 + (k++ % 9) * 1.2, sz + (typ === 'bogen' ? 1.2 : -0.6)); VK.app.tempo = 4; }, SZ);
-  ok((await info(page)).eigene === 13 && (await page.$$('.kk:disabled')).length === 4, 'alle 13 Krieger stehen auf dem Feld, alle Karten sind leer');
+  // gezählt wird, wer abgesetzt wurde; ob einer inzwischen gefallen ist, hängt vom Tempo des Testrechners ab
+  ok(await page.evaluate(() => VK.app.r.rest() === 0 && VK.app.r.figuren.filter(f => f.team === 0).length === 13) && (await page.$$('.kk:disabled')).length === 4, 'alle 13 Krieger sind abgesetzt, alle Karten sind leer');
   ok(await warte(page, () => VK.info().zeit > 7, null, 90000), 'die Krieger laufen los');
   await bild(page, '3-anmarsch');
   await page.click('#schrei', { force: true });
   i = await info(page);
   ok(i.schreiAktiv && !i.schreiMoeglich && await page.textContent('#banner') === 'Kriegsschrei!', 'Kriegsschrei ausgelöst');
+  ok(await page.evaluate(() => { const s = VK.app.figBild.get(VK.app.r.anfuehrer().id); return s.schreiEnde > 0 && s.akt.schrei.isRunning(); }), 'der Anführer spielt dazu die Schrei-Bewegung');
   ok(await warte(page, () => getComputedStyle(document.getElementById('schrei')).display === 'none', null, 10000), 'der Knopf verschwindet, den Schrei gibt es nur einmal');
   await bild(page, '4-kriegsschrei');
   ok(await warte(page, () => VK.info().bauten.some(b => b.leben < b.max), null, 120000), 'die Krieger beschädigen ein Gebäude');
@@ -137,6 +141,9 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
     const vf = () => page.evaluate(() => VF.info());
     let v = await vf();
     ok(v.fassung === '250k' && v.dreiecke === 250000 && v.figuren === 1, 'lädt zuerst die mittlere Fassung (250.000 Flächen), eine Figur');
+    ok(['steh', 'lauf', 'schlag1', 'schlag2', 'schrei', 'tod'].every(n => v.bewegungen.includes(n)) && v.mixer === 1, 'die Figur hat ihr Skelett und alle sechs Bewegungen');
+    await page.click('[data-b=schlag1]'); ok((await vf()).bewegung === 'schlag1', 'die Leiste schaltet die Bewegung um');
+    await page.waitForTimeout(900); await bild(page, '9-anfuehrer-hieb'); await page.click('[data-b=steh]');
     await page.waitForTimeout(1200); await bild(page, '9-anfuehrer-ganz');
     await page.click('[data-a=nah]'); await page.waitForTimeout(1200); await bild(page, '9-anfuehrer-nah-250k');
     await page.click('[data-f="80k"]');
@@ -146,7 +153,7 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
     ok(await warte(page, () => VF.info().fassung === '600k' && VF.info().dreiecke > 590000, null, 180000), 'Wechsel auf 600.000 Flächen');
     await page.waitForTimeout(1200); await bild(page, '9-anfuehrer-nah-600k');
     await page.click('[data-f="80k"]'); await warte(page, () => VF.info().fassung === '80k', null, 60000); await page.click('[data-a=raubzug]');
-    v = await vf(); ok(v.ansicht === 'raubzug' && v.figuren === 18, '„Wie im Raubzug“ zeigt 18 Figuren von oben');
+    v = await vf(); ok(v.ansicht === 'raubzug' && v.figuren === 18 && v.mixer === 18, '„Wie im Raubzug“ zeigt 18 Figuren von oben, jede bewegt sich');
     await page.waitForTimeout(1500); await bild(page, '9-anfuehrer-raubzug');
     await page.click('[data-a=ganz]'); ok((await vf()).figuren === 1, 'zurück zur einzelnen Figur');
     ohneFehler(page, 'keine Fehler auf der Ansichts-Seite'); await ctx.close(); }

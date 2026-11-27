@@ -44,9 +44,12 @@ Figuren und Bilder. Reihenfolge: Etappen in der Analyse.
 | `js/spiel.js` | Bild, Ton, Bedienung, Ablauf. Test-Zugriff `window.VK` |
 | `package.json` | nur `"type": "module"`, damit Node `js/sim.js` lesen kann (die Browser-Prüfung heißt deshalb `.cjs`) |
 | `figur.html` | Ansichts-Seite: der Anführer in drei Feinheiten zum Vergleichen (siehe unten) |
-| `modelle/` | eigene Figuren des neuen Spiels (bisher: Anführer in drei Feinheiten, ohne Skelett) |
+| `FIGUREN.md` | alle Bild-Prompts für Tripo: Krieger, Waffen, Gebäude, Gegner, Endgegner |
+| `js/licht.js` | Umgebungslicht für die eigenen Figuren (Probekampf und Ansichts-Seite) |
+| `modelle/` | eigene Figuren des neuen Spiels (bisher: Anführer in drei Feinheiten, mit Mixamo-Skelett) |
 | `eingang/` | Vorlagen des Users (`LIESMICH.md` dort) |
 | `werkzeug/figur-stufen.mjs` | macht aus einem großen Tripo-Export Master, Spiel-Fassungen und die Hilfsfigur für Mixamo |
+| `werkzeug/baue-anfuehrer.mjs` | setzt Mixamo-Skelett und Bewegungen mit der feinen Fassung zusammen |
 | `tests/sim.test.mjs` | Regeln ohne Browser: Wiederholbarkeit, Absetzen, Ende, Schwierigkeit des Beispiel-Dorfs |
 | `tests/raubzug.test.cjs` | Simuliertes Handy: laden, absetzen, halten, Kriegsschrei, ganzer Raubzug, Nachrechnen, Handy-Größen, Grafik-Stufen, Ersatzfiguren, Ansichts-Seite, Bilder |
 
@@ -112,8 +115,8 @@ Der User will bessere Qualität als „10.000 Flächen, 2K“ und exportiert aus
 Qualität. Sein Anführer kam am 27.11. als GLB mit 4,95 Mio. Dreiecken und 4K-Texturen (153 MB, per Drive-Link).
 `werkzeug/figur-stufen.mjs` macht daraus (Aufruf: `<gross.glb> <zielordner> <name>`):
 - `eingang/anfuehrer-master.glb`: 1 Mio. Dreiecke, Texturen unverändert. Quelle für alles Weitere.
-- `modelle/anfuehrer-80k.glb`, `-250k.glb`, `-600k.glb` (1,8 / 4,1 / 7,3 MB): Fassungen zum Vergleichen, noch ohne
-  Skelett, mit Farb-, Normal- und Rauheits-Karte (WebP), Meshopt-gepackt.
+- Fassungen mit 80.000, 250.000 und 600.000 Flächen zum Vergleichen, mit Farb-, Normal- und Rauheits-Karte (WebP),
+  Meshopt-gepackt, zunächst ohne Skelett (Zwischenstand im Scratchpad, nicht im Repo).
 - die Hilfsfigur für Mixamo (24.000 Dreiecke), aus der `../werkzeug/obj-fuer-mixamo.mjs` die ZIP baut
   (`eingang/anfuehrer-fuer-mixamo.zip`, 185 cm). Ohne das Flag `Permissive` vereinfachen: sonst verschmiert die
   Textur, und der User sieht die Figur in Mixamo.
@@ -121,19 +124,47 @@ Qualität. Sein Anführer kam am 27.11. als GLB mit 4,95 Mio. Dreiecken und 4K-T
 **`figur.html`** ist die Ansichts-Seite dazu: dieselbe Figur in den drei Feinheiten, Ansichten „Ganze Figur“,
 „Ganz nah“ und „Wie im Raubzug“ (18 Figuren von oben), mit Bildern pro Sekunde. Der User entscheidet damit am
 Handy, wie fein die Figur wird. Licht dort: `MeshStandardMaterial` mit Umgebungslicht aus einem gemalten Raum, so
-kommen Fell, Leder und Tattoos zur Geltung. **Der Probekampf selbst nutzt noch das einfache Licht (Lambert)**; für
-die eigenen Figuren muss `baueFigur` in `js/spiel.js` auf dieses Licht umgestellt werden.
-Schalter: `?fassung=80k|250k|600k`, `?ansicht=ganz|nah|raubzug`, `?still`, `?datei=<pfad>.glb` (beliebige Datei
+kommen Fell, Leder und Tattoos zur Geltung (`js/licht.js`, auch vom Probekampf benutzt). Gibt es mehr als eine
+Bewegung, erscheint eine Leiste zum Umschalten.
+Schalter: `?fassung=80k|250k|600k`, `?ansicht=ganz|nah|raubzug`, `?bewegung=steh|lauf|schlag1|schlag2|schrei|tod`,
+`?zeit=<s>` (Bewegung an einer Stelle anhalten), `?still`, `?dreh=<Winkel>`, `?datei=<pfad>.glb` (beliebige Datei
 dieses Ordners ansehen). Test-Zugriff `window.VF`.
 
-**Nächste Schritte:** (1) Der User wählt die Feinheit. (2) Er lädt die ZIP bei Mixamo hoch und schickt die
-Bewegungen als FBX: ruhiges Stehen, Laufen auf der Stelle, zwei Hiebe, Kriegsschrei, Fallen (die erste „With Skin“,
-die übrigen „Without Skin“, 30 Bilder pro Sekunde). (3) Wie beim Knappen: `FBX2glTF` je Datei, Figur und Skelett aus
-der ersten Datei, Bewegungen zuschneiden (`../werkzeug/baue-knappe-mixamo.mjs` als Vorlage), dann die Gewichte auf
-die gewählte feine Fassung übertragen (`../werkzeug/knappe-fein.mjs` als Vorlage; die Tripo-Figur schaut hier schon
-nach +z, die 90°-Drehung entfällt). (4) In `AUSSEHEN` eintragen: Datei, Höhe, Farbton. Gebraucht werden die Namen
-`steh`, `lauf`, `schlag1`, `tod`, dazu `schlag2` und `schrei`. Eine Waffe hat die Figur noch nicht: als eigenes
-Modell an die Hand hängen wie das Schwert im alten Spiel (`baueSchwert`).
+**Skelett und Bewegungen (`werkzeug/baue-anfuehrer.mjs`, Aufruf: `<ordner mit Mixamo-GLB> <feine Fassung.glb> <ziel.glb>`):**
+Mixamo hat die ZIP angenommen (Marker wie beim Knappen, „Standard Skeleton (65)“). Die FBX des Users liegen in
+`eingang/mixamo/` und werden je Datei mit `FBX2glTF --binary` umgewandelt. Das Werkzeug nimmt Skelett und grobes Netz
+aus `breathing-idle` (mit „With Skin“ geladen), schneidet die Bewegungen zu (`TEILE`: Datei, Name im Spiel, von/bis,
+`ort` = Hüfte bleibt an Ort und Stelle) und ersetzt das grobe Netz durch die feine Fassung: Jeder feine Punkt
+übernimmt die Gewichte der 4 nächsten groben Punkte (mittlerer Abstand 4 bis 6 mm, beide Figuren schauen nach +z,
+keine Drehung nötig). Ergebnis: `modelle/anfuehrer-80k.glb`, `-250k.glb`, `-600k.glb` (2,2 / 4,5 / 7,9 MB) mit
+Skelett. Fehlende Bewegungs-Dateien werden ausgelassen.
+
+**Alle sechs Bewegungen sind da (27.11., Mixamo liefert 24 Bilder pro Sekunde):**
+| Name im Spiel | Mixamo-Datei in `eingang/mixamo/` | Schnitt | Besonderes |
+| --- | --- | --- | --- |
+| `steh` | `breathing-idle` (Breathing Idle, mit Figur) | ganz, 9,9 s | – |
+| `lauf` | `running` (Running, In Place) | ganz, 0,67 s | – |
+| `schlag1` | `attack-downward` (Standing Melee Attack Downward) | 0,5–1,2 s | Treffer 0,33 s nach Beginn |
+| `schlag2` | `attack-horizontal` (Standing Melee Attack Horizontal) | 0,55–1,25 s | Treffer 0,33 s nach Beginn |
+| `schrei` | `battlecry` (Standing Taunt Battlecry) | 0,1–2,2 s | `nur: 'oben'`: nur Oberkörper, Arme, Kopf |
+| `tod` | `walking-to-dying` (Walking To Dying, statt „Dying“) | 1,0–2,6 s | `ort: 'start'`: fällt von der Stelle aus etwa 1,2 m nach vorn |
+
+Wie eine Bewegung verläuft, zeigt `werkzeug/ana-anim.mjs <datei.glb>` (Lage von Hüfte, Kopf, Händen, Füßen je Bild)
+oder die Ansichts-Seite mit `?bewegung=…&zeit=…`.
+
+**Im Probekampf (`js/spiel.js`):** `AUSSEHEN.anfuehrer` zeigt auf `modelle/anfuehrer-<Feinheit>.glb` mit `eigen: true`
+(die Figur behält ihr eigenes Material samt Normal- und Rauheits-Karte; das Umgebungslicht aus `js/licht.js` wirkt nur
+auf solche Figuren), `lauf: 4.0` (Tempo, bei dem die Lauf-Bewegung in echter Geschwindigkeit passt) und `tod: 1.3`
+(Dauer des Fallens). Die Hiebe wechseln sich ab (`schlag1`, `schlag2`). Beim Kriegsschrei legt `rufe()` die
+Schrei-Bewegung mit hohem Gewicht über das, was die Figur gerade tut: Die Beine laufen oder stehen weiter.
+**Die Feinheit ist vorläufig 250k, bis der User gewählt hat** (`FEINHEIT`, umschaltbar mit `?figur=80k|250k|600k`).
+
+**Nächste Schritte:** (1) Der User wählt die Feinheit auf `figur.html`. (2) Eine Waffe hat der Anführer noch nicht,
+er schlägt mit leerer Hand: Die Axt kommt als eigenes Modell aus Tripo und wird an die Hand gehängt wie das Schwert
+im alten Spiel (`baueSchwert`). (3) Die übrigen Krieger, Waffen und Gebäude: alle Bild-Prompts stehen in
+[`FIGUREN.md`](FIGUREN.md), nach Dringlichkeit geordnet. **Das Tripo-Abo des Users läuft bald aus**, er erzeugt die
+Modelle jetzt auf Vorrat; Mixamo ist nicht eilig. Jede weitere Figur geht denselben Weg: `figur-stufen.mjs`,
+ZIP für Mixamo, `baue-anfuehrer.mjs` (für weitere Figuren verallgemeinern: Name und `TEILE` als Eingabe).
 
 ## Arbeitsweise
 - Vor jedem Commit: `node vikings/tests/sim.test.mjs`, dann im Repo-Ordner `python3 -m http.server 8766` im

@@ -10,4 +10,6 @@ Hier liegen die Vorlagen, aus denen die Figuren des Wikinger-Spiels entstehen. A
 - `anfuehrer-fuer-mixamo.zip` (1,5 MB): grobe Hilfsfigur für Mixamo, 24.000 Dreiecke, als OBJ mit Farb-Textur,
   185 cm. Gebaut mit `../werkzeug/figur-stufen.mjs` und `../../werkzeug/obj-fuer-mixamo.mjs`. Sie ist im Spiel nie zu
   sehen: Mixamo setzt das Skelett ein, die Gewichte werden danach auf die feine Figur übertragen.
-- Kommt noch: `mixamo/` mit den Bewegungen als FBX.
+- `mixamo/`: die Bewegungen aus Mixamo als FBX. Da: `breathing-idle.fbx` (mit Figur und Skelett, „With Skin“).
+  Erwartet: Running (In Place), Standing Melee Attack Downward, Standing Melee Attack Horizontal,
+  Standing Taunt Battlecry, Dying (alle „Without Skin“).

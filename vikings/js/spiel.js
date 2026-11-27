@@ -1,9 +1,12 @@
 // Vikings – Bild, Ton und Bedienung des Probekampfs. Die Regeln stehen in sim.js.
-// Alles Sichtbare ist Platzhalter: Boden gemalt im Code, Häuser aus Klötzen, Krieger aus freien Figuren (../modelle).
+// Fast alles Sichtbare ist Platzhalter: Boden gemalt im Code, Häuser aus Klötzen, Krieger aus freien Figuren (../modelle).
+// Der Anführer ist die erste eigene Figur des Users (modelle/anfuehrer-*.glb).
 // Zugriff für Tests: window.VK
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as kloneSkelett } from 'three/addons/utils/SkeletonUtils.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { umgebung } from './licht.js';
 import { DT, K, EINHEITEN, BAUTEN, BEUTE, KARTEN, TRUPPE, Raubzug, botEingaben, amStrand, mulberry32 } from './sim.js';
 
 const Q = new URLSearchParams(location.search), $ = id => document.getElementById(id);
@@ -26,6 +29,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x1f4a66);
 const camera = new THREE.PerspectiveCamera(38, 1, 1, 400);
 scene.add(new THREE.HemisphereLight(0xfff0d8, 0x4a5a44, 1.25));
+scene.environment = umgebung(renderer); scene.environmentIntensity = 0.45;   // nur für die eigenen Figuren, siehe licht.js
 const sonne = new THREE.DirectionalLight(0xffdca8, 2.3); sonne.position.set(-12, 24, 12); sonne.castShadow = true;
 sonne.shadow.mapSize.set(2048, 2048); Object.assign(sonne.shadow.camera, { left: -20, right: 20, top: 24, bottom: -24, near: 1, far: 80 });
 sonne.shadow.bias = -0.0006; sonne.shadow.normalBias = 0.05; scene.add(sonne);
@@ -131,16 +135,19 @@ function zeigeBau(s, b, dt) {
   else if (s.wackel > 0) { s.wackel = Math.max(0, s.wackel - dt); const w = 1 + Math.sin(s.wackel * 60) * 0.03 * (s.wackel / 0.18); s.haus.scale.set(w, 1 / w, w); }
 }
 
-// ---------- Krieger (Platzhalter-Figuren aus dem alten Spiel) ----------
+// ---------- Krieger (Platzhalter-Figuren aus dem alten Spiel, Anführer aus Tripo und Mixamo) ----------
+// Feinheit des Anführers: vorläufig die mittlere, bis der User gewählt hat. Umschalten zum Vergleichen: ?figur=80k|250k|600k
+const FEINHEIT = ['80k', '250k', '600k'].includes(Q.get('figur')) ? Q.get('figur') : '250k';
 const AUSSEHEN = {
   schild:    { datei: '../modelle/krieger.glb',  hoehe: 2.1, ton: 0x9fc4ff },
   axt:       { datei: '../modelle/krieger.glb',  hoehe: 1.9, ton: 0xffffff },
-  anfuehrer: { datei: '../modelle/moench.glb',   hoehe: 2.5, ton: 0xffe6a8 },
+  // eigen: die Figur behält ihr eigenes Material. lauf: Tempo, bei dem die Lauf-Bewegung in echter Geschwindigkeit passt. tod: Dauer des Fallens.
+  anfuehrer: { datei: `modelle/anfuehrer-${FEINHEIT}.glb`, hoehe: 2.5, ton: 0xffffff, eigen: true, glut: 0.1, lauf: 4.0, tod: 1.3 },
   bogen:     { datei: '../modelle/schurkin.glb', hoehe: 1.8, ton: 0xd8ffc8, glut: 0.75 },   // dunkle Vorlage, deshalb heller
   wache:     { datei: '../modelle/krieger.glb',  hoehe: 1.9, ton: 0xff7a6a },
 };
 const GLUT = 0.38;   // Eigenleuchten: die kleinen Figuren sollen sich von der Wiese abheben
-const loader = new GLTFLoader(), vorlagen = {}, fehlend = [];
+const loader = new GLTFLoader(), vorlagen = {}, fehlend = []; loader.setMeshoptDecoder(MeshoptDecoder);
 async function ladeVorlagen() {
   const dateien = [...new Set(Object.values(AUSSEHEN).map(a => a.datei))];
   await Promise.all(dateien.map(async d => { if (Q.get('ohne') === 'modelle') { fehlend.push(d); return; }
@@ -151,9 +158,11 @@ function baueFigur(f) {
   const a = AUSSEHEN[f.typ], v = vorlagen[a.datei], grp = new THREE.Group(), eigen = f.team === 0;
   // grp trägt nur die Lage; gedreht wird allein der Körper, damit Ring und Lebensbalken gerade bleiben
   const koerper = new THREE.Group(); grp.add(koerper);
-  const s = { grp, koerper, mixer: null, akt: {}, jetzt: null, mats: [], r: f.r, schlagNr: f.schlagNr, zustand: '', totSeit: 0, eigen, glut: a.glut ?? GLUT };
+  const s = { grp, koerper, mixer: null, akt: {}, jetzt: null, mats: [], r: f.r, schlagNr: f.schlagNr, zustand: '', totSeit: 0, eigen, glut: a.glut ?? GLUT, eigenMat: !!a.eigen, schreiEnde: 0 };
   if (v) { const m = kloneSkelett(v.szene); m.position.y = -v.y0; const halter = new THREE.Group(); halter.add(m); halter.scale.setScalar(a.hoehe / v.h); koerper.add(halter);
-    m.traverse(o => { if (!o.isMesh) return; o.castShadow = true; o.frustumCulled = false; const alt = o.material, neu = new THREE.MeshLambertMaterial({ map: alt.map, color: a.ton });
+    m.traverse(o => { if (!o.isMesh) return; o.castShadow = true; o.frustumCulled = false;
+      if (a.eigen) { const neu = o.material.clone(); neu.emissive = new THREE.Color(0xffffff); neu.emissiveMap = neu.map; neu.emissiveIntensity = s.glut; o.material = neu; s.mats.push(neu); return; }
+      const alt = o.material, neu = new THREE.MeshLambertMaterial({ map: alt.map, color: a.ton });
       neu.color.multiplyScalar(1.9); neu.emissive = new THREE.Color(a.ton); neu.emissiveMap = alt.map; neu.emissiveIntensity = s.glut; o.material = neu; s.mats.push(neu); });
     s.mixer = new THREE.AnimationMixer(m); for (const c of v.clips) s.akt[c.name] = s.mixer.clipAction(c);
   } else { const mat = lambert(new THREE.Color(a.ton).multiplyScalar(0.8)); s.mats.push(mat);
@@ -168,23 +177,29 @@ function baueFigur(f) {
 }
 function spiele(s, name, einmal, dauer) { // Bewegung wechseln, weich überblenden
   const a = s.akt[name]; if (!a || (s.jetzt === a && !einmal)) return;
-  const blende = name === 'schlag1' ? 0.06 : name === 'tod' ? 0.12 : 0.16;
+  const blende = name.startsWith('schlag') ? 0.06 : name === 'tod' ? 0.12 : 0.16;
   a.reset(); a.setLoop(einmal ? THREE.LoopOnce : THREE.LoopRepeat, Infinity); a.clampWhenFinished = true; a.timeScale = dauer ? a.getClip().duration / dauer : 1;
   if (s.jetzt && s.jetzt !== a) { a.crossFadeFrom(s.jetzt, blende, false); a.play(); } else a.fadeIn(blende).play(); s.jetzt = a;
 }
+// Kriegsschrei des Anführers: die Bewegung betrifft nur Oberkörper und Arme und liegt mit hohem Gewicht über dem, was
+// die Figur gerade tut. Die Beine laufen oder stehen also weiter.
+function rufe(s) { const a = s?.akt.schrei; if (!a) return; const dauer = 1.5;
+  a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; a.timeScale = a.getClip().duration / dauer; a.weight = 8; a.fadeIn(0.15).play(); s.schreiEnde = zeit + dauer - 0.3; }
 function zeigeFigur(s, f, dt, anteil, r) {
   const t = EINHEITEN[f.typ], eilig = f.schreiBis > r.zeit && f.zustand !== 'tot';
   const x = f.px === undefined ? f.x : lerp(f.px, f.x, anteil), z = f.pz === undefined ? f.z : lerp(f.pz, f.z, anteil);
   s.grp.position.x = x; s.grp.position.z = z;
   let dr = f.r - s.r; dr = Math.atan2(Math.sin(dr), Math.cos(dr)); s.r += dr * (1 - Math.exp(-dt * 14)); s.koerper.rotation.y = s.r;
-  if (f.zustand === 'tot') { if (s.zustand !== 'tot') { spiele(s, 'tod', true, 0.9); s.ring.visible = false; s.balken.visible = false; if (!s.mixer) s.koerper.rotation.z = 1.4; }
+  const a = AUSSEHEN[f.typ];
+  if (s.schreiEnde && (zeit > s.schreiEnde || f.zustand === 'tot')) { s.akt.schrei.fadeOut(0.3); s.schreiEnde = 0; }
+  if (f.zustand === 'tot') { if (s.zustand !== 'tot') { spiele(s, 'tod', true, a.tod ?? 0.9); s.ring.visible = false; s.balken.visible = false; if (!s.mixer) s.koerper.rotation.z = 1.4; }
     s.totSeit += dt; if (s.totSeit > 2.2) s.grp.position.y = -Math.min(1.6, (s.totSeit - 2.2) * 0.9); if (s.totSeit > 4.2) s.grp.visible = false; }
-  else if (f.zustand === 'kampf') { if (s.schlagNr !== f.schlagNr) { s.schlagNr = f.schlagNr; spiele(s, 'schlag1', true, Math.min(0.7, t.takt * 0.8) / (eilig ? K.SCHREI_FAKTOR : 1)); } else if (s.zustand !== 'kampf') spiele(s, 'steh', false); }
-  else if (f.zustand === 'lauf') { spiele(s, 'lauf', false); if (s.jetzt === s.akt.lauf) s.jetzt.timeScale = t.tempo / 3.4 * (eilig ? K.SCHREI_FAKTOR : 1); }
+  else if (f.zustand === 'kampf') { if (s.schlagNr !== f.schlagNr) { s.schlagNr = f.schlagNr; spiele(s, s.akt.schlag2 && f.schlagNr % 2 === 0 ? 'schlag2' : 'schlag1', true, Math.min(0.7, t.takt * 0.8) / (eilig ? K.SCHREI_FAKTOR : 1)); } else if (s.zustand !== 'kampf') spiele(s, 'steh', false); }
+  else if (f.zustand === 'lauf') { spiele(s, 'lauf', false); if (s.jetzt === s.akt.lauf) s.jetzt.timeScale = t.tempo / (a.lauf ?? 3.4) * (eilig ? K.SCHREI_FAKTOR : 1); }
   else spiele(s, 'steh', false);
   s.zustand = f.zustand; s.mixer?.update(dt);
   if (f.zustand !== 'tot') { setzeBalken(s.balken, f.leben / f.maxLeben);
-    for (const m of s.mats) if (m.emissiveMap) m.emissiveIntensity = eilig ? s.glut + 0.4 + 0.2 * Math.sin(zeit * 14) : s.glut;
+    for (const m of s.mats) if (m.emissiveMap) m.emissiveIntensity = eilig ? s.glut + (s.eigenMat ? 0.22 : 0.4) * (1 + 0.5 * Math.sin(zeit * 14)) : s.glut;
     s.ring.material.color.setHex(eilig ? 0xffffff : s.eigen ? 0xffd27a : 0xff5a4a); }
 }
 
@@ -235,7 +250,7 @@ function fx(e) { // Ereignisse aus den Regeln ⇒ Bild und Ton
   else if (e.art === 'tod') { funken(e.x, 1, e.z, e.team === 0 ? 0xffb090 : 0xffe0a0, 8, 3); ton(e.team === 0 ? 150 : 240, 0.25, 'sawtooth', 0.06, 50); }
   else if (e.art === 'einsturz') { const b = r.bauten[e.bau]; funken(e.x, 1, e.z, 0x9a8a78, 16, 2.6, true); funken(e.x, 1.2, e.z, 0xffb060, 10, 4); wackel = Math.max(wackel, BAUTEN[e.typ].haupt ? 0.7 : 0.35); ton(90, 0.5, 'sawtooth', 0.11, 30);
     const lohn = BEUTE.filter(k => e.beute[k]).map(k => `${BEUTE_BILD[k]} +${e.beute[k]}`).join('  '); schweb(e.x, e.z, 2.5, lohn || `${BAUTEN[b.typ].name} zerstört`); if (BAUTEN[e.typ].haupt) banner('Langhaus gefallen!'); }
-  else if (e.art === 'schrei') { welle(e.x, e.z); banner('Kriegsschrei!', 900); wackel = Math.max(wackel, 0.3); ton(180, 0.6, 'sawtooth', 0.1, 520); setTimeout(() => ton(260, 0.5, 'square', 0.06, 640), 90); if (navigator.vibrate) try { navigator.vibrate([40, 30, 90]); } catch (x) {} }
+  else if (e.art === 'schrei') { welle(e.x, e.z); rufe(app.figBild.get(r.anfuehrer()?.id)); banner('Kriegsschrei!', 900); wackel = Math.max(wackel, 0.3); ton(180, 0.6, 'sawtooth', 0.1, 520); setTimeout(() => ton(260, 0.5, 'square', 0.06, 640), 90); if (navigator.vibrate) try { navigator.vibrate([40, 30, 90]); } catch (x) {} }
   else if (e.art === 'ende') setTimeout(zeigeErgebnis, 1300);
 }
 

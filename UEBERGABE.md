@@ -42,11 +42,23 @@ Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst
 > Ansichts-Seite `https://almaz6380.github.io/Unleashed-Kingdom/vikings/figur.html`. Die Figur sieht sehr gut aus.
 > Im Raubzug von oben ist zwischen den Fassungen kein Unterschied zu sehen, ganz nah schon (Fell, Gesicht).
 >
+> **Der Anführer bewegt sich (27.11.):** Mixamo hat die ZIP angenommen. Der User hat sechs Bewegungen geschickt
+> (Stehen, Laufen, Hieb von oben, Hieb seitlich, Kriegsschrei, Fallen). Sie sind in alle drei Feinheiten eingebaut,
+> die Ansichts-Seite spielt sie ab, und **der Anführer läuft im Probekampf mit** (vorläufig in der mittleren Feinheit
+> 250k, weil er noch nicht gewählt hat). Er schlägt noch mit leerer Hand, die Axt fehlt.
+>
+> **Sein Tripo-Abo läuft bald aus (27.11.).** Er will alle Modelle vorher erzeugen und hat dafür **alle Bild-Prompts
+> auf einmal** bekommen: [`vikings/FIGUREN.md`](vikings/FIGUREN.md), 37 Stück, nach Dringlichkeit: (1) alles für den
+> Raubzug (Axtkämpfer, Schildträger, Bogenschützin, Dorfwache, fünf Waffen, vier Gebäude, Langschiff), (2) Gebäude
+> fürs eigene Dorf, (3) weitere Krieger und Gegner, (4) Endgegner aus den Sagen. **Gruppen 2 bis 4 sind mein Vorschlag
+> aus der Analyse, von ihm noch nicht entschieden.** Er fragte nach, wofür die Figuren genau gebraucht werden; die
+> Antwort steht im Chat vom 27.11. (Gruppe 1 ersetzt die Platzhalter des Probekampfs, der Rest ist für spätere Etappen).
+> Mixamo kostet nichts und läuft nicht ab, eilig sind nur die Tripo-Modelle.
+>
 > **Als Nächstes:** (1) Seine Wahl der Feinheit (er entscheidet, nicht vorgeben) und Rückmeldung zum Probekampf.
-> (2) Er lädt die ZIP bei Mixamo hoch und schickt die Bewegungen; dann die Figur mit Skelett bauen und in den
-> Probekampf einsetzen (Schritte in `vikings/CLAUDE.md`). Der Probekampf braucht dafür das bessere Licht der
-> Ansichts-Seite. (3) Weitere Krieger (Axtkämpfer, Schildträger, Bogenschütze) und eine Waffe für die Hand.
-> (4) Danach Etappe 2 der Analyse: eigenes Dorf.
+> (2) Modelle aus Tripo annehmen, sobald er Links schickt: je Figur `figur-stufen.mjs`, ZIP für Mixamo, Bewegungen
+> einbauen (Schritte in `vikings/CLAUDE.md`); Waffen an die Hand hängen; Gebäude statt der Klötze einsetzen.
+> (3) Danach Etappe 2 der Analyse: eigenes Dorf.
 > Alles Weitere in dieser Datei beschreibt das alte Spiel (Königreich mit Rittern und Drachen).
 > Name, Figuren und Aussehen aus der Serie „Vikings“ oder aus bekannten Wikinger-Spielen werden nicht übernommen.
 
