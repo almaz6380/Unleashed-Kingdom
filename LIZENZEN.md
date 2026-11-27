@@ -17,3 +17,4 @@ Arena-Boden, Steine, Feuerschein, Effekte und Töne entstehen im Code.
 - `lib/jsm/libs/meshopt_decoder.module.js`: aus three.js r170 (MIT-Lizenz), entpackt Meshopt-gepackte Modelle.
 - Bewegungen des Knappen (`modelle/knappe.glb`): Adobe Mixamo (mixamo.com), vom User mit seinem Adobe-Konto geladen. Mixamo-Bewegungen dürfen laut Adobe kostenlos in eigenen Spielen genutzt werden (nicht als Einzeldateien weiterverteilt).
 - `modelle/schwert.glb` (aus `eingang/schwert.glb`): Schwert, vom User mit Tripo aus seinem eigenen Bild erzeugt (25.11.2026). Gehört dem User.
+- `vikings/eingang/anfuehrer-master.glb`, `vikings/modelle/anfuehrer-*.glb`, `vikings/eingang/anfuehrer-fuer-mixamo.zip`: der Anführer des Wikinger-Spiels, vom User aus seinem eigenen Bild mit Tripo erzeugt (27.11.2026). Gehört dem User.

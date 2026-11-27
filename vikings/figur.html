@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#16242e">
+<title>Vikings – Anführer ansehen</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #16242e; color: #fff;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-user-select: none; user-select: none; touch-action: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  button { font: inherit; color: inherit; border: 0; }
+  #oben { position: fixed; left: 12px; right: 12px; top: calc(10px + env(safe-area-inset-top)); pointer-events: none; text-shadow: 0 1px 4px #000; }
+  #oben b { display: block; font-size: 18px; } #mess { font-size: 13px; color: #dbe6ee; line-height: 1.4; }
+  .reihe { position: fixed; left: 8px; right: 8px; display: flex; gap: 7px; justify-content: center; }
+  #ansichten { bottom: calc(86px + env(safe-area-inset-bottom)); } #fassungen { bottom: calc(10px + env(safe-area-inset-bottom)); }
+  .reihe button { flex: 1; max-width: 130px; border-radius: 12px; padding: 9px 4px; font-size: 13px; font-weight: 700; background: rgba(22,32,42,.88);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.18); }
+  .reihe button small { display: block; font-weight: 400; font-size: 11px; color: #c9d6e0; }
+  .reihe button.an { background: rgba(255,210,122,.3); box-shadow: inset 0 0 0 3px #ffd27a; }
+  #lade { position: fixed; left: 0; right: 0; top: 45%; text-align: center; font-size: 16px; font-weight: 700; text-shadow: 0 2px 6px #000; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="bild"></canvas>
+<div id="oben"><b>Anführer – welche Fassung?</b><span id="mess"></span></div>
+<div id="lade">Lädt …</div>
+<div class="reihe" id="ansichten">
+  <button data-a="ganz">Ganze Figur</button>
+  <button data-a="nah">Ganz nah</button>
+  <button data-a="raubzug">Wie im Raubzug<small>18 Figuren</small></button>
+</div>
+<div class="reihe" id="fassungen">
+  <button data-f="80k">Fein<small>80.000 Flächen</small></button>
+  <button data-f="250k">Sehr fein<small>250.000 Flächen</small></button>
+  <button data-f="600k">Am feinsten<small>600.000 Flächen</small></button>
+</div>
+
+<script type="importmap">{ "imports": { "three": "../lib/three.module.min.js", "three/addons/": "../lib/jsm/" } }</script>
+<script type="module">
+// Ansichts-Seite: dieselbe Figur in drei Feinheiten, damit der User am Handy entscheiden kann.
+// Die Figuren stehen hier noch starr (ohne Skelett); Bewegungen kommen nach Mixamo.
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+
+const Q = new URLSearchParams(location.search), $ = id => document.getElementById(id);
+const FASSUNGEN = { '80k': 'modelle/anfuehrer-80k.glb', '250k': 'modelle/anfuehrer-250k.glb', '600k': 'modelle/anfuehrer-600k.glb' };
+const HOEHE = 1.85, DREH = +(Q.get('dreh') ?? 0);            // DREH: Vorderseite zur Kamera
+// Zum Prüfen lässt sich jede GLB-Datei dieses Ordners ansehen: ?datei=modelle/irgendwas.glb
+if (/^[\w\-./]+\.glb$/.test(Q.get('datei') ?? '') && !Q.get('datei').includes('..')) FASSUNGEN.datei = Q.get('datei');
+const zustand = { fassung: FASSUNGEN.datei ? 'datei' : FASSUNGEN[Q.get('fassung')] ? Q.get('fassung') : '250k', ansicht: ['ganz', 'nah', 'raubzug'].includes(Q.get('ansicht')) ? Q.get('ansicht') : 'ganz',
+  winkel: 0, ruhe: 0, bilder: 0, dreiecke: 0, mb: 0, ladezeit: 0 };
+
+const canvas = $('bild'), renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x1b2630);
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 300);
+
+// Umgebungslicht: ein kleiner gemalter Raum (heller Himmel, dunkler Boden, zwei Lichtflächen), damit Leder, Fell und Metall Glanz bekommen
+{ const raum = new THREE.Scene(), kugel = new THREE.SphereGeometry(20, 32, 16), farben = [];
+  const p = kugel.attributes.position, oben = new THREE.Color(0xbfd6ee), mitte = new THREE.Color(0x8a94a0), unten = new THREE.Color(0x3a3630), c = new THREE.Color();
+  for (let i = 0; i < p.count; i++) { const h = p.getY(i) / 20; c.copy(mitte).lerp(h > 0 ? oben : unten, Math.min(1, Math.abs(h) * 1.6)); farben.push(c.r, c.g, c.b); }
+  kugel.setAttribute('color', new THREE.Float32BufferAttribute(farben, 3));
+  raum.add(new THREE.Mesh(kugel, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+  const flaeche = (farbe, staerke, x, y, z, g) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(g, g), new THREE.MeshBasicMaterial({ color: new THREE.Color(farbe).multiplyScalar(staerke), side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 1, 0); raum.add(m); };
+  flaeche(0xfff0d8, 9, -7, 9, 8, 7); flaeche(0xbcd4ff, 4, 9, 5, -6, 6);
+  const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(raum, 0.03).texture; scene.environmentIntensity = 0.9; pm.dispose(); }
+const sonne = new THREE.DirectionalLight(0xffe2b8, 2.2); sonne.position.set(-3.5, 6, 5); sonne.castShadow = true; sonne.shadow.mapSize.set(2048, 2048);
+Object.assign(sonne.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: 0.5, far: 30 }); sonne.shadow.bias = -0.0004; sonne.shadow.normalBias = 0.02; scene.add(sonne);
+const boden = new THREE.Mesh(new THREE.CircleGeometry(40, 48).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x4d6a3c, roughness: 1, metalness: 0 })); boden.receiveShadow = true; scene.add(boden);
+
+const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+const geladen = {}, gruppe = new THREE.Group(); scene.add(gruppe);
+async function lade(f) {
+  if (geladen[f]) return geladen[f];
+  const t0 = performance.now(), antwort = await fetch(FASSUNGEN[f]); if (!antwort.ok) throw new Error('Datei fehlt: ' + FASSUNGEN[f]);
+  const daten = await antwort.arrayBuffer(), g = await loader.parseAsync(daten, new URL('modelle/', location.href).href);
+  const box = new THREE.Box3().setFromObject(g.scene), halter = new THREE.Group(); let dreiecke = 0;
+  g.scene.position.set(-(box.min.x + box.max.x) / 2, -box.min.y, -(box.min.z + box.max.z) / 2); halter.add(g.scene); halter.scale.setScalar(HOEHE / (box.max.y - box.min.y));
+  g.scene.traverse(o => { if (!o.isMesh) return; o.castShadow = true; o.receiveShadow = true; dreiecke += o.geometry.index.count / 3;
+    for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap']) if (o.material[k]) o.material[k].anisotropy = 8; });
+  return geladen[f] = { halter, dreiecke, mb: daten.byteLength / 1048576, ladezeit: (performance.now() - t0) / 1000 };
+}
+async function zeige(f) {
+  zustand.fassung = f; $('lade').textContent = 'Lädt …'; for (const b of document.querySelectorAll('[data-f]')) b.classList.toggle('an', b.dataset.f === f);
+  let v; try { v = await lade(f); } catch (e) { $('lade').textContent = e.message; return; }
+  if (zustand.fassung !== f) return;                      // inzwischen wurde eine andere gewählt
+  Object.assign(zustand, { dreiecke: v.dreiecke, mb: v.mb, ladezeit: v.ladezeit }); stelleAuf(); $('lade').textContent = ''; VF.bereit = true;
+}
+function stelleAuf() { // eine Figur oder 18 wie auf dem Schlachtfeld
+  gruppe.clear(); const v = geladen[zustand.fassung]; if (!v) return;
+  const n = zustand.ansicht === 'raubzug' ? 18 : 1;
+  for (let i = 0; i < n; i++) { const k = i === 0 ? v.halter : v.halter.clone(); k.position.set(n === 1 ? 0 : (i % 6 - 2.5) * 1.7, 0, n === 1 ? 0 : (Math.floor(i / 6) - 1) * 2.2); k.userData.versatz = i * 0.7; gruppe.add(k); }
+  for (const b of document.querySelectorAll('[data-a]')) b.classList.toggle('an', b.dataset.a === zustand.ansicht);
+  mt = 0; mn = 0; zustand.bilder = 0; zeigeMessung(); setzeKamera();   // nach jedem Wechsel neu messen
+}
+function setzeKamera() {
+  const w = innerWidth, h = innerHeight; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  const t = Math.tan(camera.fov * Math.PI / 360);
+  if (zustand.ansicht === 'nah') { camera.position.set(0, 1.62, 1.25); camera.lookAt(0, 1.5, 0); }
+  else if (zustand.ansicht === 'raubzug') { const d = 18 / (2 * t * camera.aspect), n = 61 * Math.PI / 180; camera.position.set(0, d * Math.sin(n), d * Math.cos(n)); camera.lookAt(0, 0, 0); }
+  else { const d = Math.max(HOEHE / 0.57 / (2 * t), 1.5 / (2 * t * camera.aspect)); camera.position.set(0, 1.0, d); camera.lookAt(0, 0.7, 0); }   // etwas nach oben gerückt, unten liegen die Knöpfe
+}
+window.addEventListener('resize', setzeKamera);
+for (const b of document.querySelectorAll('[data-f]')) b.addEventListener('click', () => zeige(b.dataset.f));
+for (const b of document.querySelectorAll('[data-a]')) b.addEventListener('click', () => { zustand.ansicht = b.dataset.a; stelleAuf(); });
+
+// Mit dem Finger drehen; lässt man los, dreht sich die Figur nach kurzer Pause wieder von selbst
+let zieh = null;
+canvas.addEventListener('pointerdown', e => { zieh = { id: e.pointerId, x: e.clientX }; try { canvas.setPointerCapture(e.pointerId); } catch (_) {} });
+canvas.addEventListener('pointermove', e => { if (zieh && zieh.id === e.pointerId) { zustand.winkel += (e.clientX - zieh.x) * 0.012; zieh.x = e.clientX; zustand.ruhe = 2.5; } });
+for (const t of ['pointerup', 'pointercancel']) canvas.addEventListener(t, () => { zieh = null; });
+
+const uhr = new THREE.Clock(); let mt = 0, mn = 0;
+function bild() {
+  requestAnimationFrame(bild); const dt = Math.min(0.1, uhr.getDelta());
+  zustand.ruhe = Math.max(0, zustand.ruhe - dt); if (!zieh && zustand.ruhe === 0 && !Q.has('still')) zustand.winkel += dt * 0.5;
+  for (const k of gruppe.children) k.rotation.y = DREH + zustand.winkel + (zustand.ansicht === 'raubzug' ? k.userData.versatz : 0);
+  renderer.render(scene, camera);
+  mt += dt; mn++; if (mt >= 1) { zustand.bilder = Math.round(mn / mt); mt = 0; mn = 0; zeigeMessung(); }
+}
+function zeigeMessung() { const n = gruppe.children.length;
+  $('mess').innerHTML = (zustand.bilder ? `${zustand.bilder} Bilder pro Sekunde` : 'misst …') + (n ? `<br>Datei ${zustand.mb.toFixed(1)} MB · geladen in ${zustand.ladezeit.toFixed(1)} s · ${Math.round(zustand.dreiecke * n / 1000).toLocaleString('de')} Tsd. Flächen im Bild` : ''); }
+const VF = window.VF = { bereit: false, zustand, zeige, info: () => ({ ...zustand, figuren: gruppe.children.length, imBild: renderer.info.render.triangles }) };
+setzeKamera(); requestAnimationFrame(bild); zeige(zustand.fassung);
+</script>
+</body>
+</html>

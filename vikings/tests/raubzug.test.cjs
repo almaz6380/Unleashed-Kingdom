@@ -130,6 +130,27 @@ let fehler = 0; const ok = (bed, text) => { console.log((bed ? '  ✓ ' : '  ✗
   await bild(page, '8-ersatzfiguren'); ohneFehler(page, 'keine Fehler mit Ersatzfiguren');
   await page.context().close();
 
+  console.log('Ansichts-Seite: der Anführer in drei Feinheiten (figur.html)');
+  { const ctx = await browser.newContext({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 2 }); page = await ctx.newPage();
+    page.fehler = []; page.on('pageerror', e => page.fehler.push(e.message)); page.on('console', m => { if (m.type() === 'error') page.fehler.push(m.text()); });
+    await page.goto(URL.replace(/index\.html.*$/, 'figur.html') + '?still'); await page.waitForFunction('window.VF && VF.bereit', null, { timeout: 180000 });
+    const vf = () => page.evaluate(() => VF.info());
+    let v = await vf();
+    ok(v.fassung === '250k' && v.dreiecke === 250000 && v.figuren === 1, 'lädt zuerst die mittlere Fassung (250.000 Flächen), eine Figur');
+    await page.waitForTimeout(1200); await bild(page, '9-anfuehrer-ganz');
+    await page.click('[data-a=nah]'); await page.waitForTimeout(1200); await bild(page, '9-anfuehrer-nah-250k');
+    await page.click('[data-f="80k"]');
+    ok(await warte(page, () => VF.info().fassung === '80k' && VF.info().dreiecke > 70000 && VF.info().dreiecke < 90000, null, 120000), 'Wechsel auf 80.000 Flächen');
+    await page.waitForTimeout(1200); await bild(page, '9-anfuehrer-nah-80k');
+    await page.click('[data-f="600k"]');
+    ok(await warte(page, () => VF.info().fassung === '600k' && VF.info().dreiecke > 590000, null, 180000), 'Wechsel auf 600.000 Flächen');
+    await page.waitForTimeout(1200); await bild(page, '9-anfuehrer-nah-600k');
+    await page.click('[data-f="80k"]'); await warte(page, () => VF.info().fassung === '80k', null, 60000); await page.click('[data-a=raubzug]');
+    v = await vf(); ok(v.ansicht === 'raubzug' && v.figuren === 18, '„Wie im Raubzug“ zeigt 18 Figuren von oben');
+    await page.waitForTimeout(1500); await bild(page, '9-anfuehrer-raubzug');
+    await page.click('[data-a=ganz]'); ok((await vf()).figuren === 1, 'zurück zur einzelnen Figur');
+    ohneFehler(page, 'keine Fehler auf der Ansichts-Seite'); await ctx.close(); }
+
   await browser.close();
   console.log(fehler ? `\n${fehler} Prüfung(en) fehlgeschlagen` : '\nAlles grün');
   process.exit(fehler ? 1 : 0);

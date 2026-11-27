@@ -36,9 +36,17 @@ Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst
 > **Er hat ihn noch nicht gespielt:** als Erstes seine Rückmeldung holen (Macht das Losschicken Spaß? Zu leicht, zu
 > schwer? Ist das Feld gut zu erkennen?).
 >
-> **Als Nächstes:** (1) Rückmeldung zum Probekampf, (2) den Anführer aus Tripo einbauen, sobald er den großen
-> Export schickt (ZIP für Mixamo bauen; Bewegungen: Stehen, Laufen auf der Stelle, Axthieb, Fallen, Kriegsschrei),
-> (3) danach Etappe 2 der Analyse: eigenes Dorf.
+> **Der Anführer ist da (27.11.):** Tripo-Export in höchster Qualität (4,95 Mio. Dreiecke, 4K-Texturen, 153 MB,
+> per Drive-Link). Daraus gebaut: Master mit 1 Mio. Dreiecken (`vikings/eingang/`), drei Fassungen zum Vergleichen
+> (80.000 / 250.000 / 600.000 Flächen, `vikings/modelle/`), die ZIP für Mixamo (`vikings/eingang/`) und die
+> Ansichts-Seite `https://almaz6380.github.io/Unleashed-Kingdom/vikings/figur.html`. Die Figur sieht sehr gut aus.
+> Im Raubzug von oben ist zwischen den Fassungen kein Unterschied zu sehen, ganz nah schon (Fell, Gesicht).
+>
+> **Als Nächstes:** (1) Seine Wahl der Feinheit (er entscheidet, nicht vorgeben) und Rückmeldung zum Probekampf.
+> (2) Er lädt die ZIP bei Mixamo hoch und schickt die Bewegungen; dann die Figur mit Skelett bauen und in den
+> Probekampf einsetzen (Schritte in `vikings/CLAUDE.md`). Der Probekampf braucht dafür das bessere Licht der
+> Ansichts-Seite. (3) Weitere Krieger (Axtkämpfer, Schildträger, Bogenschütze) und eine Waffe für die Hand.
+> (4) Danach Etappe 2 der Analyse: eigenes Dorf.
 > Alles Weitere in dieser Datei beschreibt das alte Spiel (Königreich mit Rittern und Drachen).
 > Name, Figuren und Aussehen aus der Serie „Vikings“ oder aus bekannten Wikinger-Spielen werden nicht übernommen.
 
