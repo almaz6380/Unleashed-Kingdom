@@ -177,30 +177,37 @@ Gute Grafik kommt weniger von mehr Flächen als von Stil, Umgebung, Licht, Beweg
    Schlüssel“ zu ändern? Das brauche ich erst in Etappe 3.
 6. **Clan-Verständigung:** feste Sätze oder freier Chat? Das brauche ich erst in Etappe 5.
 
-## 10. Nach der Analyse entschieden (26.11.2026)
-Der User hat vier der Fragen beantwortet, teils anders als empfohlen:
+## 10. Nach der Analyse entschieden (26. und 27.11.2026)
+Der User hat die Fragen beantwortet, teils anders als empfohlen:
 - **Neu anfangen** statt umbauen. Das alte Spiel ist nur noch Vorlage.
 - **Kampf:** Krieger werden einzeln losgeschickt und kämpfen von selbst. Einige Figuren, zum Beispiel der Anführer,
-  haben eine Spezialfähigkeit. Die Abschnitte 1, 2 und 8 oben gehen noch vom selbst gesteuerten Helden aus und
-  müssen entsprechend gelesen werden: Etappe 1 ist jetzt ein Probekampf mit losgeschickten Kriegern.
-- **Held:** eine neue Figur, ein junger Wikinger, der Anführer.
+  haben eine Spezialfähigkeit. **Zuerst Raubzüge auf Dörfer, später auch Feldschlachten** (seine Antwort: „Beides“).
+  Die Abschnitte 1, 2 und 8 oben gehen noch vom selbst gesteuerten Helden aus und müssen entsprechend gelesen
+  werden: Etappe 1 ist der Probekampf mit losgeschickten Kriegern. Er ist gebaut und liegt in `vikings/`.
+- **Held:** eine neue Figur, ein junger Wikinger, der Anführer. Aussehen in seinen Worten: „etwas blonder, mit
+  Tattoos und seitliche Haare abrasiert und mit Zopf und minimal mehr Bart (ca. 7 cm)“.
 - **Dorf:** gemaltes Bild mit Gebäude-Bildern.
-- **Stil:** offen, er wählt nach drei Probe-Bildern.
+- **Stil:** Er hat ein Bild des Anführers im rauen, fast echten Stil geschickt (blond, Zopf, rasierte Seiten, Bart,
+  Tattoos an Unterarmen und Hals, grauer Wolfspelz, blaue Tunika, Beinwickel). Das ist die Richtung.
+- **Qualität der Figuren (27.11.):** „Nein, wir machen es nicht mit 10000 in 2K. Ich will eine bessere Qualität für
+  das Spiel.“ Er exportiert aus Tripo deshalb nur noch **einmal in der höchsten Qualität** (ohne Retopo, größte
+  Textur). Die kleine Hilfsfigur für Mixamo bauen wir selbst daraus, sie ist im Spiel nie zu sehen. Wie fein die
+  Figur im Spiel wird, entscheidet er anhand von Vergleichs-Fassungen am Handy.
 
-### Stil-Proben: der Anführer in drei Stilen
+### Der Anführer in drei Stilen (mit dem neuen Aussehen)
 Dieselbe Figur, dreimal anders gemalt. Haltung und Hintergrund sind schon so, dass das Bild direkt in Tripo kann.
 
 Freundlich (Märchen-Stil):
 ```
-A single young Viking chieftain, about 20 years old, dark blond hair tied back with a few loose strands, light stubble, a grey wolf-fur mantle over the shoulders, a deep blue wool tunic with a simple woven trim, a wide leather belt with a round bronze buckle, leather bracers, wrapped leg bindings and sturdy leather boots, no helmet, no weapons. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, warm friendly colors, a confident friendly smile, realistic body proportions with the head only slightly larger than normal. Full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
+A single young Viking chieftain in his early twenties, golden blond hair with the sides of the head shaved and the long hair on top tied into one thick braid that falls down the back, a full golden blond beard about 7 cm long, dark blue Norse knotwork tattoos on both bare forearms and on one side of the neck, a grey wolf-fur mantle over the shoulders, a deep blue wool tunic with a simple woven trim and the sleeves rolled up to the elbows, a wide leather belt with a round bronze buckle, wrapped leg bindings and sturdy leather boots, no helmet, no weapons. Storybook fairy-tale fantasy style, soft painterly shading, gentle clean outlines, warm friendly colors, a confident friendly smile, realistic body proportions with the head only slightly larger than normal. Full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
 Kräftig (dazwischen):
 ```
-A single young Viking chieftain, about 20 years old, dark blond hair tied back with a few loose strands, light stubble, a grey wolf-fur mantle over the shoulders, a deep blue wool tunic with a simple woven trim, a wide leather belt with a round bronze buckle, leather bracers, wrapped leg bindings and sturdy leather boots, no helmet, no weapons. Stylized game character art, bold chunky shapes with a strong clear silhouette, slightly exaggerated broad shoulders and big hands, hand-painted textures, cool northern color palette with one strong accent color, determined expression. Full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
+A single young Viking chieftain in his early twenties, golden blond hair with the sides of the head shaved and the long hair on top tied into one thick braid that falls down the back, a full golden blond beard about 7 cm long, dark blue Norse knotwork tattoos on both bare forearms and on one side of the neck, a grey wolf-fur mantle over the shoulders, a deep blue wool tunic with a simple woven trim and the sleeves rolled up to the elbows, a wide leather belt with a round bronze buckle, wrapped leg bindings and sturdy leather boots, no helmet, no weapons. Stylized game character art, bold chunky shapes with a strong clear silhouette, slightly exaggerated broad shoulders and big hands, hand-painted textures, cool northern color palette with one strong accent color, determined expression. Full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
 ```
 
-Rau und ernst:
+Rau und ernst (**in diesem Stil ist das Bild, das er geschickt hat**):
 ```
-A single young Viking chieftain, about 20 years old, dark blond hair tied back with a few loose strands, light stubble, a grey wolf-fur mantle over the shoulders, a deep blue wool tunic with a simple woven trim, a wide leather belt with a round bronze buckle, leather bracers, wrapped leg bindings and sturdy leather boots, no helmet, no weapons. Gritty semi-realistic style, realistic body proportions, weathered skin with a small scar on the cheek, worn and patched clothing, muted earthy colors, cold overcast light, grim serious expression. Full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
+A single young Viking chieftain in his early twenties, golden blond hair with the sides of the head shaved and the long hair on top tied into one thick braid that falls down the back, a full golden blond beard about 7 cm long, dark blue Norse knotwork tattoos on both bare forearms and on one side of the neck, a grey wolf-fur mantle over the shoulders, a deep blue wool tunic with a simple woven trim and the sleeves rolled up to the elbows, a wide leather belt with a round bronze buckle, wrapped leg bindings and sturdy leather boots, no helmet, no weapons. Gritty semi-realistic style, realistic body proportions, weathered skin with a small scar on the cheek, worn and patched clothing, muted earthy colors, cold overcast light, grim serious expression. Full body from head to feet, front view, standing upright in a clear A-pose with both arms held about 40 degrees away from the body, hands open and empty, legs slightly apart with a gap between them, plain light grey background, even lighting, no ground shadow, no text.
 ```

@@ -8,11 +8,15 @@ ohne Fachbegriffe. Immer ehrlich sagen, was nur simuliert geprüft ist.
 
 **Richtungswechsel am 26.11.2026:** Der User will ein **neues Wikinger-Spiel** („Vikings“ als Arbeitstitel) mit
 Bauen, Clans, Spielersuche über Supabase und besserer 3D-Grafik. Er hat entschieden: **neu anfangen** (dieses
-Spiel bleibt liegen und ist nur Vorlage), Krieger werden **einzeln losgeschickt**, einige Figuren wie der Anführer
-haben eine Spezialfähigkeit, neuer Held (junger Wikinger), Dorf als gemaltes Bild. Stil und Einzelheiten des Kampfs
-sind offen. Analyse, Etappen und Stil-Prompts: `VIKINGS-ANALYSE.md`, Stand der Entscheidungen: `UEBERGABE.md`.
-Gebaut ist dafür noch nichts. Alles unten beschreibt das alte Spiel. Mit Online fallen im neuen Spiel zwei feste
-Regeln: „keine Schlüssel“ (wird „keine geheimen Schlüssel“) und „alles in `index.html`“.
+Spiel bleibt liegen und ist nur Vorlage), Krieger werden **einzeln losgeschickt** und kämpfen von selbst (zuerst
+Raubzüge auf Dörfer, später Feldschlachten), der Anführer hat eine Spezialfähigkeit, neuer Held (junger blonder
+Anführer mit Zopf, Bart und Tattoos, rauer Stil), Dorf als gemaltes Bild, Figuren in besserer Qualität als
+„10.000 Flächen, 2K“.
+**Das neue Spiel liegt im Ordner `vikings/` (eigene Regeln und Aufbau: `vikings/CLAUDE.md`).** Gebaut ist dort seit
+27.11. der erste Probekampf mit Platzhaltern. Analyse, Etappen und Stil-Prompts: `VIKINGS-ANALYSE.md`, Stand der
+Entscheidungen: `UEBERGABE.md`. Alles unten beschreibt das alte Spiel. Im neuen Spiel gelten zwei Regeln von hier
+nicht: „alles in `index.html`“ (dort mehrere Dateien) und mit Online „keine Schlüssel“ (wird „keine geheimen
+Schlüssel“).
 
 ## Wohin das Ganze soll (vom User am 22.11. festgelegt)
 Ein **Kampf- und Aufbauspiel** in einem **Königreich mit Rittern und Drachen**, **Märchen-Stil** (seit 23.11.):

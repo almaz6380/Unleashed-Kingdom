@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#16242e">
+<title>Vikings – Probekampf</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #16242e; color: #fff;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  button { font: inherit; color: inherit; }
+
+  /* Anzeige oben: Zeit, Zerstörung, Runen, Beenden */
+  #oben { position: fixed; left: 10px; right: 10px; top: calc(8px + env(safe-area-inset-top)); display: none;
+    grid-template-columns: 1fr auto 1fr; align-items: center; pointer-events: none; }
+  #uhr { font-size: 22px; font-weight: 800; text-shadow: 0 2px 6px #000; }
+  #stand { text-align: center; padding: 5px 14px; border-radius: 999px; background: rgba(14,22,30,.72); box-shadow: inset 0 0 0 1.5px rgba(255,220,150,.35); }
+  #prozent { font-size: 13px; font-weight: 700; }
+  #runen { font-size: 17px; letter-spacing: 3px; color: #ffd27a; margin-left: 6px; }
+  #aufgeben { justify-self: end; pointer-events: auto; border: 0; border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 700;
+    background: rgba(14,22,30,.72); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.25); }
+
+  /* Karten unten */
+  #karten { position: fixed; left: 8px; right: 8px; bottom: calc(10px + env(safe-area-inset-bottom)); display: none; gap: 7px; justify-content: center; }
+  .kk { flex: 1; max-width: 96px; min-width: 0; border: 0; border-radius: 14px; padding: 7px 2px 6px; text-align: center; position: relative;
+    background: rgba(22,32,42,.88); box-shadow: inset 0 0 0 2px rgba(255,255,255,.18), 0 4px 12px rgba(0,0,0,.4); }
+  .kk .bild { display: block; font-size: 30px; line-height: 1.15; }
+  .kk b { display: block; font-size: 10.5px; letter-spacing: -.2px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kk i { position: absolute; right: -3px; top: -6px; min-width: 22px; padding: 2px 5px; border-radius: 999px; font-style: normal; font-size: 13px; font-weight: 800;
+    background: #ffd27a; color: #2a1806; box-shadow: 0 2px 5px rgba(0,0,0,.4); }
+  .kk.an { background: rgba(255,210,122,.3); box-shadow: inset 0 0 0 3px #ffd27a, 0 0 16px rgba(255,210,122,.55); transform: translateY(-5px); }
+  .kk:disabled { opacity: .35; } .kk:disabled i { background: #777; color: #ddd; }
+
+  #schrei { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(112px + env(safe-area-inset-bottom)); display: none;
+    width: 84px; height: 84px; border: 0; border-radius: 50%; font-size: 34px; line-height: 1; background: rgba(255,170,60,.88);
+    box-shadow: inset 0 0 0 3px #fff3c4, 0 0 22px rgba(255,190,80,.9); animation: puls .6s infinite alternate; }
+  #schrei small { display: block; font-size: 10px; font-weight: 800; color: #2a1806; margin-top: 2px; }
+  @keyframes puls { to { filter: brightness(1.25); transform: scale(1.05); } }
+
+  #hinweis { position: fixed; left: 0; right: 0; bottom: calc(108px + env(safe-area-inset-bottom)); text-align: center; pointer-events: none;
+    font-size: 14px; font-weight: 700; text-shadow: 0 1px 4px #000, 0 0 10px rgba(0,0,0,.8); opacity: 0; transition: opacity .25s; padding: 0 100px 0 12px; }
+  #hinweis.an { opacity: 1; } #hinweis.falsch { color: #ff9a86; }
+  #banner { position: fixed; left: 0; right: 0; top: 26%; text-align: center; font-size: 38px; font-weight: 900; pointer-events: none;
+    text-shadow: 0 4px 18px rgba(0,0,0,.8), 0 0 30px rgba(255,190,90,.6); opacity: 0; transform: scale(.7); transition: opacity .2s, transform .25s; }
+  #banner.an { opacity: 1; transform: scale(1); }
+  .schweb { position: fixed; left: 0; top: 0; font-size: 15px; font-weight: 800; color: #ffe9b0; pointer-events: none; white-space: nowrap;
+    text-shadow: 0 2px 4px #000; animation: schweb 1.4s ease-out forwards; }
+  @keyframes schweb { 0% { opacity: 1; margin-top: 0; } 100% { opacity: 0; margin-top: -50px; } }
+
+  /* Fenster: Start und Ergebnis */
+  .fenster { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(8,14,20,.6); }
+  .fenster.an { display: flex; }
+  .karte { width: 100%; max-width: 340px; padding: 22px 18px 18px; border-radius: 20px; text-align: center; background: rgba(28,40,52,.95);
+    box-shadow: 0 10px 40px rgba(0,0,0,.55), inset 0 0 0 1.5px rgba(255,210,122,.35); }
+  .karte h1 { margin: 0 0 6px; font-size: 32px; letter-spacing: .04em; } .karte h2 { margin: 0 0 4px; font-size: 26px; }
+  .karte p { margin: 0 0 12px; font-size: 14px; line-height: 1.45; color: #dbe6ee; }
+  .gross { border: 0; border-radius: 999px; padding: 14px 34px; font-size: 19px; font-weight: 800; background: #ffd27a; color: #2a1806; box-shadow: 0 6px 20px rgba(0,0,0,.4); margin: 4px; }
+  .gross:disabled { background: #5d6b76; color: #aeb9c2; box-shadow: none; }
+  .klein { border: 0; background: none; color: #c9d6e0; font-size: 13px; padding: 8px 10px; }
+  #meldung { font-size: 12px; color: #ffcf9a; min-height: 1.2em; margin-top: 6px; }
+  #ergRunen { font-size: 44px; letter-spacing: 8px; color: #ffd27a; margin: 2px 0 6px; text-shadow: 0 0 18px rgba(255,200,90,.6); }
+  .beute { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin: 0 0 14px; min-height: 30px; }
+  .beute span { background: #16222c; border-radius: 999px; padding: 5px 11px; font-weight: 800; font-size: 14px; }
+</style>
+</head>
+<body>
+<canvas id="bild"></canvas>
+
+<div id="oben">
+  <div id="uhr"></div>
+  <div id="stand"><span id="prozent"></span><span id="runen"></span></div>
+  <button id="aufgeben">Beenden</button>
+</div>
+<div id="banner"></div>
+<div id="hinweis"></div>
+<button id="schrei">📯<small>Kriegsschrei</small></button>
+<div id="karten"></div>
+
+<div id="start" class="fenster an"><div class="karte">
+  <h1>Vikings</h1>
+  <p><b>Probekampf.</b> Dein Langschiff liegt am Strand. Wähle unten eine Karte und tippe auf den Strand, um einen Krieger abzusetzen. Sie kämpfen von selbst. Steht der Anführer auf dem Feld, kannst du einmal den Kriegsschrei auslösen.</p>
+  <p>Figuren, Häuser und Boden sind noch Platzhalter.</p>
+  <button class="gross" id="los" disabled>Raubzug starten</button><br>
+  <button class="klein" id="sTon"></button>
+  <div id="meldung">Lädt …</div>
+</div></div>
+
+<div id="ergebnis" class="fenster"><div class="karte">
+  <h2 id="ergTitel"></h2>
+  <div id="ergRunen"></div>
+  <p id="ergText"></p>
+  <div class="beute" id="ergBeute"></div>
+  <button class="gross" id="nochmal">Nochmal</button>
+</div></div>
+
+<script type="importmap">{ "imports": { "three": "../lib/three.module.min.js", "three/addons/": "../lib/jsm/" } }</script>
+<script type="module" src="js/spiel.js"></script>
+</body>
+</html>

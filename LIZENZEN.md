@@ -2,7 +2,7 @@
 
 | Datei | Inhalt | Quelle | Urheber | Lizenz |
 | --- | --- | --- | --- | --- |
-| `modelle/moench.glb`, `schurkin.glb`, `krieger.glb` | Platzhalter-Kämpfer mit Kampfbewegungen | „RPG Characters – Nov 2020“, opengameart.org/content/lowpoly-rpg-characters | Quaternius (quaternius.com) | CC0 1.0 (gemeinfrei) |
+| `modelle/moench.glb`, `schurkin.glb`, `krieger.glb` | Platzhalter-Kämpfer mit Kampfbewegungen (auch im Probekampf `vikings/`) | „RPG Characters – Nov 2020“, opengameart.org/content/lowpoly-rpg-characters | Quaternius (quaternius.com) | CC0 1.0 (gemeinfrei) |
 | `lib/` | three.js r170 | npm-Paket `three@0.170.0` | three.js-Autoren | MIT |
 
 | `figuren/vorlagen/` | Charakterblatt, Junge, Mädchen | eigene App Anigosha des Users (`almaz6380/anigosha`) | der User | eigene Figuren |

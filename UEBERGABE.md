@@ -1,4 +1,4 @@
-# Übergabe – Stand 26.11.2026
+# Übergabe – Stand 27.11.2026
 
 Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst, danach `CLAUDE.md`
 (Regeln, Kampfwerte, Aufbau des Codes).
@@ -6,23 +6,39 @@ Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst
 > **Richtungswechsel am 26.11.2026: neues Wikinger-Spiel („Vikings“ als Arbeitstitel).** Der User will Bauen, Clans,
 > Spielersuche über Supabase und richtig gute 3D-Grafik. Die Analyse dazu steht in
 > [`VIKINGS-ANALYSE.md`](VIKINGS-ANALYSE.md): Spielsinn, Bausteine, Online, Grafik, Kosten, Etappen.
+> **Das neue Spiel liegt im Ordner [`vikings/`](vikings/); lies dafür [`vikings/CLAUDE.md`](vikings/CLAUDE.md).**
 >
-> **Von ihm entschieden am 26.11.:**
+> **Von ihm entschieden (26. und 27.11.):**
 > - **Neu anfangen**, nicht umbauen. Ich hatte Umbauen empfohlen, er entscheidet. Das bisherige Spiel bleibt
 >   unverändert liegen und dient nur als Vorlage: wiederholbare Kampf-Rechnung, Tests, Figuren-Weg über Tripo und
 >   Mixamo, Grafik-Stufen.
-> - **Kampf**, in seinen Worten: „Figuren einzeln losschicken und einige Figuren (wie bspw. der Wikingerführer)
->   haben Spezialfähigkeit“. Mein Verständnis, **von ihm noch zu bestätigen**: Raubzug auf ein Dorf, man setzt
->   Krieger einzeln aufs Feld, sie kämpfen von selbst. Der Anführer ist eine besondere Figur mit einem Knopf für
->   seine Spezialfähigkeit. Einen selbst gesteuerten Helden gibt es dann nicht mehr.
-> - **Held:** eine ganz neue Figur, ein junger Wikinger (der Anführer). Nicht mehr der Junge aus Anigosha.
+> - **Kampf:** „Figuren einzeln losschicken und einige Figuren (wie bspw. der Wikingerführer) haben
+>   Spezialfähigkeit“. **Zuerst Raubzüge auf Dörfer, später auch Feldschlachten** (seine Antwort: „Beides“).
+>   Einen selbst gesteuerten Helden gibt es nicht mehr.
+> - **Held:** eine ganz neue Figur, der junge Anführer: „etwas blonder, mit Tattoos und seitliche Haare abrasiert
+>   und mit Zopf und minimal mehr Bart (ca. 7 cm)“. Nicht mehr der Junge aus Anigosha.
+> - **Stil:** Er hat ein Bild des Anführers im rauen, fast echten Stil geschickt (Wolfspelz, blaue Tunika, Tattoos
+>   an Unterarmen und Hals). Das ist die Richtung. Die Prompts stehen in Abschnitt 10 der Analyse.
 > - **Dorf:** gemaltes Bild mit Gebäude-Bildern in Stufen, kein 3D-Dorf.
-> - **Stil:** offen. Er wollte Beispiele und hat drei Prompts für den Anführer bekommen (freundlich, kräftig, rau;
->   sie stehen in Abschnitt 10 der Analyse). Er wählt nach den Bildern.
+> - **Qualität der Figuren (27.11.):** „Nein, wir machen es nicht mit 10000 in 2K. Ich will eine bessere Qualität
+>   für das Spiel.“ Vereinbart: Er exportiert aus Tripo **nur einmal, in der höchsten Qualität** (ohne Retopo,
+>   größte Textur, GLB). Die kleine Hilfsfigur, die Mixamo für das Skelett braucht, bauen wir selbst aus diesem
+>   Export; sie ist im Spiel nie zu sehen. Die Figur im Spiel entsteht wie beim Knappen aus dem großen Export
+>   (`werkzeug/knappe-fein.mjs` als Vorlage). **Wie fein sie wird, entscheidet er**: ihm zwei oder drei Fassungen
+>   zum Vergleichen am Handy bauen, nicht für ihn festlegen. Bedenken ehrlich nennen: Im Raubzug stehen bis zu 18
+>   Figuren zugleich auf dem Feld; den Anführer gibt es nur einmal, er darf deshalb am feinsten sein.
 > - Später zu klären: Supabase-Konto und Schlüssel-Regel (Etappe Konto), Clan-Chat (Etappe Clans), eigener Name.
 >
-> **Noch nichts gebaut.** Mein Vorschlag: das neue Spiel in einem eigenen Ordner `vikings/` in diesem Repo, in
-> mehreren Dateien. Erst sein OK zum Kampf-Verständnis einholen, dann einen ersten Probekampf mit Platzhaltern.
+> **Gebaut (27.11.): der erste Probekampf** unter `https://almaz6380.github.io/Unleashed-Kingdom/vikings/`. Ein
+> Raubzug auf ein Beispiel-Dorf, alles Sichtbare ist Platzhalter. Karte wählen, auf den Strand tippen, die Krieger
+> kämpfen von selbst, der Anführer hat den Kriegsschrei. Regeln getrennt vom Bild (`vikings/js/sim.js`), wiederholbar
+> und aus den aufgezeichneten Eingaben exakt nachrechenbar. Geprüft nur ohne Browser und im simulierten Handy.
+> **Er hat ihn noch nicht gespielt:** als Erstes seine Rückmeldung holen (Macht das Losschicken Spaß? Zu leicht, zu
+> schwer? Ist das Feld gut zu erkennen?).
+>
+> **Als Nächstes:** (1) Rückmeldung zum Probekampf, (2) den Anführer aus Tripo einbauen, sobald er den großen
+> Export schickt (ZIP für Mixamo bauen; Bewegungen: Stehen, Laufen auf der Stelle, Axthieb, Fallen, Kriegsschrei),
+> (3) danach Etappe 2 der Analyse: eigenes Dorf.
 > Alles Weitere in dieser Datei beschreibt das alte Spiel (Königreich mit Rittern und Drachen).
 > Name, Figuren und Aussehen aus der Serie „Vikings“ oder aus bekannten Wikinger-Spielen werden nicht übernommen.
 
@@ -181,9 +197,8 @@ Lässt sich eine GLB-Datei nicht im Chat schicken, kann er sie über die GitHub-
 (Ordner `eingang/` vorschlagen).
 
 ## 7. Nächste Schritte, in dieser Reihenfolge
-**Seit 26.11. zuerst:** (1) sein OK zu meinem Verständnis des neuen Kampfs einholen, (2) seine Stil-Wahl nach den
-drei Probe-Bildern, (3) dann das neue Spiel beginnen: Probekampf mit Platzhaltern, danach der Anführer aus Tripo
-und Mixamo. Die Liste darunter ist der Plan des alten Spiels und gilt nicht mehr.
+**Seit 27.11. gilt die Liste oben im Kasten** (Rückmeldung zum Probekampf, Anführer aus Tripo, dann das eigene
+Dorf). Die Liste darunter ist der Plan des alten Spiels und gilt nicht mehr.
 1. **Rückmeldung vom echten Handy einholen:** Fühlt sich der Kampf gut an? Sitzen die Knöpfe? Ist Stufe 1 zu
    leicht oder zu schwer? Ruckelt es? Danach an `K`, `TYPEN` und `Bot` nachstellen (Zahlen vorher und nachher
    vergleichen).
@@ -209,3 +224,5 @@ und Mixamo. Die Liste darunter ist der Plan des alten Spiels und gilt nicht mehr
 - Kleine Commits auf Deutsch. Nach grünen Tests auf `main` pushen (GitHub Pages liefert `main` aus), dann prüfen,
   dass der Link die neue Fassung zeigt.
 - Nach jeder größeren Änderung diese Datei und `CLAUDE.md` nachführen.
+- Neues Spiel: `node vikings/tests/sim.test.mjs`, dann mit laufendem Server (im Repo-Ordner gestartet)
+  `node vikings/tests/raubzug.test.cjs`, Bilder in `vikings/tests/screenshots/`.
