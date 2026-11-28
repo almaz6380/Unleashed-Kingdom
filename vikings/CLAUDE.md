@@ -49,6 +49,7 @@ Figuren und Bilder. Reihenfolge: Etappen in der Analyse.
 | `modelle/` | eigene Figuren des neuen Spiels (bisher: Anführer in drei Feinheiten, mit Mixamo-Skelett) |
 | `eingang/` | Vorlagen des Users (`LIESMICH.md` dort) |
 | `werkzeug/figur-stufen.mjs` | macht aus einem großen Tripo-Export die Spiel-Fassungen und die Hilfsfigur für Mixamo (und einen Master, wenn das Original zu groß für GitHub ist); dreht die Figur nach vorn und stellt sie auf den Boden |
+| `werkzeug/figur-bilder.cjs` | Bilder einer neuen Figur zum Prüfen: vorn, Seite, hinten, ganz nah, Hände, Beine, Rücken, Collage für den User |
 | `werkzeug/baue-anfuehrer.mjs` | setzt Mixamo-Skelett und Bewegungen mit der feinen Fassung zusammen |
 | `tests/sim.test.mjs` | Regeln ohne Browser: Wiederholbarkeit, Absetzen, Ende, Schwierigkeit des Beispiel-Dorfs |
 | `tests/raubzug.test.cjs` | Simuliertes Handy: laden, absetzen, halten, Kriegsschrei, ganzer Raubzug, Nachrechnen, Handy-Größen, Grafik-Stufen, Ersatzfiguren, Ansichts-Seite, Bilder |
@@ -168,9 +169,19 @@ GitHub-Grenze liegt, wird **das Original selbst** aufgehoben (`eingang/axtkaempf
 Ursprung. `werkzeug/figur-stufen.mjs` gleicht das seit 28.11. aus: Blickrichtung erkennen (Arme = breitere
 waagerechte Achse, vorn = wohin die Fußspitzen zeigen), um y drehen, Füße auf y = 0. Vorgeben mit `--dreh=<Grad>`.
 Ein Master entsteht nur noch, wenn das Original über 90 MB hat (oder mit `--master`). **Jede neue Figur zuerst
-ansehen** (Bilder von vorn, hinten, Seite, ganz nah; Hände und Beine vergrößert) und dem User die Bilder schicken:
-Bei Fehlern kann er neu erzeugen, solange das Abo läuft. Zum Ansehen die Fassungen kurz unter `modelle/` legen und
-`figur.html?datei=modelle/…&still&dreh=<Bogenmaß>` aufrufen; vor dem Commit wieder entfernen.
+ansehen** und dem User die Bilder mit einem ehrlichen Urteil schicken (gut / nur in Ordnung / neu erzeugen, verglichen
+mit dem Anführer): Bei Fehlern kann er neu erzeugen, solange das Abo läuft. Dafür die Fassungen kurz nach
+`modelle/_probe/` legen, Prüf-Server starten und
+`NODE_PATH=$(npm root -g) node figur-bilder.cjs modelle/_probe/<name>-600k.glb <zielordner> <name>` aufrufen (macht
+alle Ansichten, Ausschnitte von Händen, Beinen und Rücken und eine Collage); `_probe` vor dem Commit wieder entfernen.
+Die Werkzeuge brauchen ihre Pakete (`@gltf-transform/*`, `meshoptimizer`, `sharp`, `fbx2gltf`): in einem Ordner im
+Scratchpad installieren und die Werkzeuge dorthin kopieren.
+
+**Ablauf je Figur, vom User am 28.11. freigegeben:** Er schickt die GLB (direkt im Chat, 18 MB gingen, oder als
+Drive-Link; Links auf die Tripo-Seite sind gesperrt). Ansehen und urteilen, Original nach `eingang/<name>-original.glb`,
+ZIP für Mixamo nach `eingang/<name>-fuer-mixamo.zip` und an ihn, Notizen, Tests, Commit. Einbau ins Spiel erst, wenn
+die Mixamo-Bewegungen da sind. In der Tripo-App muss der **Diamant** gewählt sein (fein, mit Farbe); das **Gitter**
+liefert ein grobes graues Netz, das wir nicht brauchen können (ist ihm am 28.11. bei drei Figuren passiert).
 
 Stand: Figur geprüft und in Ordnung, drei Feinheiten ohne Skelett gebaut (1,0 / 2,5 / 4,9 MB, nicht im Repo, in
 einer Minute neu gebaut), ZIP für Mixamo (`eingang/axtkaempfer-fuer-mixamo.zip`, 180 cm) an den User geschickt.
@@ -186,6 +197,18 @@ Melee Attack Horizontal, Walking To Dying) und schickt sie im Chat; sie kommen n
    Figur mit Vorgabe: **vorläufig Axtkämpfer 80k, Anführer 250k**, `?figur=` schaltet alle um. Der User entscheidet.
 4. `figur.html`: Auswahl der Figur (`?wer=anfuehrer|axtkaempfer`), Überschrift und Fassungen je Figur.
 5. `tests/raubzug.test.cjs`: Axtkämpfer ist die eigene Figur mit fünf Bewegungen; Ansichts-Seite für beide.
+
+## Bogenschützin (in Arbeit seit 28.11.)
+Zweites Modell aus der Liste: 1,93 Mio. Dreiecke, 4K, 19 MB (`eingang/bogenschuetzin-original.glb`). **Gut**, klar
+besser als der Axtkämpfer: Umhang mit Kapuze, Lederweste, Armschienen, Köcher mit Pfeilen und Zopf sind sauber, das
+Gesicht ist scharf, die Finger einzeln. Zu erwarten: Der Umhang liegt über den Oberarmen und wird sich beim Heben
+der Arme (Bogenschuss) verziehen; der Zopf liegt auf der Brust und der Köcher am Rücken, beide bewegen sich mit dem
+Oberkörper. Nach Mixamo am Bild prüfen. ZIP für Mixamo (`eingang/bogenschuetzin-fuer-mixamo.zip`, 170 cm) ist beim
+User. Bewegungen: Breathing Idle („With Skin“), Running (In Place), **ein Bogenschuss**, Walking To Dying. Den Namen
+des Bogenschusses in Mixamo konnte ich nicht nachschlagen (aus dem Gedächtnis: „Shooting Arrow“; Suche „arrow“,
+Ausholen und Schuss in einer Bewegung). Im Spiel ist sie der Typ `bogen`; der Schuss wird `schlag1`, der Pfeil
+fliegt los, wenn die Sehne losgelassen wird (Schnitt mit `ana-anim.mjs` messen). Der Bogen kommt als eigenes Modell
+(1.8) an die linke Hand.
 
 **Platz:** Je Figur etwa 17 MB Original und 15 MB für drei Feinheiten. GitHub Pages liefert alles auf `main` aus und
 erlaubt höchstens 1 GB. Für die Figuren des Raubzugs reicht das; bei allen 37 Modellen nicht. Sobald der User die

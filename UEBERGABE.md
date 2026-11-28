@@ -67,13 +67,31 @@ Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst
 > auf der Ansichts-Seite eine Auswahl der Figur. Die Fassungen ohne Skelett liegen nicht im Repo; sie entstehen in
 > einer Minute aus dem Original.
 >
+> **Sein Urteil zum Axtkämpfer (28.11.):** Er fragte „nur in Ordnung oder gut?“. Ehrliche Antwort: Körper und
+> Kleidung gut, Gesicht und Haare nur in Ordnung, klar schwächer als der Anführer; im Raubzug von oben sieht man es
+> nicht. Er sagte „Ok nächste Figur“, **behält ihn also**. Er will solche klaren Urteile: bei jeder Figur sagen, ob
+> sie gut ist oder nur in Ordnung, und mit dem Anführer vergleichen.
+>
+> **Die Bogenschützin ist da (28.11.), sie ist gut:** 1,93 Mio. Dreiecke, 4K, direkt im Chat geschickt (18 MB gehen
+> also). Original und ZIP für Mixamo (170 cm) liegen in `vikings/eingang/`, die ZIP hat er. Sie braucht statt der
+> Hiebe einen Bogenschuss; den Mixamo-Namen konnte ich nicht nachschlagen (aus dem Gedächtnis „Shooting Arrow“, Suche
+> „arrow“). **Zwischenfall:** Drei Figuren hatte er in der Tripo-App versehentlich mit dem **Gitter** statt dem
+> **Diamanten** erzeugt (graues grobes Netz ohne Farbe, unbrauchbar); erklärt, er erzeugt sie neu. Der Schildträger
+> (1.2) kommt noch. Links auf die Tripo-Seite kann ich nicht öffnen (Sperre gegen Programme), er schickt die Dateien.
+> Unter seinen Tripo-Figuren steht „Öffentlich“; darauf hingewiesen, seine Sache.
+>
+> **Ablauf je Figur, von ihm als Plan freigegeben (28.11.):** Datei kommt → sofort ansehen (`figur-bilder.cjs`) →
+> Bilder und Urteil an ihn → Original und ZIP für Mixamo ins Repo, ZIP an ihn → Notizen, Tests, Commit. Einbau ins
+> Spiel, sobald die Mixamo-Bewegungen da sind. Bei Waffen und Gebäuden entfällt Mixamo. Seine App steht oft im
+> Planungs-Modus: dann erst lesen, kurzen Plan schreiben, freigeben lassen.
+>
 > **Platz im Blick behalten:** Je Figur etwa 17 MB Original und 15 MB für drei Feinheiten. Für die Figuren des
 > Raubzugs reicht das, bei allen 37 Modellen wird es eng (GitHub Pages: höchstens 1 GB, ausgeliefert wird alles auf
 > `main`). Sobald er die Feinheit gewählt hat, fallen die übrigen Fassungen weg; für die Originale dann einen
 > Vorschlag machen (zum Beispiel ein eigener Zweig, der nicht ausgeliefert wird). Ihm gesagt: **Originale im Drive
 > nicht löschen.** Seine Tripo-Credits (28.11.): 2860, ein Modell kostet 55.
 >
-> **Als Nächstes:** (1) Seine Mixamo-Dateien für den Axtkämpfer einbauen (siehe oben). (2) Seine Wahl der Feinheit
+> **Als Nächstes:** (1) Seine Mixamo-Dateien für Axtkämpfer und Bogenschützin einbauen (siehe oben). (2) Seine Wahl der Feinheit
 > (er entscheidet, nicht vorgeben) und Rückmeldung zum Probekampf. (3) Weitere Modelle aus Tripo annehmen, sobald er
 > Links schickt: je Figur zuerst ansehen und ihm Bilder schicken (bei Fehlern kann er neu erzeugen, solange das Abo
 > läuft), dann `figur-stufen.mjs`, ZIP für Mixamo, Bewegungen einbauen (Schritte in `vikings/CLAUDE.md`); Waffen an
@@ -83,7 +101,7 @@ Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst
 
 ## 1. Mit wem du arbeitest
 - Der User ist **kein Programmierer**, schreibt **kurz und auf Deutsch** und arbeitet meist **am Handy**. Für
-  Tripo und Mixamo nutzt er inzwischen auch einen Mac. Dateien bis etwa 6 MB schickt er direkt im Chat.
+  Tripo und Mixamo nutzt er inzwischen auch einen Mac. Dateien schickt er direkt im Chat (18 MB gingen am 28.11.).
 - Antworte auf Deutsch, ohne Fachbegriffe. Zeige Ergebnisse als **Bilder im Chat**.
 - Sag immer ehrlich, was nur im simulierten Browser geprüft ist. **Auf einem echten Handy lief das Spiel noch nie.**
 - Er ändert seine Meinung oft und schnell. Frag bei Richtungswechseln kurz nach, bevor du viel baust, und halte

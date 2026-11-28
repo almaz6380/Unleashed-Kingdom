@@ -22,3 +22,11 @@ Die Fassungen fürs Spiel entstehen daraus mit `../werkzeug/figur-stufen.mjs` (s
 - `axtkaempfer-fuer-mixamo.zip` (0,9 MB): Hilfsfigur für Mixamo, 24.000 Dreiecke, 180 cm.
 - `mixamo/axtkaempfer/` (kommt noch): Breathing Idle („With Skin“), Running (In Place), Standing Melee Attack
   Downward, Standing Melee Attack Horizontal, Walking To Dying (alle „Without Skin“).
+
+## Bogenschützin
+- `bogenschuetzin-original.glb` (19 MB): **das Original aus Tripo, unverändert** (28.11.2026, Tripo-App, direkt im
+  Chat geschickt): 1,93 Mio. Dreiecke, Farbe/ORM/Normal in 4K, gltfpack/Meshopt, ohne Skelett, schaut nach +x.
+  Köcher mit Pfeilen auf dem Rücken und Zopf über der Schulter sind Teil der Figur.
+- `bogenschuetzin-fuer-mixamo.zip` (1,1 MB): Hilfsfigur für Mixamo, 24.000 Dreiecke, 170 cm.
+- `mixamo/bogenschuetzin/` (kommt noch): Breathing Idle („With Skin“), Running (In Place), ein Bogenschuss (Suche
+  „arrow“, Ausholen und Schuss in einer Bewegung), Walking To Dying (alle „Without Skin“).
