@@ -30,3 +30,17 @@ Die Fassungen fürs Spiel entstehen daraus mit `../werkzeug/figur-stufen.mjs` (s
 - `bogenschuetzin-fuer-mixamo.zip` (1,1 MB): Hilfsfigur für Mixamo, 24.000 Dreiecke, 170 cm.
 - `mixamo/bogenschuetzin/` (kommt noch): Breathing Idle („With Skin“), Running (In Place), ein Bogenschuss (Suche
   „arrow“, Ausholen und Schuss in einer Bewegung), Walking To Dying (alle „Without Skin“).
+
+## Schildträger
+- `schildtraeger-master.glb` (15 MB): **alle 1,95 Mio. Dreiecke, gepackt** (Meshopt, fein gerastert), Texturen
+  unverändert. Gebaut am 28.11.2026 aus dem Export des Users per Drive-Link: 61 MB, ungepackt, von der Tripo-Web-Seite
+  (Erzeuger „Tripo“), **Texturen nur 2048 Pixel** (alle anderen Figuren haben 4096). Das Original liegt nur in seinem
+  Drive. Der Master schaut nach +z, steht auf y = 0, doppelte Punkte an harten Kanten sind zusammengelegt.
+- `schildtraeger-fuer-mixamo.zip` (1,6 MB): Hilfsfigur für Mixamo, 24.000 Dreiecke, 185 cm.
+- `mixamo/schildtraeger/` (kommt noch): wie beim Axtkämpfer.
+
+## Dorfwache (Gegner)
+- `dorfwache-original.glb` (18 MB): **das Original aus Tripo, unverändert** (28.11.2026, Tripo-App, direkt im Chat):
+  1,88 Mio. Dreiecke, Farbe/ORM/Normal in 4K, gltfpack/Meshopt, ohne Skelett, schaut nach +x.
+- `dorfwache-fuer-mixamo.zip` (1,0 MB): Hilfsfigur für Mixamo, 24.000 Dreiecke, 178 cm.
+- `mixamo/dorfwache/` (kommt noch): wie beim Axtkämpfer.

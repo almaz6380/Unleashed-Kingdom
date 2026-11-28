@@ -80,6 +80,13 @@ Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst
 > (1.2) kommt noch. Links auf die Tripo-Seite kann ich nicht öffnen (Sperre gegen Programme), er schickt die Dateien.
 > Unter seinen Tripo-Figuren steht „Öffentlich“; darauf hingewiesen, seine Sache.
 >
+> **Schildträger und Dorfwache sind da (28.11.), beide gut:** Der Schildträger (Drive-Link) ist die beste Figur nach
+> dem Anführer, kam aber in einem anderen Export (Tripo-Web-Seite, 61 MB, Texturen nur 2K statt 4K); im Repo liegt ein
+> gepackter Master mit allen Dreiecken. Ihm gesagt, dass er ihn mit 4K neu exportieren kann, wenn er ihn groß zeigen
+> will, sonst reicht es. Die Dorfwache (im Chat) hat ganz nah einen seltsamen hellen Streifen am Helm. Beide ZIPs für
+> Mixamo hat er. **Damit sind alle vier Figuren des Raubzugs da; es fehlen Waffen, Gebäude und Langschiff.**
+> `figur-stufen.mjs` legt jetzt doppelte Punkte zusammen (sonst ließ sich der Schildträger nicht vereinfachen).
+>
 > **Ablauf je Figur, von ihm als Plan freigegeben (28.11.):** Datei kommt → sofort ansehen (`figur-bilder.cjs`) →
 > Bilder und Urteil an ihn → Original und ZIP für Mixamo ins Repo, ZIP an ihn → Notizen, Tests, Commit. Einbau ins
 > Spiel, sobald die Mixamo-Bewegungen da sind. Bei Waffen und Gebäuden entfällt Mixamo. Seine App steht oft im
@@ -91,7 +98,9 @@ Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst
 > Vorschlag machen (zum Beispiel ein eigener Zweig, der nicht ausgeliefert wird). Ihm gesagt: **Originale im Drive
 > nicht löschen.** Seine Tripo-Credits (28.11.): 2860, ein Modell kostet 55.
 >
-> **Als Nächstes:** (1) Seine Mixamo-Dateien für Axtkämpfer und Bogenschützin einbauen (siehe oben). (2) Seine Wahl der Feinheit
+> **Als Nächstes:** (1) Seine Mixamo-Dateien für Axtkämpfer, Bogenschützin, Schildträger und Dorfwache einbauen
+> (siehe oben). Waffen und Gebäude brauchen in `figur-stufen.mjs` noch einen eigenen Weg (keine Arme und Füße zum
+> Ausrichten, weniger Flächen, keine Hilfsfigur für Mixamo). (2) Seine Wahl der Feinheit
 > (er entscheidet, nicht vorgeben) und Rückmeldung zum Probekampf. (3) Weitere Modelle aus Tripo annehmen, sobald er
 > Links schickt: je Figur zuerst ansehen und ihm Bilder schicken (bei Fehlern kann er neu erzeugen, solange das Abo
 > läuft), dann `figur-stufen.mjs`, ZIP für Mixamo, Bewegungen einbauen (Schritte in `vikings/CLAUDE.md`); Waffen an

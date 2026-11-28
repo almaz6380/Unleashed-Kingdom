@@ -1,6 +1,6 @@
 // Macht aus dem großen Tripo-Export (Millionen Dreiecke, 4K-Texturen) mehrere Fassungen:
-//   <name>-master.glb   1 Mio. Dreiecke, Texturen unverändert  → Vorlage im Repo, nur wenn das Original zu groß für
-//                       GitHub ist (über 90 MB) oder mit --master. Sonst wird das Original selbst aufgehoben.
+//   <name>-master.glb   bis 2 Mio. Dreiecke, gepackt, Texturen unverändert  → Vorlage im Repo, nur wenn das Original zu
+//                       schwer ist (über 30 MB) oder mit --master. Sonst wird das Original selbst aufgehoben.
 //   <name>-<n>k.glb     Fassungen fürs Spiel zum Vergleichen (ohne Skelett)
 //   <name>-mixamo.glb   grobe Hilfsfigur, daraus macht obj-fuer-mixamo.mjs die ZIP für Mixamo
 // Alle Fassungen schauen nach +z und stehen auf y = 0. Tripo liefert das nicht immer so (die Handy-App dreht die Figur
@@ -22,10 +22,22 @@ fs.mkdirSync(ZIEL, { recursive: true });
 
 const quelle = await io.read(EIN); await quelle.transform(dequantize());
 const prim = quelle.getRoot().listMeshes()[0].listPrimitives()[0], mat = prim.getMaterial();
-const P = new Float32Array(prim.getAttribute('POSITION').getArray()), N = new Float32Array(prim.getAttribute('NORMAL').getArray()),
+let P = new Float32Array(prim.getAttribute('POSITION').getArray()), N = new Float32Array(prim.getAttribute('NORMAL').getArray()),
   T = new Float32Array(prim.getAttribute('TEXCOORD_0').getArray()), I = new Uint32Array(prim.getIndices().getArray());
 const bild = { farbe: mat.getBaseColorTexture(), normal: mat.getNormalTexture(), rm: mat.getMetallicRoughnessTexture() };
 console.log('Quelle:', I.length / 3, 'Dreiecke,', P.length / 3, 'Punkte');
+
+// ---------- Doppelte Punkte zusammenlegen ----------
+// Der Export von der Tripo-Web-Seite legt an harten Kanten Punkte doppelt an, die sich nur in der Normale unterscheiden
+// (beim Schildträger 90.000). Solche Nähte sperren das Vereinfachen: es blieb bei 138.000 Dreiecken hängen. Punkte mit
+// gleichem Ort und gleicher Textur-Koordinate werden deshalb zu einem, die Normalen gemittelt.
+{ const n = P.length / 3, ort = new Map(), id = new Uint32Array(n); let u = 0;
+  for (let i = 0; i < n; i++) { const k = `${P[i * 3]},${P[i * 3 + 1]},${P[i * 3 + 2]},${T[i * 2]},${T[i * 2 + 1]}`; let v = ort.get(k); if (v === undefined) { v = u++; ort.set(k, v); } id[i] = v; }
+  if (u < n) { const P2 = new Float32Array(u * 3), N2 = new Float32Array(u * 3), T2 = new Float32Array(u * 2);
+    for (let i = 0; i < n; i++) { const v = id[i]; for (let c = 0; c < 3; c++) { P2[v * 3 + c] = P[i * 3 + c]; N2[v * 3 + c] += N[i * 3 + c]; } T2[v * 2] = T[i * 2]; T2[v * 2 + 1] = T[i * 2 + 1]; }
+    for (let v = 0; v < u; v++) { const l = Math.hypot(N2[v * 3], N2[v * 3 + 1], N2[v * 3 + 2]) || 1; N2[v * 3] /= l; N2[v * 3 + 1] /= l; N2[v * 3 + 2] /= l; }
+    for (let i = 0; i < I.length; i++) I[i] = id[I[i]];
+    console.log(`doppelte Punkte zusammengelegt: ${n} → ${u}`); P = P2; N = N2; T = T2; } }
 
 // ---------- Ausrichtung: Blick nach +z, Füße auf y = 0 ----------
 const g = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity];
@@ -58,12 +70,15 @@ function vereinfache(soll, fehler, flags) {
 }
 
 // texturen: { farbe: 4096 | 2048 | 'roh', normal: ..., rm: ... }; fehlt ein Eintrag, kommt die Karte nicht mit
-async function schreibe(datei, netz, texturen, packen) {
+const gewarnt = new Set();
+async function schreibe(datei, netz, texturen, packen, genau) {   // genau: feiner gerastert, für den Master
   const doc = new Document(), buf = doc.createBuffer(), acc = (typ, arr) => doc.createAccessor().setType(typ).setArray(arr).setBuffer(buf);
   const m = doc.createMaterial(NAME).setRoughnessFactor(texturen.rm ? 1 : 0.85).setMetallicFactor(texturen.rm ? 1 : 0);
   const tex = async (art, format) => { const g = texturen[art], q = bild[art]; if (!g || !q) return null;
     if (g === 'roh') return doc.createTexture(art).setImage(q.getImage()).setMimeType(q.getMimeType());
-    const s = sharp(Buffer.from(q.getImage())).resize(g, g);
+    const roh = Buffer.from(q.getImage()), breite = (await sharp(roh).metadata()).width, kante = Math.min(g, breite);   // nie größer als die Vorlage
+    if (kante < g && !gewarnt.has(art)) { gewarnt.add(art); console.log(`    Hinweis: ${art} ist in der Vorlage nur ${breite} Pixel breit`); }
+    const s = sharp(roh).resize(kante, kante);
     return format === 'jpeg' ? doc.createTexture(art).setImage(await s.jpeg({ quality: 90 }).toBuffer()).setMimeType('image/jpeg')
       : doc.createTexture(art).setImage(await s.webp({ quality: art === 'normal' ? 92 : 88 }).toBuffer()).setMimeType('image/webp'); };
   const format = packen ? 'webp' : 'jpeg';
@@ -71,13 +86,15 @@ async function schreibe(datei, netz, texturen, packen) {
   if (f) m.setBaseColorTexture(f); if (nm) m.setNormalTexture(nm); if (rm) m.setMetallicRoughnessTexture(rm);
   const p = doc.createPrimitive().setAttribute('POSITION', acc('VEC3', netz.P)).setAttribute('NORMAL', acc('VEC3', netz.N)).setAttribute('TEXCOORD_0', acc('VEC2', netz.T)).setIndices(acc('SCALAR', netz.I)).setMaterial(m);
   doc.createScene(NAME).addChild(doc.createNode(NAME).setMesh(doc.createMesh(NAME).addPrimitive(p)));
-  if (packen) await doc.transform(meshopt({ encoder: MeshoptEncoder, level: 'medium' }));
+  if (packen) await doc.transform(meshopt({ encoder: MeshoptEncoder, level: 'medium', ...(genau ? { quantizePosition: 16, quantizeNormal: 12, quantizeTexcoord: 16 } : {}) }));
   const ziel = path.join(ZIEL, datei); await io.write(ziel, doc);
   console.log(`    ${datei}: ${(fs.statSync(ziel).size / 1024 / 1024).toFixed(1)} MB`);
 }
 
 if (!NUR) {
-  if (OPT.master || fs.statSync(EIN).size > 90e6) await schreibe(`${NAME}-master.glb`, vereinfache(1000000, 0.01, []), { farbe: 'roh', normal: 'roh', rm: 'roh' }, true);
+  // Master: nur wenn das Original zu schwer fürs Repo ist (über 30 MB) oder mit --master. Bis 2 Mio. Dreiecke bleibt das
+  // Netz vollständig und wird nur gepackt; Texturen unverändert. (Der Anführer, 4,95 Mio., bekam am 27.11. 1 Mio.)
+  if (OPT.master || fs.statSync(EIN).size > 30e6) await schreibe(`${NAME}-master.glb`, I.length / 3 > 2000000 ? vereinfache(2000000, 0.01, []) : { P, N, T, I }, { farbe: 'roh', normal: 'roh', rm: 'roh' }, true, true);
   for (const [zahl, tx] of [[600000, { farbe: 4096, normal: 4096, rm: 2048 }], [250000, { farbe: 4096, normal: 2048, rm: 2048 }], [80000, { farbe: 2048, normal: 2048, rm: 1024 }]])
     await schreibe(`${NAME}-${zahl / 1000}k.glb`, vereinfache(zahl, 0.01, []), tx, true);
 }

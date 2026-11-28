@@ -1,7 +1,9 @@
 # Vikings: Bild-Prompts für Tripo
 
 **Schon da (Stand 28.11.2026):** 1.1 Axtkämpfer (Körper und Kleidung gut, Gesicht und Haare nur in Ordnung; der User
-behält ihn), 1.3 Bogenschützin (gut). Unterwegs: 1.2 Schildträger (einmal in der falschen Stufe erzeugt, siehe unten).
+behält ihn), 1.2 Schildträger (sehr gut, aber nur mit 2K-Texturen exportiert), 1.3 Bogenschützin (gut), 1.4 Dorfwache
+(gut). **Damit sind alle vier Figuren des Raubzugs da.** Es fehlen aus Gruppe 1: die fünf Waffen (1.5 bis 1.9), die
+vier Gebäude (1.10 bis 1.13) und das Langschiff (1.14).
 
 **In der Tripo-App am Handy:** Unter dem Bild liegen zwei Zeichen. **Diamant** = feine Stufe mit Farbe (richtig).
 **Gitter** = grobes graues Netz ohne Farbe (unbrauchbar). Vor „Generieren“ muss der Diamant hell hinterlegt sein,

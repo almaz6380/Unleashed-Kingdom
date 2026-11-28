@@ -210,6 +210,20 @@ Ausholen und Schuss in einer Bewegung). Im Spiel ist sie der Typ `bogen`; der Sc
 fliegt los, wenn die Sehne losgelassen wird (Schnitt mit `ana-anim.mjs` messen). Der Bogen kommt als eigenes Modell
 (1.8) an die linke Hand.
 
+## Schildträger und Dorfwache (in Arbeit seit 28.11.)
+- **Schildträger:** sehr gut, die beste Figur nach dem Anführer (Helm mit Nieten, Kettenhemd, geflochtener Bart,
+  Armschienen). Kam als Drive-Link in einem **anderen Export**: von der Tripo-Web-Seite, 61 MB ungepackt, Texturen nur
+  2048 Pixel (ganz nah wirkt das Kettenhemd etwas grob, von oben nicht zu sehen). Dieser Export legt an harten Kanten
+  Punkte doppelt an (90.000, nur die Normale unterscheidet sich); das sperrte das Vereinfachen bei 138.000 Dreiecken.
+  `figur-stufen.mjs` legt solche Punkte jetzt zusammen (gleicher Ort und gleiche Textur-Koordinate, Normalen
+  gemittelt) und nimmt nie eine größere Textur als die Vorlage. Im Repo liegt statt des Originals ein **gepackter
+  Master mit allen Dreiecken** (`eingang/schildtraeger-master.glb`, 15 MB; Regel: Master ab 30 MB Original).
+  ZIP für Mixamo 185 cm.
+- **Dorfwache (Gegner):** gut (roter Steppwams, Eisenhut, Gürteltasche, Gesicht und Hände in Ordnung). Ganz nah
+  hängt vor der Nase ein heller Streifen am Helm, das sieht etwas seltsam aus. Original 18 MB
+  (`eingang/dorfwache-original.glb`), ZIP für Mixamo 178 cm.
+- Beide brauchen dieselben fünf Bewegungen wie der Axtkämpfer. Im Spiel sind es die Typen `schild` und `wache`.
+
 **Platz:** Je Figur etwa 17 MB Original und 15 MB für drei Feinheiten. GitHub Pages liefert alles auf `main` aus und
 erlaubt höchstens 1 GB. Für die Figuren des Raubzugs reicht das; bei allen 37 Modellen nicht. Sobald der User die
 Feinheit gewählt hat, die übrigen Fassungen entfernen, und für die Originale einen Vorschlag machen.
