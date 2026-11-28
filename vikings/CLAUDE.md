@@ -48,7 +48,7 @@ Figuren und Bilder. Reihenfolge: Etappen in der Analyse.
 | `js/licht.js` | Umgebungslicht für die eigenen Figuren (Probekampf und Ansichts-Seite) |
 | `modelle/` | eigene Figuren des neuen Spiels (bisher: Anführer in drei Feinheiten, mit Mixamo-Skelett) |
 | `eingang/` | Vorlagen des Users (`LIESMICH.md` dort) |
-| `werkzeug/figur-stufen.mjs` | macht aus einem großen Tripo-Export Master, Spiel-Fassungen und die Hilfsfigur für Mixamo |
+| `werkzeug/figur-stufen.mjs` | macht aus einem großen Tripo-Export die Spiel-Fassungen und die Hilfsfigur für Mixamo (und einen Master, wenn das Original zu groß für GitHub ist); dreht die Figur nach vorn und stellt sie auf den Boden |
 | `werkzeug/baue-anfuehrer.mjs` | setzt Mixamo-Skelett und Bewegungen mit der feinen Fassung zusammen |
 | `tests/sim.test.mjs` | Regeln ohne Browser: Wiederholbarkeit, Absetzen, Ende, Schwierigkeit des Beispiel-Dorfs |
 | `tests/raubzug.test.cjs` | Simuliertes Handy: laden, absetzen, halten, Kriegsschrei, ganzer Raubzug, Nachrechnen, Handy-Größen, Grafik-Stufen, Ersatzfiguren, Ansichts-Seite, Bilder |
@@ -132,7 +132,7 @@ dieses Ordners ansehen). Test-Zugriff `window.VF`.
 
 **Skelett und Bewegungen (`werkzeug/baue-anfuehrer.mjs`, Aufruf: `<ordner mit Mixamo-GLB> <feine Fassung.glb> <ziel.glb>`):**
 Mixamo hat die ZIP angenommen (Marker wie beim Knappen, „Standard Skeleton (65)“). Die FBX des Users liegen in
-`eingang/mixamo/` und werden je Datei mit `FBX2glTF --binary` umgewandelt. Das Werkzeug nimmt Skelett und grobes Netz
+`eingang/mixamo/anfuehrer/` (je Figur ein Unterordner) und werden je Datei mit `FBX2glTF --binary` umgewandelt. Das Werkzeug nimmt Skelett und grobes Netz
 aus `breathing-idle` (mit „With Skin“ geladen), schneidet die Bewegungen zu (`TEILE`: Datei, Name im Spiel, von/bis,
 `ort` = Hüfte bleibt an Ort und Stelle) und ersetzt das grobe Netz durch die feine Fassung: Jeder feine Punkt
 übernimmt die Gewichte der 4 nächsten groben Punkte (mittlerer Abstand 4 bis 6 mm, beide Figuren schauen nach +z,
@@ -140,7 +140,7 @@ keine Drehung nötig). Ergebnis: `modelle/anfuehrer-80k.glb`, `-250k.glb`, `-600
 Skelett. Fehlende Bewegungs-Dateien werden ausgelassen.
 
 **Alle sechs Bewegungen sind da (27.11., Mixamo liefert 24 Bilder pro Sekunde):**
-| Name im Spiel | Mixamo-Datei in `eingang/mixamo/` | Schnitt | Besonderes |
+| Name im Spiel | Mixamo-Datei in `eingang/mixamo/anfuehrer/` | Schnitt | Besonderes |
 | --- | --- | --- | --- |
 | `steh` | `breathing-idle` (Breathing Idle, mit Figur) | ganz, 9,9 s | – |
 | `lauf` | `running` (Running, In Place) | ganz, 0,67 s | – |
@@ -159,12 +159,43 @@ auf solche Figuren), `lauf: 4.0` (Tempo, bei dem die Lauf-Bewegung in echter Ges
 Schrei-Bewegung mit hohem Gewicht über das, was die Figur gerade tut: Die Beine laufen oder stehen weiter.
 **Die Feinheit ist vorläufig 250k, bis der User gewählt hat** (`FEINHEIT`, umschaltbar mit `?figur=80k|250k|600k`).
 
-**Nächste Schritte:** (1) Der User wählt die Feinheit auf `figur.html`. (2) Eine Waffe hat der Anführer noch nicht,
-er schlägt mit leerer Hand: Die Axt kommt als eigenes Modell aus Tripo und wird an die Hand gehängt wie das Schwert
-im alten Spiel (`baueSchwert`). (3) Die übrigen Krieger, Waffen und Gebäude: alle Bild-Prompts stehen in
-[`FIGUREN.md`](FIGUREN.md), nach Dringlichkeit geordnet. **Das Tripo-Abo des Users läuft bald aus**, er erzeugt die
-Modelle jetzt auf Vorrat; Mixamo ist nicht eilig. Jede weitere Figur geht denselben Weg: `figur-stufen.mjs`,
-ZIP für Mixamo, `baue-anfuehrer.mjs` (für weitere Figuren verallgemeinern: Name und `TEILE` als Eingabe).
+## Weitere Figuren: der Axtkämpfer (in Arbeit seit 28.11.)
+Erstes Modell aus [`FIGUREN.md`](FIGUREN.md), vom User in der **Tripo-App am Handy** erzeugt und als Drive-Link
+geschickt: 1,96 Mio. Dreiecke, Farbe/ORM/Normal in 4K, mit gltfpack gepackt nur 17 MB. Weil die Datei unter der
+GitHub-Grenze liegt, wird **das Original selbst** aufgehoben (`eingang/axtkaempfer-original.glb`), kein Master.
+
+**Die App liefert anders als die Web-Seite:** Die Figur schaut nach +x (Arme entlang z) und hat die Mitte im
+Ursprung. `werkzeug/figur-stufen.mjs` gleicht das seit 28.11. aus: Blickrichtung erkennen (Arme = breitere
+waagerechte Achse, vorn = wohin die Fußspitzen zeigen), um y drehen, Füße auf y = 0. Vorgeben mit `--dreh=<Grad>`.
+Ein Master entsteht nur noch, wenn das Original über 90 MB hat (oder mit `--master`). **Jede neue Figur zuerst
+ansehen** (Bilder von vorn, hinten, Seite, ganz nah; Hände und Beine vergrößert) und dem User die Bilder schicken:
+Bei Fehlern kann er neu erzeugen, solange das Abo läuft. Zum Ansehen die Fassungen kurz unter `modelle/` legen und
+`figur.html?datei=modelle/…&still&dreh=<Bogenmaß>` aufrufen; vor dem Commit wieder entfernen.
+
+Stand: Figur geprüft und in Ordnung, drei Feinheiten ohne Skelett gebaut (1,0 / 2,5 / 4,9 MB, nicht im Repo, in
+einer Minute neu gebaut), ZIP für Mixamo (`eingang/axtkaempfer-fuer-mixamo.zip`, 180 cm) an den User geschickt.
+Er lädt fünf Bewegungen (Breathing Idle „With Skin“, Running In Place, Standing Melee Attack Downward, Standing
+Melee Attack Horizontal, Walking To Dying) und schickt sie im Chat; sie kommen nach `eingang/mixamo/axtkaempfer/`.
+
+**Wenn die Bewegungen da sind (vom User freigegebener Plan):**
+1. `werkzeug/baue-anfuehrer.mjs` wird `baue-figur.mjs`: Aufruf `<figur> <ordner mit Mixamo-GLB> <feine Fassung.glb>
+   <ziel.glb>`, Schnitt-Tabelle je Figur. Schnitte für den Axtkämpfer mit `ana-anim.mjs` neu messen (Treffer 0,33 s
+   nach Beginn), ohne `schrei`.
+2. `modelle/axtkaempfer-80k.glb`, `-250k.glb`, `-600k.glb`.
+3. `js/spiel.js`: `AUSSEHEN.axt` auf die eigene Figur (`eigen: true`, `lauf`, `tod`, Höhe etwa 2,1). Feinheit je
+   Figur mit Vorgabe: **vorläufig Axtkämpfer 80k, Anführer 250k**, `?figur=` schaltet alle um. Der User entscheidet.
+4. `figur.html`: Auswahl der Figur (`?wer=anfuehrer|axtkaempfer`), Überschrift und Fassungen je Figur.
+5. `tests/raubzug.test.cjs`: Axtkämpfer ist die eigene Figur mit fünf Bewegungen; Ansichts-Seite für beide.
+
+**Platz:** Je Figur etwa 17 MB Original und 15 MB für drei Feinheiten. GitHub Pages liefert alles auf `main` aus und
+erlaubt höchstens 1 GB. Für die Figuren des Raubzugs reicht das; bei allen 37 Modellen nicht. Sobald der User die
+Feinheit gewählt hat, die übrigen Fassungen entfernen, und für die Originale einen Vorschlag machen.
+
+**Nächste Schritte:** (1) Mixamo-Dateien des Axtkämpfers einbauen (oben). (2) Der User wählt die Feinheit auf
+`figur.html`. (3) Waffen: Anführer und Axtkämpfer schlagen mit leerer Hand. Die Äxte kommen als eigene Modelle aus
+Tripo und werden an die Hand gehängt wie das Schwert im alten Spiel (`baueSchwert`). (4) Die übrigen Krieger, Waffen
+und Gebäude: alle Bild-Prompts stehen in [`FIGUREN.md`](FIGUREN.md), nach Dringlichkeit geordnet. **Das Tripo-Abo
+des Users läuft bald aus**, er erzeugt die Modelle jetzt auf Vorrat; Mixamo ist nicht eilig.
 
 ## Arbeitsweise
 - Vor jedem Commit: `node vikings/tests/sim.test.mjs`, dann im Repo-Ordner `python3 -m http.server 8766` im

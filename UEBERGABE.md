@@ -1,4 +1,4 @@
-# Übergabe – Stand 27.11.2026
+# Übergabe – Stand 28.11.2026
 
 Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst, danach `CLAUDE.md`
 (Regeln, Kampfwerte, Aufbau des Codes).
@@ -55,10 +55,29 @@ Dieses Dokument ist für eine neue Claude-Sitzung ohne Vorwissen. Lies es zuerst
 > Antwort steht im Chat vom 27.11. (Gruppe 1 ersetzt die Platzhalter des Probekampfs, der Rest ist für spätere Etappen).
 > Mixamo kostet nichts und läuft nicht ab, eilig sind nur die Tripo-Modelle.
 >
-> **Als Nächstes:** (1) Seine Wahl der Feinheit (er entscheidet, nicht vorgeben) und Rückmeldung zum Probekampf.
-> (2) Modelle aus Tripo annehmen, sobald er Links schickt: je Figur `figur-stufen.mjs`, ZIP für Mixamo, Bewegungen
-> einbauen (Schritte in `vikings/CLAUDE.md`); Waffen an die Hand hängen; Gebäude statt der Klötze einsetzen.
-> (3) Danach Etappe 2 der Analyse: eigenes Dorf.
+> **Der Axtkämpfer ist da (28.11.):** erstes Modell aus der Liste, diesmal aus der **Tripo-App am Handy**
+> (1,96 Mio. Dreiecke, 4K-Texturen, gepackt nur 17 MB). Die App liefert die Figur zur Seite gedreht und mit der Mitte
+> im Ursprung; `vikings/werkzeug/figur-stufen.mjs` erkennt das jetzt und dreht sie nach vorn auf den Boden. Die Figur
+> ist sauber (Finger einzeln, Lücke zwischen den Beinen, Rücken in Ordnung; Augen etwas blass, Stirn glänzt ganz nah).
+> Im Repo: das Original (`vikings/eingang/axtkaempfer-original.glb`) und die ZIP für Mixamo
+> (`vikings/eingang/axtkaempfer-fuer-mixamo.zip`, 180 cm). **Er hat die ZIP bekommen und lädt in Mixamo fünf
+> Bewegungen** (wie beim Anführer, ohne Kriegsschrei) und schickt sie im Chat. Danach nach dem freigegebenen Plan:
+> `baue-anfuehrer.mjs` für mehrere Figuren verallgemeinern, drei Feinheiten mit Skelett nach `vikings/modelle/`,
+> im Probekampf die sechs Axtkämpfer ersetzen (vorläufig 80k, Anführer bleibt 250k, `?figur=` schaltet alle um),
+> auf der Ansichts-Seite eine Auswahl der Figur. Die Fassungen ohne Skelett liegen nicht im Repo; sie entstehen in
+> einer Minute aus dem Original.
+>
+> **Platz im Blick behalten:** Je Figur etwa 17 MB Original und 15 MB für drei Feinheiten. Für die Figuren des
+> Raubzugs reicht das, bei allen 37 Modellen wird es eng (GitHub Pages: höchstens 1 GB, ausgeliefert wird alles auf
+> `main`). Sobald er die Feinheit gewählt hat, fallen die übrigen Fassungen weg; für die Originale dann einen
+> Vorschlag machen (zum Beispiel ein eigener Zweig, der nicht ausgeliefert wird). Ihm gesagt: **Originale im Drive
+> nicht löschen.** Seine Tripo-Credits (28.11.): 2860, ein Modell kostet 55.
+>
+> **Als Nächstes:** (1) Seine Mixamo-Dateien für den Axtkämpfer einbauen (siehe oben). (2) Seine Wahl der Feinheit
+> (er entscheidet, nicht vorgeben) und Rückmeldung zum Probekampf. (3) Weitere Modelle aus Tripo annehmen, sobald er
+> Links schickt: je Figur zuerst ansehen und ihm Bilder schicken (bei Fehlern kann er neu erzeugen, solange das Abo
+> läuft), dann `figur-stufen.mjs`, ZIP für Mixamo, Bewegungen einbauen (Schritte in `vikings/CLAUDE.md`); Waffen an
+> die Hand hängen; Gebäude statt der Klötze einsetzen. (4) Danach Etappe 2 der Analyse: eigenes Dorf.
 > Alles Weitere in dieser Datei beschreibt das alte Spiel (Königreich mit Rittern und Drachen).
 > Name, Figuren und Aussehen aus der Serie „Vikings“ oder aus bekannten Wikinger-Spielen werden nicht übernommen.
 

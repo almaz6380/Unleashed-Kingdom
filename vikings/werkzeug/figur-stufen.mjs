@@ -1,8 +1,12 @@
 // Macht aus dem großen Tripo-Export (Millionen Dreiecke, 4K-Texturen) mehrere Fassungen:
-//   <name>-master.glb   1 Mio. Dreiecke, Texturen unverändert  → Vorlage im Repo (das Original ist zu groß für GitHub)
+//   <name>-master.glb   1 Mio. Dreiecke, Texturen unverändert  → Vorlage im Repo, nur wenn das Original zu groß für
+//                       GitHub ist (über 90 MB) oder mit --master. Sonst wird das Original selbst aufgehoben.
 //   <name>-<n>k.glb     Fassungen fürs Spiel zum Vergleichen (ohne Skelett)
 //   <name>-mixamo.glb   grobe Hilfsfigur, daraus macht obj-fuer-mixamo.mjs die ZIP für Mixamo
-// Aufruf: node figur-stufen.mjs <gross.glb> <zielordner> <name>
+// Alle Fassungen schauen nach +z und stehen auf y = 0. Tripo liefert das nicht immer so (die Handy-App dreht die Figur
+// zur Seite und legt die Mitte in den Ursprung): Die Blickrichtung wird erkannt (Arme = breitere waagerechte Achse,
+// vorn = wohin die Fußspitzen zeigen) und lässt sich mit --dreh=<Grad um y> vorgeben. Immer am Bild nachprüfen.
+// Aufruf: node figur-stufen.mjs <gross.glb> <zielordner> <name> [mixamo] [--dreh=<Grad>] [--master]
 import { NodeIO, Document } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 import { meshopt, dequantize } from '@gltf-transform/functions';
@@ -10,7 +14,8 @@ import { MeshoptDecoder, MeshoptEncoder, MeshoptSimplifier } from 'meshoptimizer
 import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
-const [EIN, ZIEL, NAME = 'figur'] = process.argv.slice(2);
+const OPT = Object.fromEntries(process.argv.slice(2).filter(a => a.startsWith('--')).map(a => { const [k, v = '1'] = a.slice(2).split('='); return [k, v]; }));
+const [EIN, ZIEL, NAME = 'figur', NUR] = process.argv.slice(2).filter(a => !a.startsWith('--'));   // NUR: 'mixamo' baut nur die Hilfsfigur neu
 await MeshoptDecoder.ready; await MeshoptEncoder.ready; await MeshoptSimplifier.ready;
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ 'meshopt.decoder': MeshoptDecoder, 'meshopt.encoder': MeshoptEncoder });
 fs.mkdirSync(ZIEL, { recursive: true });
@@ -21,6 +26,24 @@ const P = new Float32Array(prim.getAttribute('POSITION').getArray()), N = new Fl
   T = new Float32Array(prim.getAttribute('TEXCOORD_0').getArray()), I = new Uint32Array(prim.getIndices().getArray());
 const bild = { farbe: mat.getBaseColorTexture(), normal: mat.getNormalTexture(), rm: mat.getMetallicRoughnessTexture() };
 console.log('Quelle:', I.length / 3, 'Dreiecke,', P.length / 3, 'Punkte');
+
+// ---------- Ausrichtung: Blick nach +z, Füße auf y = 0 ----------
+const g = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity];
+for (let i = 0; i < P.length; i += 3) for (let c = 0; c < 3; c++) { g[c] = Math.min(g[c], P[i + c]); g[c + 3] = Math.max(g[c + 3], P[i + c]); }
+const hoehe = g[4] - g[1];
+let dreh = OPT.dreh !== undefined ? +OPT.dreh : null;
+if (dreh === null) {
+  const armeAufZ = g[5] - g[2] > g[3] - g[0], a = armeAufZ ? 0 : 2;   // a: Achse, entlang der die Figur schaut
+  let zehen = 0, nz = 0, knoechel = 0, nk = 0;
+  for (let i = 0; i < P.length; i += 3) { const h = (P[i + 1] - g[1]) / hoehe; if (h < 0.03) { zehen += P[i + a]; nz++; } else if (h > 0.06 && h < 0.1) { knoechel += P[i + a]; nk++; } }
+  const vorn = zehen / nz >= knoechel / nk ? 1 : -1;
+  dreh = armeAufZ ? (vorn > 0 ? -90 : 90) : (vorn > 0 ? 0 : 180);
+  console.log(`Ausrichtung erkannt: Arme entlang ${armeAufZ ? 'z' : 'x'}, Fußspitzen ${((zehen / nz - knoechel / nk) / hoehe * 100).toFixed(1)} % der Höhe vor dem Knöchel`);
+}
+{ const w = dreh * Math.PI / 180, co = Math.cos(w), si = Math.sin(w);
+  for (const A of [P, N]) for (let i = 0; i < A.length; i += 3) { const x = A[i], z = A[i + 2]; A[i] = x * co + z * si; A[i + 2] = -x * si + z * co; }
+  for (let i = 1; i < P.length; i += 3) P[i] -= g[1]; }
+console.log(`gedreht um ${dreh}°, auf den Boden gestellt (um ${(-g[1]).toFixed(3)} gehoben), Höhe ${hoehe.toFixed(3)}`);
 
 function vereinfache(soll, fehler, flags) {
   const t0 = performance.now();
@@ -53,9 +76,8 @@ async function schreibe(datei, netz, texturen, packen) {
   console.log(`    ${datei}: ${(fs.statSync(ziel).size / 1024 / 1024).toFixed(1)} MB`);
 }
 
-const NUR = process.argv[5];   // optional: nur 'mixamo' neu bauen
 if (!NUR) {
-  await schreibe(`${NAME}-master.glb`, vereinfache(1000000, 0.01, []), { farbe: 'roh', normal: 'roh', rm: 'roh' }, true);
+  if (OPT.master || fs.statSync(EIN).size > 90e6) await schreibe(`${NAME}-master.glb`, vereinfache(1000000, 0.01, []), { farbe: 'roh', normal: 'roh', rm: 'roh' }, true);
   for (const [zahl, tx] of [[600000, { farbe: 4096, normal: 4096, rm: 2048 }], [250000, { farbe: 4096, normal: 2048, rm: 2048 }], [80000, { farbe: 2048, normal: 2048, rm: 1024 }]])
     await schreibe(`${NAME}-${zahl / 1000}k.glb`, vereinfache(zahl, 0.01, []), tx, true);
 }
